@@ -17,11 +17,11 @@ func MustSetInitialTime() {
 	var err error
 
 	if _, err = os.Stat(filePath); err == nil {
-		fmt.Println("getting existence initialization file...")
+		fmt.Println("Getting existence initialization file...")
 		InitialTime, err = readAndParseDatetime(filePath)
 
 	} else if errors.Is(err, os.ErrNotExist) {
-		fmt.Println("creating new initialization file...")
+		fmt.Println("Creating new initialization file...")
 		InitialTime, err = writeCurrentDatetime(filePath)
 	}
 

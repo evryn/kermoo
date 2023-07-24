@@ -2,25 +2,51 @@ package main
 
 import (
 	"buggybox/modules/Datetime"
+	"flag"
 	"fmt"
+	"os"
+	"time"
 )
 
-// go run -ldflags "-X main.Version=1.0.0 -X 'main.Build=$(date --iso-8601)'" main.go
+// go run main.go
 
-var Version string
-var Build string
+var (
+	Version string
+	Hash    string
+	Build   string
+
+	InitDelay *time.Duration
+)
 
 func main() {
-	fmt.Println(`
-	░░         
-    ▒▒    ▓▓  ██
-       ░░ ██    
-  ▓▓    ▓▓        
-    ▓▓▒▒   ░░   
-	`)
+	printSignature()
+	parseArgs()
 
-	fmt.Printf("BuggyBox - %s (%s)\n", Version, Build)
+	fmt.Printf("Hostname %v\n", os.Getenv("HOSTNAME"))
 
 	Datetime.MustSetInitialTime()
-	fmt.Printf("initial time: %v\n", Datetime.InitialTime)
+	fmt.Printf("Initialization time: %v\n", Datetime.InitialTime)
+
+	fmt.Printf("Sleeping for %s because of the initial delay...", InitDelay.String())
+	time.Sleep(*InitDelay)
+	fmt.Println("Woke up.")
+
+}
+
+func printSignature() {
+	fmt.Println(`
+	     ░░         
+       ▒▒    ▓▓  ██
+          ░░ ██    
+     ▓▓    ▓▓        
+       ▓▓▒▒   ░░   
+	`)
+
+	fmt.Printf("BuggyBox %s - %s (%s)\n", Version, Hash, Build)
+
+}
+
+func parseArgs() {
+	InitDelay = flag.Duration("init-delay", time.Duration(5*time.Second), "Initial container delay")
+	flag.Parse()
 }
