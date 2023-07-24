@@ -10,6 +10,6 @@ RUN go mod download && go mod verify
 COPY . .
 RUN hash=$(git rev-parse --short HEAD) \
  && build=$(git log -s --pretty='format:%cd' --date=format:'%Y-%m-%d' $hash | head) \
- && go build -ldflags "-X main.Version=1.0.0 -X main.Hash=$hash -X main.Build=$build" -v -o /usr/local/bin/buggybox .
+ && go build -ldflags "-X buggybox/config.AppVersion=1.0.0 -X buggybox/config.AppBuildHash=$hash -X buggybox/config.AppBuildTime=$build" -v -o /usr/local/bin/buggybox .
 
 CMD ["buggybox"]
