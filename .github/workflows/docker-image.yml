@@ -29,7 +29,33 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: name/app
- 
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
+
+      -
+        name: Build and export to Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          
+      -
+        name: Test
+        run: |
+          # docker run --rm ${{ env.TEST_TAG }}
+          echo TODO: Test buggybox functionality with ${{ steps.metadata.outputs.tags[0] }}
+
+      -
+        name: Login to DockerHub
+        #if: ${{ github.ref_type == 'tag' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
 #       - name: Docker metadata
 #         id: metadata
 #         uses: docker/metadata-action@v3
