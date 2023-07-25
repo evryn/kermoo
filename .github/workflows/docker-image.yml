@@ -18,17 +18,23 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
-
-      - name: Debug
-        run: |
-          echo "github.ref -> {{ github.ref }}"
- 
+        
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
       -
         name: Docker metadata
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.IMG_NAME }}
+          images: |
+            evryn/buggybox
+            ghcr.io/evryn/buggybox
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -41,12 +47,13 @@ jobs:
             org.label-schema.vcs-url=https://github.com/${{ github.repository }}.git
             org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 buggybox start fixed
             org.label-schema.docker.cmd.help=docker exec -it $CONTAINER buggybox --help
-            
+
       -
         name: Build and export to Docker
         uses: docker/build-push-action@v4
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           load: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -54,7 +61,7 @@ jobs:
             BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
-          
+
       -
         name: Test
         run: |
@@ -76,28 +83,19 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-#       - name: Docker metadata
-#         id: metadata
-#         uses: docker/metadata-action@v3
-#         with:
-#           images: ${{ env.IMG_NAME }}
-#           tags: |
-#             type=semver,pattern={{version}}
-#             type=semver,pattern={{major}}.{{minor}}
-#             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
-            
-#       - name: Log in to Docker Hub
-#         uses: docker/login-action@v1
-#         if: ${{ github.ref_type == 'tag' }}
-#         with:
-#           username: ${{ secrets.DOCKER_USERNAME }}
-#           password: ${{ secrets.DOCKER_PASSWORD }}
 
-#       - name: Build and push Docker image
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: .
-#           push: ${{ github.event.base_ref =='refs/heads/main' && github.ref_type == 'tag' && !startsWith(github.ref, 'refs/tags/v0.')}}
-#           tags: ${{ steps.metadata.outputs.tags }}
-#           labels: ${{ steps.metadata.outputs.labels }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          # push: ${{ github.event.base_ref =='refs/heads/main' && github.ref_type == 'tag' && !startsWith(github.ref, 'refs/tags/v0.')}}
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
