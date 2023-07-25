@@ -14,7 +14,7 @@ func GetVersionCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(config.AppTitle)
 			fmt.Println(config.AppDescription)
-			fmt.Printf("Version: %s\nBuild: %s (%s)\n", config.AppVersion, config.AppBuildHash, config.AppBuildTime)
+			fmt.Printf("Version: %s\nBuild: %s (%s)\n", config.BuildVersion, config.BuildRef, config.BuildDate)
 			fmt.Println("Home: https://github.com/evryn/buggybox")
 			fmt.Println("Source: https://github.com/evryn/buggybox")
 			fmt.Println("Made with 💖 by: Amirreza Nasiri and contributors.")

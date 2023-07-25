@@ -28,5 +28,5 @@ func printSignature() {
        ▓▓▒▒   ░░   
 	`)
 
-	fmt.Printf("%s %s\n", config.AppTitle, config.AppVersion)
+	fmt.Printf("%s %s\n", config.AppTitle, config.BuildVersion)
 }
