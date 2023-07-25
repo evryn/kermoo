@@ -35,12 +35,12 @@ jobs:
             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
           labels: |
             org.opencontainers.image.vendor=Evryn
-            org.opencontainers.image.authors="Amirreza Nasiri <nasiri.amirreza.96@gmail.com> and contributors"
-            maintainer="Amirreza Nasiri <nasiri.amirreza.96@gmail.com>"
+            org.opencontainers.image.authors=Amirreza Nasiri <nasiri.amirreza.96@gmail.com> and contributors
+            maintainer=Amirreza Nasiri <nasiri.amirreza.96@gmail.com>
             org.label-schema.schema-version=1.0
             org.label-schema.vcs-url=https://github.com/${{ github.repository }}.git
-            org.label-schema.docker.cmd="docker run -d -p 8080:8080 -p 5000:5000 buggybox start fixed"
-            org.label-schema.docker.cmd.help="docker exec -it $CONTAINER buggybox --help"
+            org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 buggybox start fixed
+            org.label-schema.docker.cmd.help=docker exec -it $CONTAINER buggybox --help
             
       -
         name: Build and export to Docker
@@ -68,6 +68,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           
 #       - name: Docker metadata
 #         id: metadata
