@@ -1,4 +1,4 @@
-package Planner
+package planner
 
 import "buggybox/config"
 

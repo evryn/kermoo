@@ -1,77 +1,11 @@
-package Planner
+package planner_test
 
 import (
+	"buggybox/modules/planner"
+
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
-
-type Execution struct {
-	TimeSpent       time.Duration
-	ExecutablePlan  ExecutablePlan
-	ExecutableValue ExecutableValue
-}
-
-type PlanRecorder struct {
-	TotalTimeSpent time.Duration
-	Executions     []Execution
-	ExecutaionCap  int
-}
-
-type ExpectedExecutionValue struct {
-	Static    float32
-	Minimum   float32
-	Maximum   float32
-	IsBetween bool
-}
-
-func (r *PlanRecorder) Reset() {
-	r.Executions = []Execution{}
-	r.TotalTimeSpent = 0
-}
-
-func (r *PlanRecorder) RecordPreSleep(ep ExecutablePlan, ev ExecutableValue) PlanSignal {
-	r.Executions = append(r.Executions, Execution{
-		ExecutablePlan:  ep,
-		ExecutableValue: ev,
-	})
-
-	return PLAN_SIGNAL_CONTINUE
-}
-
-func (r *PlanRecorder) RecordPostSleep(startedAt time.Time, timeSpent time.Duration) PlanSignal {
-	r.Executions[len(r.Executions)-1].TimeSpent = timeSpent
-	r.TotalTimeSpent += timeSpent
-
-	if r.ExecutaionCap != 0 && len(r.Executions) == r.ExecutaionCap {
-		return PLAN_SIGNAL_TERMINATE
-	}
-
-	return PLAN_SIGNAL_CONTINUE
-}
-
-func (r *PlanRecorder) AssertExpectedValues(t *testing.T, expectedValues []ExpectedExecutionValue) {
-	assert.Len(t, r.Executions, len(expectedValues))
-
-	for i, ev := range expectedValues {
-		v := r.Executions[i].ExecutableValue
-
-		if ev.IsBetween {
-			assert.GreaterOrEqual(t, v.GetValue(), ev.Minimum)
-			assert.LessOrEqual(t, v.GetValue(), ev.Maximum)
-			assert.Equal(t, v.GetValue(), v.GetValue(), "Ranged values should always get similar result which is determined by the first attempt to retrieve the value.")
-		} else {
-			assert.Equal(t, ev.Static, v.GetValue())
-		}
-	}
-}
-
-func (r *PlanRecorder) AssertTotalTimeSpent(t *testing.T, expectedDuration time.Duration, expectedError time.Duration) {
-	assert.LessOrEqual(t, r.TotalTimeSpent-expectedDuration, expectedError)
-}
-
-var Recorder PlanRecorder
 
 func teardownSubTest(t *testing.T) {
 	Recorder.Reset()
@@ -81,32 +15,27 @@ var (
 	name          = "My Plan"
 	interval_10ms = 10 * time.Millisecond
 	interval_30ms = 30 * time.Millisecond
-	interval_1s   = 1 * time.Second
 	duration_50ms = 50 * time.Millisecond
 	duration_60ms = 60 * time.Millisecond
-	duration_5s   = 5 * time.Second
 	float_0_1     = float32(0.1)
-	float_0_3     = float32(0.3)
 	float_0_5     = float32(0.5)
 	float_0_9     = float32(0.9)
-	float_5_5     = float32(5.5)
 )
 
 func TestSimplePlanExecution(t *testing.T) {
 	t.Run("executes simple plan with static value", func(t *testing.T) {
 		defer teardownSubTest(t)
 
-		plan := Plan{
-			Value: &Value{
+		plan := planner.InitPlan(planner.Plan{
+			Value: &planner.Value{
 				Static: &float_0_5,
 			},
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
-			internal: &PlanInternal{},
-		}
+		})
 
-		plan.Execute(Callbacks{
+		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
 			PostSleep: Recorder.RecordPostSleep,
 		})
@@ -125,18 +54,17 @@ func TestSimplePlanExecution(t *testing.T) {
 	t.Run("executes simple plan with minimum and maximum value", func(t *testing.T) {
 		defer teardownSubTest(t)
 
-		plan := Plan{
-			Value: &Value{
+		plan := planner.InitPlan(planner.Plan{
+			Value: &planner.Value{
 				Minimum: &float_0_1,
 				Maximum: &float_0_9,
 			},
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
-			internal: &PlanInternal{},
-		}
+		})
 
-		plan.Execute(Callbacks{
+		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
 			PostSleep: Recorder.RecordPostSleep,
 		})
@@ -156,19 +84,18 @@ func TestSimplePlanExecution(t *testing.T) {
 	t.Run("executes simple plan with chart bar", func(t *testing.T) {
 		defer teardownSubTest(t)
 
-		plan := Plan{
-			Value: &Value{
-				Chart: &Chart{
+		plan := planner.InitPlan(planner.Plan{
+			Value: &planner.Value{
+				Chart: &planner.Chart{
 					Bars: []float32{0, 0.3, 0.7},
 				},
 			},
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
-			internal: &PlanInternal{},
-		}
+		})
 
-		plan.Execute(Callbacks{
+		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
 			PostSleep: Recorder.RecordPostSleep,
 		})
@@ -200,19 +127,18 @@ func TestSubPlanExecution(t *testing.T) {
 
 	t.Run("executes sub plan with specific duration", func(t *testing.T) {
 		defer teardownSubTest(t)
-		plan := Plan{
-			Name:     &name,
-			internal: &PlanInternal{},
-			SubPlans: []SubPlan{
+		plan := planner.InitPlan(planner.Plan{
+			Name: &name,
+			SubPlans: []planner.SubPlan{
 				{
-					Value: &Value{
+					Value: &planner.Value{
 						Static: &float_0_5,
 					},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value: &Value{
+					Value: &planner.Value{
 						Minimum: &float_0_1,
 						Maximum: &float_0_9,
 					},
@@ -220,8 +146,8 @@ func TestSubPlanExecution(t *testing.T) {
 					Duration: &duration_60ms,
 				},
 				{
-					Value: &Value{
-						Chart: &Chart{
+					Value: &planner.Value{
+						Chart: &planner.Chart{
 							Bars: []float32{0.2, 0.3, 0.4},
 						},
 					},
@@ -229,9 +155,9 @@ func TestSubPlanExecution(t *testing.T) {
 					Duration: &duration_50ms,
 				},
 			},
-		}
+		})
 
-		plan.Execute(Callbacks{
+		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
 			PostSleep: Recorder.RecordPostSleep,
 		})
@@ -259,19 +185,18 @@ func TestSubPlanExecution(t *testing.T) {
 
 	t.Run("executes sub plan with inifinit duration", func(t *testing.T) {
 		defer teardownSubTest(t)
-		plan := Plan{
-			Name:     &name,
-			internal: &PlanInternal{},
-			SubPlans: []SubPlan{
+		plan := planner.InitPlan(planner.Plan{
+			Name: &name,
+			SubPlans: []planner.SubPlan{
 				{
-					Value: &Value{
+					Value: &planner.Value{
 						Static: &float_0_5,
 					},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value: &Value{
+					Value: &planner.Value{
 						Minimum: &float_0_1,
 						Maximum: &float_0_9,
 					},
@@ -279,21 +204,21 @@ func TestSubPlanExecution(t *testing.T) {
 					Duration: &duration_60ms,
 				},
 				{
-					Value: &Value{
-						Chart: &Chart{
+					Value: &planner.Value{
+						Chart: &planner.Chart{
 							Bars: []float32{0.2, 0.3, 0.4},
 						},
 					},
 					Interval: &interval_10ms,
 				},
 			},
-		}
+		})
 
 		// Limit the execution to 20 times. It's here to preven the real inifnit number of executions -
 		// just enough to test.
 		Recorder.ExecutaionCap = 20
 
-		plan.Execute(Callbacks{
+		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
 			PostSleep: Recorder.RecordPostSleep,
 		})

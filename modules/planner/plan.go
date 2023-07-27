@@ -1,4 +1,4 @@
-package Planner
+package planner
 
 import (
 	"time"
@@ -89,4 +89,9 @@ func (p *Plan) Execute(callbacks Callbacks) {
 			}
 		}
 	}
+}
+
+func InitPlan(p Plan) Plan {
+	p.SetInternal(&PlanInternal{})
+	return p
 }
