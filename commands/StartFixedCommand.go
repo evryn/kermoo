@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"buggybox/modules/Router"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -19,18 +19,33 @@ func GetStartFixedCommand() *cobra.Command {
 		`,
 		Run: func(cmd *cobra.Command, args []string) {
 			chance, _ := cmd.Flags().GetFloat32("success-chance")
-			httpPort, _ := cmd.Flags().GetString("http-port")
 
 			if chance < 0 || chance > 1 {
 				fmt.Printf("Chance must be a float number between 0.0 and 1.0. Entered '%f' is not a valid value\n", chance)
 				os.Exit(1)
 			}
 
-			Router.MustSetupRouter("0.0.0.0:" + httpPort)
+			InitStartPhase(cmd)
+
+			//state := state.State{}
+
+			go handleFixedPhase(1, 1)
+
+			time.Sleep(5 * time.Millisecond)
+
+			InitWebServer(cmd)
 		},
 	}
 
 	cmd.Flags().Float32P("success-chance", "c", 0.5, "The chance (0.0 to 1.0) of acting as a working app with successful response")
 
 	return cmd
+}
+
+func handleFixedPhase(interval time.Duration, chance float32) {
+	for {
+		// state.ByChance(chance)
+		fmt.Printf("Will response successfully for %s", interval)
+		time.Sleep(interval)
+	}
 }

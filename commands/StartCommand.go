@@ -1,9 +1,12 @@
 package commands
 
 import (
+	"buggybox/modules/Router"
+	"buggybox/modules/Time"
 	"buggybox/modules/Utils"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -53,4 +56,21 @@ func GetStartCommand() *cobra.Command {
 	cmd.AddCommand(GetStartFixedCommand())
 
 	return cmd
+}
+
+func InitStartPhase(cmd *cobra.Command) {
+	sleepFor, _ := Utils.GetDurationFlag(cmd, "sleep-for")
+
+	Time.MustSetInitialTime()
+
+	fmt.Printf("Sleeping for %s...\n", sleepFor.String())
+	time.Sleep(*sleepFor)
+	fmt.Println("Waking up")
+}
+
+func InitWebServer(cmd *cobra.Command) {
+	httpPort, _ := cmd.Flags().GetInt32("http-port")
+	httpAddr := fmt.Sprintf("0.0.0.0:%d", httpPort)
+	fmt.Printf("Starting HTTP server on %s\n", httpAddr)
+	Router.MustSetupRouter(httpAddr)
 }

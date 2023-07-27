@@ -1,4 +1,4 @@
-package Datetime
+package Time
 
 import (
 	"errors"
