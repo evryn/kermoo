@@ -1,4 +1,4 @@
-package Router
+package router
 
 type Response struct {
 	Server  Server  `json:"server"`
