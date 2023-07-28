@@ -7,8 +7,15 @@ type PlannerDefault struct {
 	Maximum  float32
 	Interval time.Duration
 }
+
+type WebServerDefault struct {
+	Interface string
+	Port      int32
+}
+
 type DefaultTemplate struct {
-	Planner PlannerDefault
+	Planner   PlannerDefault
+	WebServer WebServerDefault
 }
 
 var (
@@ -22,6 +29,10 @@ var (
 			Minimum:  0.0,
 			Maximum:  1.0,
 			Interval: 2 * time.Second,
+		},
+		WebServer: WebServerDefault{
+			Port:      80,
+			Interface: "0.0.0.0",
 		},
 	}
 )

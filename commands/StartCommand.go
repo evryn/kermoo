@@ -3,7 +3,6 @@ package commands
 import (
 	"buggybox/modules/Time"
 	"buggybox/modules/Utils"
-	"buggybox/modules/router"
 	"fmt"
 	"os"
 	"time"
@@ -72,5 +71,5 @@ func InitWebServer(cmd *cobra.Command) {
 	httpPort, _ := cmd.Flags().GetInt32("http-port")
 	httpAddr := fmt.Sprintf("0.0.0.0:%d", httpPort)
 	fmt.Printf("Starting HTTP server on %s\n", httpAddr)
-	router.MustSetupRouter(httpAddr)
+	// web_server.MustSetupRouter(httpAddr)
 }
