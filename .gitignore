@@ -1,3 +1,4 @@
 .idea
 .vs
+.vscode
 docker-compose.yml
