@@ -2,24 +2,38 @@ package planner
 
 import (
 	"buggybox/config"
+	"buggybox/modules/common"
 	"time"
 )
 
 type SubPlan struct {
-	Value    *Value
+	Value    *common.MixedValueF
 	Interval *time.Duration
 	Duration *time.Duration
 }
 
-func (s *SubPlan) ToExecutablePlan() ExecutablePlan {
+func (s *SubPlan) ToExecutablePlan() (*ExecutablePlan, error) {
 	interval := config.Default.Planner.Interval
+
+	var executableValues []*ExecutableValue
+
+	singleValues, err := s.Value.ToSingleValues()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range singleValues {
+		ev := NewExecutableValue(v)
+		executableValues = append(executableValues, &ev)
+	}
 
 	if s.Interval != nil {
 		interval = *s.Interval
 	}
 
 	ep := ExecutablePlan{
-		Values:       s.Value.GetExecutableValues(),
+		Values:       executableValues,
 		Interval:     interval,
 		CurrentTries: 0,
 		TotalTries:   0,
@@ -33,5 +47,5 @@ func (s *SubPlan) ToExecutablePlan() ExecutablePlan {
 		ep.TotalTries = uint64(dur.Nanoseconds() / interval.Nanoseconds())
 	}
 
-	return ep
+	return &ep, nil
 }

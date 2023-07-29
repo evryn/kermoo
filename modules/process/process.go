@@ -31,7 +31,7 @@ func (p *Process) makePlan() planner.Plan {
 	})
 
 	callback := planner.Callbacks{
-		PreSleep: func(ep planner.ExecutablePlan, ev planner.ExecutableValue) planner.PlanSignal {
+		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
 			return planner.PLAN_SIGNAL_CONTINUE
 		},
 		PostSleep: func(startedAt time.Time, timeSpent time.Duration) planner.PlanSignal {

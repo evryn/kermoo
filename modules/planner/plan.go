@@ -1,16 +1,17 @@
 package planner
 
 import (
+	"buggybox/modules/common"
 	"time"
 )
 
 type PlanInternal struct {
-	ExecutablePlans []ExecutablePlan
+	ExecutablePlans []*ExecutablePlan
 	Callbacks       []Callbacks
 }
 
 type Plan struct {
-	Value    *Value
+	Value    *common.MixedValueF
 	Interval *time.Duration
 	Duration *time.Duration
 	Name     *string
@@ -19,7 +20,7 @@ type Plan struct {
 }
 
 type Callbacks struct {
-	PreSleep  func(ep ExecutablePlan, ev ExecutableValue) PlanSignal
+	PreSleep  func(ep *ExecutablePlan, ev *ExecutableValue) PlanSignal
 	PostSleep func(startedAt time.Time, timeSpent time.Duration) PlanSignal
 }
 
@@ -46,27 +47,43 @@ func (p *Plan) AddCallback(callback Callbacks) {
 	p.internal.Callbacks = append(p.internal.Callbacks, callback)
 }
 
-func (p *Plan) GetExecutablePlans() []ExecutablePlan {
+func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
 	if len(p.SubPlans) == 0 {
-		sp := p.ToSubPlan()
-		return []ExecutablePlan{
-			sp.ToExecutablePlan(),
+		subPlan := p.ToSubPlan()
+		executablePlan, err := subPlan.ToExecutablePlan()
+
+		if err != nil {
+			return nil, err
 		}
+
+		return []*ExecutablePlan{executablePlan}, nil
 	}
 
 	// If the plans has SubPlans, generate coresponding executable SubPlans
-	var ep = []ExecutablePlan{}
+	var ep = []*ExecutablePlan{}
 
 	for _, sp := range p.SubPlans {
-		ep = append(ep, sp.ToExecutablePlan())
+		executablePlan, err := sp.ToExecutablePlan()
+
+		if err != nil {
+			return nil, err
+		}
+
+		ep = append(ep, executablePlan)
 	}
 
-	return ep
+	return ep, nil
 }
 
-func (p *Plan) Execute(callbacks Callbacks) {
+func (p *Plan) Execute(callbacks Callbacks) error {
 	if len(p.internal.ExecutablePlans) == 0 {
-		p.internal.ExecutablePlans = p.GetExecutablePlans()
+		executablePlans, err := p.GetExecutablePlans()
+
+		if err != nil {
+			return err
+		}
+
+		p.internal.ExecutablePlans = executablePlans
 	}
 
 	for _, ep := range p.internal.ExecutablePlans {
@@ -83,22 +100,30 @@ func (p *Plan) Execute(callbacks Callbacks) {
 				}
 
 				if callbacks.PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
-					return
+					return nil
 				}
 
 				time.Sleep(ep.Interval)
 
 				if callbacks.PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
-					return
+					return nil
 				}
 			}
 		}
 	}
+
+	return nil
 }
 
-func (p *Plan) ExecuteAll() {
+func (p *Plan) ExecuteAll() error {
 	if len(p.internal.ExecutablePlans) == 0 {
-		p.internal.ExecutablePlans = p.GetExecutablePlans()
+		executablePlans, err := p.GetExecutablePlans()
+
+		if err != nil {
+			return err
+		}
+
+		p.internal.ExecutablePlans = executablePlans
 	}
 
 	for _, ep := range p.internal.ExecutablePlans {
@@ -116,7 +141,7 @@ func (p *Plan) ExecuteAll() {
 
 				for _, c := range p.internal.Callbacks {
 					if c.PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
-						return
+						return nil
 					}
 				}
 
@@ -124,20 +149,22 @@ func (p *Plan) ExecuteAll() {
 
 				for _, c := range p.internal.Callbacks {
 					if c.PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
-						return
+						return nil
 					}
 				}
 
 			}
 		}
 	}
+
+	return nil
 }
 
 func InitPlan(p Plan) Plan {
 	p.SetInternal(&PlanInternal{})
 
 	if p.Value == nil {
-		p.Value = &Value{}
+		p.Value = &common.MixedValueF{}
 	}
 
 	return p

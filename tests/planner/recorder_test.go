@@ -10,8 +10,8 @@ import (
 
 type Execution struct {
 	TimeSpent       time.Duration
-	ExecutablePlan  planner.ExecutablePlan
-	ExecutableValue planner.ExecutableValue
+	ExecutablePlan  *planner.ExecutablePlan
+	ExecutableValue *planner.ExecutableValue
 }
 
 type PlanRecorder struct {
@@ -32,7 +32,7 @@ func (r *PlanRecorder) Reset() {
 	r.TotalTimeSpent = 0
 }
 
-func (r *PlanRecorder) RecordPreSleep(ep planner.ExecutablePlan, ev planner.ExecutableValue) planner.PlanSignal {
+func (r *PlanRecorder) RecordPreSleep(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
 	r.Executions = append(r.Executions, Execution{
 		ExecutablePlan:  ep,
 		ExecutableValue: ev,

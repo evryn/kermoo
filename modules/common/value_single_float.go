@@ -15,7 +15,7 @@ func (s *SingleValueF) GetValue() (float32, error) {
 		return *s.Exactly, nil
 	}
 
-	if len(s.BetweenRange) != 0 {
+	if len(s.BetweenRange) != 2 {
 		return 0, fmt.Errorf("value of BetweenRange needs to have exactly two element as range")
 	}
 

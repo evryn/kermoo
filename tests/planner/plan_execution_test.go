@@ -1,6 +1,7 @@
 package planner_test
 
 import (
+	"buggybox/modules/common"
 	"buggybox/modules/planner"
 
 	"testing"
@@ -27,13 +28,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.InitPlan(planner.Plan{
-			Value: &planner.Value{
-				Static: &float_0_5,
-			},
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
 		})
+
+		plan.Value.Exactly = &float_0_5
 
 		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
@@ -55,14 +55,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.InitPlan(planner.Plan{
-			Value: &planner.Value{
-				Minimum: &float_0_1,
-				Maximum: &float_0_9,
-			},
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
 		})
+
+		plan.Value.BetweenRange = []float32{float_0_1, float_0_9}
 
 		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
@@ -85,15 +83,16 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.InitPlan(planner.Plan{
-			Value: &planner.Value{
-				Chart: &planner.Chart{
-					Bars: []float32{0, 0.3, 0.7},
-				},
-			},
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
 		})
+
+		plan.Value = &common.MixedValueF{
+			Chart: &common.Chart{
+				Bars: []float32{0, 0.3, 0.7},
+			},
+		}
 
 		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
@@ -135,31 +134,28 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value: &planner.Value{
-						Static: &float_0_5,
-					},
+					Value:    &common.MixedValueF{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value: &planner.Value{
-						Minimum: &float_0_1,
-						Maximum: &float_0_9,
-					},
+					Value:    &common.MixedValueF{},
 					Interval: &interval_30ms,
 					Duration: &duration_60ms,
 				},
 				{
-					Value: &planner.Value{
-						Chart: &planner.Chart{
-							Bars: []float32{0.2, 0.3, 0.4},
-						},
-					},
+					Value:    &common.MixedValueF{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 			},
 		})
+
+		plan.SubPlans[0].Value.Exactly = &float_0_5
+		plan.SubPlans[1].Value.BetweenRange = []float32{float_0_1, float_0_9}
+		plan.SubPlans[2].Value.Chart = &common.Chart{
+			Bars: []float32{0.2, 0.3, 0.4},
+		}
 
 		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
@@ -193,30 +189,27 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value: &planner.Value{
-						Static: &float_0_5,
-					},
+					Value:    &common.MixedValueF{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value: &planner.Value{
-						Minimum: &float_0_1,
-						Maximum: &float_0_9,
-					},
+					Value:    &common.MixedValueF{},
 					Interval: &interval_30ms,
 					Duration: &duration_60ms,
 				},
 				{
-					Value: &planner.Value{
-						Chart: &planner.Chart{
-							Bars: []float32{0.2, 0.3, 0.4},
-						},
-					},
+					Value:    &common.MixedValueF{},
 					Interval: &interval_10ms,
 				},
 			},
 		})
+
+		plan.SubPlans[0].Value.Exactly = &float_0_5
+		plan.SubPlans[1].Value.BetweenRange = []float32{float_0_1, float_0_9}
+		plan.SubPlans[2].Value.Chart = &common.Chart{
+			Bars: []float32{0.2, 0.3, 0.4},
+		}
 
 		// Limit the execution to 20 times. It's here to preven the real inifnit number of executions -
 		// just enough to test.

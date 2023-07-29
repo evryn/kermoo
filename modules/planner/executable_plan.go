@@ -6,7 +6,7 @@ import (
 )
 
 type ExecutablePlan struct {
-	Values       []ExecutableValue
+	Values       []*ExecutableValue
 	Interval     time.Duration
 	CurrentTries uint64
 	TotalTries   uint64
