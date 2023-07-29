@@ -16,7 +16,7 @@ type Route struct {
 }
 
 func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
-	if route.Content.Reflector {
+	if route.Content.Whoami {
 		w.Header().Set("Content-Type", "application/json")
 		j := json.NewEncoder(w)
 		j.SetIndent("", "  ")
@@ -30,7 +30,7 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 
 type RouteContent struct {
 	Static       string `json:"static"`
-	Reflector    bool   `json:"reflector"`
+	Whoami       bool   `json:"reflector"`
 	NoServerInfo bool   `json:"server_info"`
 }
 
