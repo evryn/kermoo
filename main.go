@@ -2,6 +2,7 @@ package main
 
 import (
 	"buggybox/commands"
+	"buggybox/modules/state"
 	"time"
 )
 
@@ -16,6 +17,8 @@ var (
 )
 
 func main() {
+
+	state.AppInitiatedAt = time.Now()
 	commands.ExecuteRootCommand()
 
 	//parseArgs()

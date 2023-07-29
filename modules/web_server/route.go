@@ -2,8 +2,7 @@ package web_server
 
 import (
 	"buggybox/config"
-	"buggybox/modules/Time"
-	"buggybox/modules/Utils"
+	"buggybox/modules/utils"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -42,11 +41,11 @@ func (rc *RouteContent) GetReflectionContent(r *http.Request) ReflectorResponse 
 
 	if !rc.NoServerInfo {
 		server = ServerInfo{
-			Hostname:        os.Getenv("HOSTNAME"),
-			InitializedAt:   Time.InitialTime.Format(time.RFC3339Nano),
-			CurrentTime:     now.Format(time.RFC3339Nano),
-			UptimeSeconds:   int64(now.Sub(*Time.InitialTime).Seconds()),
-			InterfaceIps:    Utils.GetIpList(),
+			Hostname: os.Getenv("HOSTNAME"),
+			// TODO: InitializedAt:   time.InitialTime.Format(time.RFC3339Nano),
+			CurrentTime: now.Format(time.RFC3339Nano),
+			// TODO: UptimeSeconds:   int64(now.Sub(*Time.InitialTime).Seconds()),
+			InterfaceIps:    utils.GetIpList(),
 			BuggyboxVersion: config.BuildVersion,
 		}
 	}

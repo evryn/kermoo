@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+var AppInitiatedAt time.Time
+
 type State struct {
 	State      bool
 	TargetTime *time.Time

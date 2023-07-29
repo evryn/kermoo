@@ -110,6 +110,10 @@ func TestSimplePlanExecution(t *testing.T) {
 			{Static: 0.3},
 		})
 	})
+
+	t.Run("simple plan without duration lasts for ever", func(t *testing.T) {
+		t.Skip("TODO: Implement")
+	})
 }
 
 func TestSubPlanExecution(t *testing.T) {

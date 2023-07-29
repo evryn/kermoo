@@ -6,6 +6,7 @@ import (
 
 type PlanInternal struct {
 	ExecutablePlans []ExecutablePlan
+	Callbacks       []Callbacks
 }
 
 type Plan struct {
@@ -39,6 +40,10 @@ func (p *Plan) ToSubPlan() SubPlan {
 		Interval: p.Interval,
 		Duration: p.Duration,
 	}
+}
+
+func (p *Plan) AddCallback(callback Callbacks) {
+	p.internal.Callbacks = append(p.internal.Callbacks, callback)
 }
 
 func (p *Plan) GetExecutablePlans() []ExecutablePlan {
@@ -91,7 +96,49 @@ func (p *Plan) Execute(callbacks Callbacks) {
 	}
 }
 
+func (p *Plan) ExecuteAll() {
+	if len(p.internal.ExecutablePlans) == 0 {
+		p.internal.ExecutablePlans = p.GetExecutablePlans()
+	}
+
+	for _, ep := range p.internal.ExecutablePlans {
+		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
+			for _, ev := range ep.Values {
+				t := time.Now()
+
+				if !ep.IsForever {
+					ep.CurrentTries++
+
+					if ep.CurrentTries > ep.TotalTries {
+						break
+					}
+				}
+
+				for _, c := range p.internal.Callbacks {
+					if c.PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
+						return
+					}
+				}
+
+				time.Sleep(ep.Interval)
+
+				for _, c := range p.internal.Callbacks {
+					if c.PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
+						return
+					}
+				}
+
+			}
+		}
+	}
+}
+
 func InitPlan(p Plan) Plan {
 	p.SetInternal(&PlanInternal{})
+
+	if p.Value == nil {
+		p.Value = &Value{}
+	}
+
 	return p
 }

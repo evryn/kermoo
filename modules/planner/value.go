@@ -1,6 +1,9 @@
 package planner
 
-import "buggybox/config"
+import (
+	"buggybox/config"
+	"buggybox/modules/common"
+)
 
 type Value struct {
 	Chart   *Chart
@@ -18,10 +21,9 @@ func (v Value) GetExecutableValues() []ExecutableValue {
 		var ev []ExecutableValue
 
 		for _, bar := range v.Chart.Bars {
-			ev = append(ev, ExecutableValue{
-				Minimum: bar,
-				Maximum: bar,
-			})
+			ev = append(ev, NewExecutableValue(common.SingleValueF{
+				Exactly: &bar,
+			}))
 		}
 
 		return ev
@@ -48,9 +50,8 @@ func (v Value) GetExecutableValues() []ExecutableValue {
 	}
 
 	return []ExecutableValue{
-		{
-			Minimum: min,
-			Maximum: max,
-		},
+		NewExecutableValue(common.SingleValueF{
+			BetweenRange: []float32{min, max},
+		}),
 	}
 }
