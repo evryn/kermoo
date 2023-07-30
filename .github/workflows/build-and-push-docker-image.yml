@@ -49,16 +49,26 @@ jobs:
             org.label-schema.docker.cmd.help=docker exec -it $CONTAINER buggybox --help
 
       -
+        name: Build and run tests
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: test
+          build-args: |
+            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      -
         name: Build and export to Docker
         uses: docker/build-push-action@v4
         with:
           context: .
-          # platforms: linux/amd64,linux/arm64
           load: true
           tags: |
             ${{ steps.meta.outputs.tags }}
             ${{ env.TEST_IMAGE_TAG }}
-          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
