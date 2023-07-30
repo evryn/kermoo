@@ -48,6 +48,14 @@ jobs:
             org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 buggybox start fixed
             org.label-schema.docker.cmd.help=docker exec -it $CONTAINER buggybox --help
 
+
+      -
+        name: Test
+        run: |
+          # docker run --rm ${{ env.TEST_TAG }}
+          echo TODO: Test buggybox functionality with ${{ steps.meta.outputs.tags[0] }}
+
+
       -
         name: Build and export to Docker
         uses: docker/build-push-action@v4
@@ -61,12 +69,6 @@ jobs:
             BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
-
-      -
-        name: Test
-        run: |
-          # docker run --rm ${{ env.TEST_TAG }}
-          echo TODO: Test buggybox functionality with ${{ fromJSON(steps.meta.outputs.tags)[0] }}
 
       -
         name: Test image functionality
