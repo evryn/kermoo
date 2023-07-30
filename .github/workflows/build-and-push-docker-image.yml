@@ -52,7 +52,7 @@ jobs:
         name: Test
         run: |
           # docker run --rm ${{ env.TEST_TAG }}
-          echo TODO: Test buggybox functionality with ${{ steps.meta.outputs.tags }}
+          echo TODO: Test buggybox functionality with ${{ toJSON(steps.meta.outputs.tags) }}
 
       -
         name: Build and export to Docker
