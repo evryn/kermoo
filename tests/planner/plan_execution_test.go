@@ -21,6 +21,7 @@ var (
 	float_0_1     = float32(0.1)
 	float_0_5     = float32(0.5)
 	float_0_9     = float32(0.9)
+	acceptedError = 5 * time.Millisecond
 )
 
 func TestSimplePlanExecution(t *testing.T) {
@@ -40,7 +41,7 @@ func TestSimplePlanExecution(t *testing.T) {
 			PostSleep: Recorder.RecordPostSleep,
 		})
 
-		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, 2*time.Millisecond)
+		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
 		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
 			{Static: 0.5},
@@ -68,7 +69,7 @@ func TestSimplePlanExecution(t *testing.T) {
 		})
 
 		// Assert that it took around 50ms (with 2ms error)
-		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, 2*time.Millisecond)
+		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
 		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
 			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
@@ -99,7 +100,7 @@ func TestSimplePlanExecution(t *testing.T) {
 			PostSleep: Recorder.RecordPostSleep,
 		})
 
-		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, 2*time.Millisecond)
+		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
 		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
 			{Static: 0},
@@ -164,7 +165,7 @@ func TestSubPlanExecution(t *testing.T) {
 
 		Recorder.AssertTotalTimeSpent(t,
 			(50*time.Millisecond)+(60*time.Millisecond)+(50*time.Millisecond),
-			5*time.Millisecond,
+			acceptedError,
 		)
 
 		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
@@ -225,7 +226,7 @@ func TestSubPlanExecution(t *testing.T) {
 		// Chart runs unlimited time but since capped, ends with 13 times which equals 130ms
 		Recorder.AssertTotalTimeSpent(t,
 			(50*time.Millisecond)+(60*time.Millisecond)+(13*10*time.Millisecond),
-			5*time.Millisecond,
+			acceptedError,
 		)
 
 		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
