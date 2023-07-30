@@ -66,13 +66,13 @@ jobs:
         name: Test
         run: |
           # docker run --rm ${{ env.TEST_TAG }}
-          echo TODO: Test buggybox functionality with ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          echo TODO: Test buggybox functionality with ${{ fromJSON(steps.meta.outputs.tags)[0] }}
 
       -
         name: Test image functionality
         uses: plexsystems/container-structure-test-action@v0.1.0
         with:
-          image: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          image: ${{ fromJSON(steps.meta.outputs.tags)[0] }}
           config: container-structure-test.yaml
 
       -
