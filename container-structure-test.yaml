@@ -1,0 +1,21 @@
+schemaVersion: 2.0.0
+fileExistenceTests:
+- name: 'Kermoo executable exists'
+  path: '/usr/local/bin/buggybox'
+  shouldExist: true
+  permissions: '-rwxr-xr-x'
+  uid: 0 # TODO
+  gid: 0 # TODO
+commandTests:
+- name: "Kermoo executable is runnable"
+  command: "/usr/local/bin/buggybox"
+  args: ["version"]
+  exitCode: 0
+  expectedOutput: 
+  - ".*BuggyBox.*"
+  - ".*Made with 💖 by.*"
+metadataTest:
+  exposedPorts: ["80"]
+  entrypoint: ["/bin/sh", "-c", "buggybox"]
+#  workdir: "/app"
+#  user: "buggier"
