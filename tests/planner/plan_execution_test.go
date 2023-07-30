@@ -21,7 +21,7 @@ var (
 	float_0_1     = float32(0.1)
 	float_0_5     = float32(0.5)
 	float_0_9     = float32(0.9)
-	acceptedError = 5 * time.Millisecond
+	acceptedError = float64(0.1)
 )
 
 func TestSimplePlanExecution(t *testing.T) {

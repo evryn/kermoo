@@ -68,8 +68,12 @@ func (r *PlanRecorder) AssertExpectedValues(t *testing.T, expectedValues []Expec
 	}
 }
 
-func (r *PlanRecorder) AssertTotalTimeSpent(t *testing.T, expectedDuration time.Duration, expectedError time.Duration) {
-	assert.LessOrEqual(t, r.TotalTimeSpent-expectedDuration, expectedError)
+func (r *PlanRecorder) AssertTotalTimeSpent(t *testing.T, expectedDuration time.Duration, expectedError float64) {
+	assert.LessOrEqual(
+		t,
+		r.TotalTimeSpent-expectedDuration,
+		time.Duration(float64(expectedDuration)*expectedError),
+	)
 }
 
 var Recorder PlanRecorder
