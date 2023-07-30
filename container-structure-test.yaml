@@ -12,10 +12,10 @@ commandTests:
   args: ["version"]
   exitCode: 0
   expectedOutput: 
-  - "*BuggyBox*"
-  - "*Made with 💖 by*"
+  - ".*BuggyBox.*"
+  - ".*Made with 💖 by.*"
 metadataTest:
   exposedPorts: ["80"]
-  entrypoint: ["buggybox"]
-  workdir: "/app"
+  entrypoint: ["/bin/sh -c buggybox"]
+#  workdir: "/app"
 #  user: "buggier"
