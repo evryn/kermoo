@@ -17,10 +17,10 @@ import (
 var UserConfig UserConfigType
 
 type UserConfigType struct {
-	ApiVersion string                 `json:"apiVersion"`
-	Process    process.Process        `json:"process"`
-	Plans      []planner.Plan         `json:"plans"`
-	WebServers []web_server.WebServer `json:"webServers"`
+	SchemaVersion string                 `json:"schemaVersion"`
+	Process       process.Process        `json:"process"`
+	Plans         []planner.Plan         `json:"plans"`
+	WebServers    []web_server.WebServer `json:"webServers"`
 }
 
 func MustLoadUserConfig(filename string) {
