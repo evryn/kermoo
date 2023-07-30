@@ -69,6 +69,13 @@ jobs:
           echo TODO: Test buggybox functionality with ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
 
       -
+        name: Test image functionality
+        uses: plexsystems/container-structure-test-action@v0.1.0
+        with:
+          image: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          config: container-structure-test.yaml
+
+      -
         name: Login to DockerHub
         uses: docker/login-action@v2
         if: ${{ github.ref_type == 'tag' }}
