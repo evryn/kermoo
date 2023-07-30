@@ -16,6 +16,6 @@ commandTests:
   - ".*Made with 💖 by.*"
 metadataTest:
   exposedPorts: ["80"]
-  entrypoint: ["/bin/sh", "-c", "buggybox"]
+  entrypoint: ["buggybox"]
 #  workdir: "/app"
 #  user: "buggier"
