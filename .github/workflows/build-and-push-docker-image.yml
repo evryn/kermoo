@@ -13,7 +13,7 @@ jobs:
     name: Build & push docker image
     runs-on: ubuntu-latest
     env:
-      IMG_NAME: ${{ github.repository }}
+      TEST_IMAGE_TAG: ${{ github.repository }}:test
     steps:
       -
         name: Checkout
@@ -49,19 +49,15 @@ jobs:
             org.label-schema.docker.cmd.help=docker exec -it $CONTAINER buggybox --help
 
       -
-        name: Test
-        run: |
-          # docker run --rm ${{ env.TEST_TAG }}
-          echo TODO: Test buggybox functionality with ${{ toJSON(steps.meta.outputs.tags) }}
-
-      -
         name: Build and export to Docker
         uses: docker/build-push-action@v4
         with:
           context: .
           # platforms: linux/amd64,linux/arm64
           load: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ${{ env.TEST_IMAGE_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
@@ -72,7 +68,7 @@ jobs:
         name: Test image functionality
         uses: plexsystems/container-structure-test-action@v0.1.0
         with:
-          image: ${{ fromJSON(steps.meta.outputs.tags)[0] }}
+          image: ${{ env.TEST_IMAGE_TAG }}
           config: container-structure-test.yaml
 
       -
