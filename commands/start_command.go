@@ -3,6 +3,7 @@ package commands
 import (
 	"buggybox/modules/logger"
 	"buggybox/modules/user_config"
+	"time"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -22,7 +23,12 @@ func GetStartCommand() *cobra.Command {
 
 			logger.Log.Info("configuration is loaded", zap.Any("configuration", user_config.UserConfig))
 
-			user_config.UserConfig.Process.Run()
+			user_config.UserConfig.Process.MustRun()
+
+			for {
+				time.Sleep(1 * time.Minute)
+				logger.Log.Info("app is alive")
+			}
 		},
 	}
 

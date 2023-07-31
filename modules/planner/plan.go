@@ -2,20 +2,24 @@ package planner
 
 import (
 	"buggybox/modules/common"
+	"buggybox/modules/logger"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type PlanInternal struct {
 	ExecutablePlans []*ExecutablePlan
 	Callbacks       []Callbacks
+	IsPublic        bool
 }
 
 type Plan struct {
-	Value    *common.MixedValueF
-	Interval *time.Duration
-	Duration *time.Duration
-	Name     *string
-	SubPlans []SubPlan
+	Value    *common.MixedValueF `json:"value"`
+	Interval *time.Duration      `json:"interval"`
+	Duration *time.Duration      `json:"duration"`
+	Name     *string             `json:"name"`
+	SubPlans []SubPlan           `json:"subPlans"`
 	internal *PlanInternal
 }
 
@@ -45,6 +49,10 @@ func (p *Plan) ToSubPlan() SubPlan {
 
 func (p *Plan) AddCallback(callback Callbacks) {
 	p.internal.Callbacks = append(p.internal.Callbacks, callback)
+}
+
+func (p *Plan) MakePrivate() {
+	p.internal.IsPublic = false
 }
 
 func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
@@ -89,6 +97,8 @@ func (p *Plan) Execute(callbacks Callbacks) error {
 	for _, ep := range p.internal.ExecutablePlans {
 		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
 			for _, ev := range ep.Values {
+				logger.Log.Info("ticking plan...", zap.String("name", *p.Name))
+
 				t := time.Now()
 
 				if !ep.IsForever {
@@ -116,6 +126,9 @@ func (p *Plan) Execute(callbacks Callbacks) error {
 }
 
 func (p *Plan) ExecuteAll() error {
+	logger.Log.Info("executing plan...", zap.String("name", *p.Name))
+	logger.Log.Debug("plan details", zap.Any("plan", *p))
+
 	if len(p.internal.ExecutablePlans) == 0 {
 		executablePlans, err := p.GetExecutablePlans()
 
@@ -129,6 +142,8 @@ func (p *Plan) ExecuteAll() error {
 	for _, ep := range p.internal.ExecutablePlans {
 		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
 			for _, ev := range ep.Values {
+				logger.Log.Info("ticking plan...", zap.String("name", *p.Name))
+
 				t := time.Now()
 
 				if !ep.IsForever {
@@ -161,7 +176,9 @@ func (p *Plan) ExecuteAll() error {
 }
 
 func InitPlan(p Plan) Plan {
-	p.SetInternal(&PlanInternal{})
+	p.SetInternal(&PlanInternal{
+		IsPublic: true,
+	})
 
 	if p.Value == nil {
 		p.Value = &common.MixedValueF{}

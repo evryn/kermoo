@@ -17,18 +17,29 @@ type Process struct {
 	} `json:"exit"`
 }
 
-func (p *Process) Run() {
+func (p *Process) MustRun() {
 	plan := p.makePlan()
-	plan.ExecuteAll()
+	err := plan.ExecuteAll()
+	if err != nil {
+		logger.Log.Fatal("process killer plan execution failed", zap.Error(err))
+	}
 }
 
 func (p *Process) makePlan() planner.Plan {
 	value, _ := p.Exit.After.GetValue()
+	name := "process-killer-plan"
 
 	plan := planner.InitPlan(planner.Plan{
+		Name:     &name,
 		Interval: &value,
 		Duration: &value,
 	})
+
+	// Set a dummy value since plan validation requires it
+	dummyValue := float32(1.0)
+	plan.Value.Exactly = &dummyValue
+
+	plan.MakePrivate()
 
 	callback := planner.Callbacks{
 		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
