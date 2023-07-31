@@ -55,10 +55,11 @@ func mustReadStdin() string {
 		logger.Log.Fatal("stdin is not available to read from")
 	}
 
-	var stdin []byte
+	var stdin string
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		stdin = append(stdin, scanner.Bytes()...)
+		line := scanner.Bytes()
+		stdin += string(line) + "\n"
 	}
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
@@ -68,7 +69,6 @@ func mustReadStdin() string {
 }
 
 func mustUnmarshal(content string) UserConfigType {
-
 	firstChar := string(content[0])
 
 	// Content is probably JSON
