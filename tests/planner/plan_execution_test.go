@@ -2,6 +2,7 @@ package planner_test
 
 import (
 	"buggybox/modules/common"
+	"buggybox/modules/logger"
 	"buggybox/modules/planner"
 
 	"testing"
@@ -25,6 +26,8 @@ var (
 )
 
 func TestSimplePlanExecution(t *testing.T) {
+	logger.MustInitLogger("fatal")
+
 	t.Run("executes simple plan with static value", func(t *testing.T) {
 		defer teardownSubTest(t)
 
@@ -117,6 +120,8 @@ func TestSimplePlanExecution(t *testing.T) {
 }
 
 func TestSubPlanExecution(t *testing.T) {
+	logger.MustInitLogger("fatal")
+
 	t.Run("fails when value is set along with sub plans", func(t *testing.T) {
 		t.Skip("TODO: Implement")
 	})
