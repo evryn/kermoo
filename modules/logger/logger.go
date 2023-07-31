@@ -18,6 +18,10 @@ func MustInitLogger(verbosity string) {
 		config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
 	}
 
+	if verbosity == "fatal" {
+		config.Level = zap.NewAtomicLevelAt(zapcore.FatalLevel)
+	}
+
 	Log, err = config.Build()
 
 	if err != nil {
