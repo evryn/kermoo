@@ -12,7 +12,7 @@ import (
 func TestLoadUserConfig(t *testing.T) {
 	logger.MustInitLogger("fatal")
 
-	root := "../.."
+	root := "../../.."
 
 	tt := []struct {
 		name     string
