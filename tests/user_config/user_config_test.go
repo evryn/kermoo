@@ -103,8 +103,6 @@ func TestLoadUserConfig(t *testing.T) {
 				oldStdin := os.Stdin
 				defer func() { os.Stdin = oldStdin }() // Restore original Stdin
 				os.Stdin = tmpfile
-			} else {
-
 			}
 
 			_, err := user_config.LoadUserConfig(tc.filename)
