@@ -10,37 +10,46 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gosimple/slug"
 	"go.uber.org/zap"
 )
 
 type WebServer struct {
+	planner.PlannableTrait
 	Routes        []Route        `json:"routes"`
 	Interface     *string        `json:"interface"`
 	Port          *int32         `json:"port"`
 	InitiateAfter *time.Duration `json:"initiate_after"`
 	Plan          *planner.Plan  `json:"plan"`
-	PlanRef       *string        `json:"plan_ref"`
+	PlanRefs      []string       `json:"plan_refs"`
 	server        *http.Server
+}
+
+func (ws *WebServer) GetUid() string {
+	return slug.Make(fmt.Sprintf("webserver-%s-%d", ws.GetInterface(), ws.GetPort()))
+}
+
+func (ws *WebServer) GetPort() int32 {
+	if ws.Port != nil {
+		return *ws.Port
+	}
+
+	return config.Default.WebServer.Port
+}
+
+func (ws *WebServer) GetInterface() string {
+	if ws.Interface != nil {
+		return *ws.Interface
+	}
+
+	return config.Default.WebServer.Interface
 }
 
 func (ws *WebServer) ListenOnBackground() error {
 	r := mux.NewRouter()
 
-	var (
-		interf = config.Default.WebServer.Interface
-		port   = config.Default.WebServer.Port
-	)
-
 	if ws.Routes == nil {
 		return fmt.Errorf("no routes are provided for web server")
-	}
-
-	if ws.Interface != nil {
-		interf = *ws.Interface
-	}
-
-	if ws.Port != nil {
-		port = *ws.Port
 	}
 
 	for _, route := range ws.Routes {
@@ -48,7 +57,7 @@ func (ws *WebServer) ListenOnBackground() error {
 	}
 
 	ws.server = &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", interf, port),
+		Addr:    fmt.Sprintf("%s:%d", ws.GetInterface(), ws.GetPort()),
 		Handler: r,
 	}
 
@@ -74,4 +83,17 @@ func (ws *WebServer) Stop() error {
 	defer cancel()
 
 	return ws.server.Shutdown(ctx)
+}
+
+func (ws *WebServer) HasCustomPlan() bool {
+	return ws.Plan != nil
+}
+
+func (ws *WebServer) MakeCustomPlan() *planner.Plan {
+	plan := *ws.Plan
+	return &plan
+}
+
+func (ws *WebServer) GetDesiredPlanNames() []string {
+	return ws.PlanRefs
 }

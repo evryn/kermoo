@@ -28,5 +28,5 @@ func (s *SingleValueF) GetValue() (float32, error) {
 		max = t
 	}
 
-	return utils.GenerateRandomFloat32Between(min, max), nil
+	return utils.RandomFloat(min, max), nil
 }

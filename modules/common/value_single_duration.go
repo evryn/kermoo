@@ -30,5 +30,11 @@ func (s *SingleValueDur) GetValue() (time.Duration, error) {
 		max = t
 	}
 
-	return utils.RandomDuration(min, max), nil
+	dur, err := utils.RandomDuration(min, max)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return *dur, nil
 }

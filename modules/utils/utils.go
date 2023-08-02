@@ -4,32 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"os"
 	"time"
 
 	"math/rand"
 
-	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
-
-func FileExists(filePath string) bool {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
-
-func GetDurationFlag(cmd *cobra.Command, flag string) (*time.Duration, error) {
-	value, _ := cmd.Flags().GetString(flag)
-	duration, err := time.ParseDuration(value)
-
-	if err != nil {
-		return nil, fmt.Errorf("'%s' is not a valid duration. Valid duration examples: 200ms, 5s, 10m, 2h, 1d", value)
-	}
-
-	return &duration, nil
-}
 
 func GetIpList() []string {
 	list := []string{}
@@ -74,15 +54,23 @@ func GetIpList() []string {
 	return list
 }
 
-func GenerateRandomFloat32Between(min float32, max float32) float32 {
+func RandomFloat(min float32, max float32) float32 {
 	return min + rand.Float32()*(max-min)
 }
 
-func RandomDuration(min, max time.Duration) time.Duration {
+func RandomDuration(min, max time.Duration) (*time.Duration, error) {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
 
-	return min + time.Duration(r.Int63n(int64(max-min)))
+	diff := int64(max - min)
+
+	if diff <= 0 {
+		return nil, fmt.Errorf("duration is invalid since the range is zero or negative")
+	}
+
+	dur := min + time.Duration(r.Int63n(diff))
+
+	return &dur, nil
 }
 
 func YamlToJSON(yamlStr string) (string, error) {
@@ -117,4 +105,21 @@ func convertMapKeysToString(m map[interface{}]interface{}) map[string]interface{
 		}
 	}
 	return n
+}
+
+func GetDuplicates(items []string) []string {
+	itemCount := make(map[string]int)
+	duplicates := []string{}
+
+	for _, item := range items {
+		itemCount[item]++
+	}
+
+	for item, count := range itemCount {
+		if count > 1 {
+			duplicates = append(duplicates, item)
+		}
+	}
+
+	return duplicates
 }

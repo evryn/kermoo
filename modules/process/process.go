@@ -11,6 +11,7 @@ import (
 )
 
 type Process struct {
+	planner.PlannableTrait
 	Exit struct {
 		After common.SingleValueDur `json:"after"`
 		Code  uint                  `json:"code"`
@@ -18,16 +19,28 @@ type Process struct {
 }
 
 func (p *Process) MustRun() {
-	plan := p.makePlan()
+	plan := p.MakeCustomPlan()
 	err := plan.ExecuteAll()
 	if err != nil {
 		logger.Log.Fatal("process killer plan execution failed", zap.Error(err))
 	}
 }
 
-func (p *Process) makePlan() planner.Plan {
+func (p *Process) GetUid() string {
+	return "process-killer"
+}
+
+func (p *Process) HasCustomPlan() bool {
+	return true
+}
+
+func (p Process) GetDesiredPlanNames() []string {
+	return nil
+}
+
+func (p *Process) MakeCustomPlan() *planner.Plan {
 	value, _ := p.Exit.After.GetValue()
-	name := "process-killer-plan"
+	name := p.GetUid()
 
 	plan := planner.InitPlan(planner.Plan{
 		Name:     &name,
@@ -59,5 +72,5 @@ func (p *Process) makePlan() planner.Plan {
 
 	plan.AddCallback(callback)
 
-	return plan
+	return &plan
 }

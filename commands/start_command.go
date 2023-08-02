@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 func GetStartCommand() *cobra.Command {
@@ -21,9 +20,12 @@ func GetStartCommand() *cobra.Command {
 
 			user_config.MustLoadUserConfig(filename)
 
-			logger.Log.Info("configuration is loaded", zap.Any("configuration", user_config.UserConfig))
-
 			user_config.UserConfig.Process.MustRun()
+
+			for _, v := range v {
+
+			}
+			user_config.UserConfig.Plans
 
 			for {
 				time.Sleep(1 * time.Minute)
