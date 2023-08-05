@@ -158,9 +158,9 @@ func (p *Plan) ExecuteAll() error {
 	for _, ep := range p.internal.ExecutablePlans {
 		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
 			for _, ev := range ep.Values {
-				logger.Log.Info("ticking plan...", zap.String("name", *p.Name))
-
 				t := time.Now()
+
+				logger.Log.Info("executing pre-sleep hooks...", zap.String("plan", *p.Name))
 
 				if !ep.IsForever {
 					ep.CurrentTries++
@@ -170,20 +170,23 @@ func (p *Plan) ExecuteAll() error {
 					}
 				}
 
-				for _, c := range p.internal.Callbacks {
-					if c.PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
+				for _, p := range p.plannables {
+					plannable := *p
+					if plannable.GetPlanCallbacks().PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
 						return nil
 					}
 				}
 
 				time.Sleep(ep.Interval)
 
-				for _, c := range p.internal.Callbacks {
-					if c.PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
+				logger.Log.Info("executing post-sleep hooks...", zap.String("plan", *p.Name))
+
+				for _, p := range p.plannables {
+					plannable := *p
+					if plannable.GetPlanCallbacks().PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
 						return nil
 					}
 				}
-
 			}
 		}
 	}

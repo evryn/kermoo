@@ -1,0 +1,6 @@
+schemaVersion: "0.1-beta"
+process:
+  exit:
+    after:
+      exactly: 2s
+    code: 20
