@@ -11,16 +11,24 @@ import (
 	"go.uber.org/zap"
 )
 
-func MustLoadUserConfig(filename string) {
+func MustLoadProvidedConfig(filename string) {
 	uc, err := LoadUserConfig(filename)
 
 	if err != nil {
-		logger.Log.Fatal("unable to load user config", zap.Error(err))
+		logger.Log.Fatal("invalid initial user-provided config", zap.Error(err))
 	}
 
-	UserConfig = *uc
+	logger.Log.Info("initial configuration is loaded", zap.Any("unprepared", *uc))
 
-	logger.Log.Info("configuration is loaded", zap.Any("configuration", UserConfig))
+	prepared, err := uc.GetPreparedConfig()
+
+	if err != nil {
+		logger.Log.Fatal("invalid prepared user-provided config", zap.Error(err))
+	}
+
+	logger.Log.Info("prepared configuration is loaded", zap.Any("prepared", prepared))
+
+	Prepared = *prepared
 }
 
 func LoadUserConfig(filename string) (*UserConfigType, error) {
@@ -116,7 +124,7 @@ func unmarshal(content string) (UserConfigType, error) {
 }
 
 func unmarshalJson(jsonContent string) (UserConfigType, error) {
-	uc := UserConfig
+	uc := UserConfigType{}
 
 	logger.Log.Debug("unmarshalling json content", zap.String("json", jsonContent))
 

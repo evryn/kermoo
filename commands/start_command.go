@@ -18,14 +18,9 @@ func GetStartCommand() *cobra.Command {
 
 			logger.MustInitLogger(verbosity)
 
-			user_config.MustLoadUserConfig(filename)
+			user_config.MustLoadProvidedConfig(filename)
 
-			user_config.UserConfig.Process.MustRun()
-
-			for _, v := range v {
-
-			}
-			user_config.UserConfig.Plans
+			user_config.Prepared.Start()
 
 			for {
 				time.Sleep(1 * time.Minute)

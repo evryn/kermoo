@@ -17,7 +17,7 @@ func TestRoutes(t *testing.T) {
 	t.Run("test web server with static route", func(t *testing.T) {
 
 		// Define the routes for the server
-		routes := []web_server.Route{
+		routes := []*web_server.Route{
 			{
 				Path:    "/info",
 				Methods: []string{"GET"},
@@ -56,7 +56,7 @@ func TestRoutes(t *testing.T) {
 
 	t.Run("test web server with whoami route", func(t *testing.T) {
 		// Define the routes for the server
-		routes := []web_server.Route{
+		routes := []*web_server.Route{
 			{
 				Path:    "/info",
 				Methods: []string{"GET"},

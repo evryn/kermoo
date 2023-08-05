@@ -4,14 +4,15 @@ type Plannable interface {
 	GetUid() string
 	HasCustomPlan() bool
 	MakeCustomPlan() *Plan
-	AssignPlans([]*Plan)
+	AssignPlan(*Plan)
 	GetDesiredPlanNames() []string
+	GetPlanCallbacks() Callbacks
 }
 
 type PlannableTrait struct {
 	assignedPlans []*Plan
 }
 
-func (p *PlannableTrait) AssignPlans(ap []*Plan) {
-	p.assignedPlans = ap
+func (p *PlannableTrait) AssignPlan(plan *Plan) {
+	p.assignedPlans = append(p.assignedPlans, plan)
 }

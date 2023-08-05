@@ -2,17 +2,53 @@ package web_server
 
 import (
 	"buggybox/config"
+	"buggybox/modules/planner"
 	"buggybox/modules/utils"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+
+	"github.com/gosimple/slug"
 )
 
 type Route struct {
-	Path    string       `json:"path"`
-	Methods []string     `json:"methods"`
-	Content RouteContent `json:"content"`
+	planner.PlannableTrait
+	Path     string        `json:"path"`
+	Methods  []string      `json:"methods"`
+	Content  RouteContent  `json:"content"`
+	Plan     *planner.Plan `json:"plan"`
+	PlanRefs []string      `json:"plan_refs"`
+}
+
+func (route *Route) GetUid() string {
+	return slug.Make(fmt.Sprintf("route-%s", strings.ReplaceAll(route.Path, "/", "slash")))
+}
+
+func (route *Route) GetDesiredPlanNames() []string {
+	return route.PlanRefs
+}
+
+func (route *Route) HasCustomPlan() bool {
+	return route.Plan != nil
+}
+
+func (route *Route) MakeCustomPlan() *planner.Plan {
+	plan := *route.Plan
+	return &plan
+}
+
+func (route *Route) GetPlanCallbacks() planner.Callbacks {
+	return planner.Callbacks{
+		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
+			return planner.PLAN_SIGNAL_CONTINUE
+		},
+		PostSleep: func(startedAt time.Time, timeSpent time.Duration) planner.PlanSignal {
+			return planner.PLAN_SIGNAL_TERMINATE
+		},
+	}
 }
 
 func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +62,40 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte(route.Content.Static))
+}
+
+func (route *Route) GetMethods() ([]string, error) {
+	if len(route.Methods) == 0 {
+		return []string{"HEAD", "GET", "POST"}, nil
+	}
+
+	validMethods := []string{"HEAD", "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "CONNECT", "TRACE"}
+
+	methods := []string{}
+
+	for _, method := range route.Methods {
+		method := strings.ToUpper(method)
+
+		if !utils.Contains(validMethods, method) {
+			return nil, fmt.Errorf("%s is not a valid HTTP method", method)
+		}
+
+		if !utils.Contains(methods, method) {
+			methods = append(methods, method)
+		}
+	}
+
+	return methods, nil
+}
+
+func (route *Route) Validate() error {
+	_, err := route.GetMethods()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type RouteContent struct {

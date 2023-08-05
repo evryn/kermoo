@@ -17,7 +17,7 @@ func (v MixedValueF) ToSingleValues() ([]SingleValueF, error) {
 	if v.Chart != nil && len(v.Chart.Bars) > 0 {
 		var sv []SingleValueF
 
-		for i, _ := range v.Chart.Bars {
+		for i := range v.Chart.Bars {
 			sv = append(sv, SingleValueF{
 				Exactly: &v.Chart.Bars[i],
 			})

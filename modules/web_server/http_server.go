@@ -16,7 +16,7 @@ import (
 
 type WebServer struct {
 	planner.PlannableTrait
-	Routes        []Route        `json:"routes"`
+	Routes        []*Route       `json:"routes"`
 	Interface     *string        `json:"interface"`
 	Port          *int32         `json:"port"`
 	InitiateAfter *time.Duration `json:"initiate_after"`
@@ -45,12 +45,22 @@ func (ws *WebServer) GetInterface() string {
 	return config.Default.WebServer.Interface
 }
 
-func (ws *WebServer) ListenOnBackground() error {
-	r := mux.NewRouter()
-
+func (ws *WebServer) Validate() error {
 	if ws.Routes == nil {
-		return fmt.Errorf("no routes are provided for web server")
+		return fmt.Errorf("no routes are provided")
 	}
+
+	return nil
+}
+
+func (ws *WebServer) ListenOnBackground() error {
+	invalid := ws.Validate()
+
+	if invalid != nil {
+		return invalid
+	}
+
+	r := mux.NewRouter()
 
 	for _, route := range ws.Routes {
 		r.HandleFunc(route.Path, route.Handle).Methods(route.Methods...)
@@ -96,4 +106,15 @@ func (ws *WebServer) MakeCustomPlan() *planner.Plan {
 
 func (ws *WebServer) GetDesiredPlanNames() []string {
 	return ws.PlanRefs
+}
+
+func (ws *WebServer) GetPlanCallbacks() planner.Callbacks {
+	return planner.Callbacks{
+		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
+			return planner.PLAN_SIGNAL_CONTINUE
+		},
+		PostSleep: func(startedAt time.Time, timeSpent time.Duration) planner.PlanSignal {
+			return planner.PLAN_SIGNAL_TERMINATE
+		},
+	}
 }

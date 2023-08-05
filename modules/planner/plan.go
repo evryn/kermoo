@@ -15,12 +15,13 @@ type PlanInternal struct {
 }
 
 type Plan struct {
-	Value    *common.MixedValueF `json:"value"`
-	Interval *time.Duration      `json:"interval"`
-	Duration *time.Duration      `json:"duration"`
-	Name     *string             `json:"name"`
-	SubPlans []SubPlan           `json:"subPlans"`
-	internal *PlanInternal
+	Value      *common.MixedValueF `json:"value"`
+	Interval   *time.Duration      `json:"interval"`
+	Duration   *time.Duration      `json:"duration"`
+	Name       *string             `json:"name"`
+	SubPlans   []SubPlan           `json:"subPlans"`
+	internal   *PlanInternal
+	plannables []*Plannable
 }
 
 type Callbacks struct {
@@ -45,6 +46,11 @@ func (p *Plan) ToSubPlan() SubPlan {
 		Interval: p.Interval,
 		Duration: p.Duration,
 	}
+}
+
+func (p *Plan) Assign(plannable Plannable) {
+	p.plannables = append(p.plannables, &plannable)
+	plannable.AssignPlan(p)
 }
 
 func (p *Plan) AddCallback(callback Callbacks) {
@@ -83,15 +89,25 @@ func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
 	return ep, nil
 }
 
+func (p *Plan) Validate() error {
+	_, err := p.GetExecutablePlans()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *Plan) Execute(callbacks Callbacks) error {
+	invalid := p.Validate()
+
+	if invalid != nil {
+		return invalid
+	}
+
 	if len(p.internal.ExecutablePlans) == 0 {
-		executablePlans, err := p.GetExecutablePlans()
-
-		if err != nil {
-			return err
-		}
-
-		p.internal.ExecutablePlans = executablePlans
+		p.internal.ExecutablePlans, _ = p.GetExecutablePlans()
 	}
 
 	for _, ep := range p.internal.ExecutablePlans {
