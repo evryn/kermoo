@@ -1,12 +1,16 @@
 package user_config
 
 import (
+	"buggybox/modules/logger"
 	"buggybox/modules/planner"
 	"buggybox/modules/process"
 	"buggybox/modules/utils"
 	"buggybox/modules/web_server"
 	"fmt"
 	"strings"
+	"time"
+
+	"go.uber.org/zap"
 )
 
 var Prepared PreparedConfigType
@@ -19,6 +23,13 @@ type PreparedConfigType struct {
 }
 
 func (pc *PreparedConfigType) Start() {
+	if pc.Process != nil && pc.Process.Delay != nil {
+		dur, _ := pc.Process.Delay.GetValue()
+		logger.Log.Info("sleeping because of process manager configuration...", zap.Duration("sleep", dur))
+		time.Sleep(dur)
+		logger.Log.Info("woke up.")
+	}
+
 	for _, plan := range pc.Plans {
 		go plan.ExecuteAll()
 	}

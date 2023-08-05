@@ -16,10 +16,13 @@ var _ planner.Plannable = &Process{}
 
 type Process struct {
 	planner.PlannableTrait
-	Exit struct {
-		After common.SingleValueDur `json:"after"`
-		Code  uint                  `json:"code"`
-	} `json:"exit"`
+	Delay *common.SingleValueDur `json:"delay"`
+	Exit  *ProcessExit           `json:"exit"`
+}
+
+type ProcessExit struct {
+	After common.SingleValueDur `json:"after"`
+	Code  uint                  `json:"code"`
 }
 
 func (p *Process) MustRun() {
@@ -35,24 +38,24 @@ func (p *Process) GetUid() string {
 }
 
 func (p *Process) HasCustomPlan() bool {
-	return true
+	return p.Exit != nil
 }
 
 func (p Process) GetDesiredPlanNames() []string {
 	return nil
 }
 
-func (p Process) ShouldStart() bool {
-	value, _ := p.Exit.After.GetValue()
-
-	return value != 0
-}
-
 func (p Process) Validate() error {
-	_, err := p.Exit.After.GetValue()
+	if p.Delay != nil {
+		if _, err := p.Delay.GetValue(); err != nil {
+			return fmt.Errorf("unable to get delay duration: %v", err)
+		}
+	}
 
-	if err != nil {
-		return fmt.Errorf("unable to get exit duration: %v", err)
+	if p.Exit != nil {
+		if _, err := p.Exit.After.GetValue(); err != nil {
+			return fmt.Errorf("unable to get exit duration: %v", err)
+		}
 	}
 
 	return nil

@@ -7,8 +7,8 @@ import (
 )
 
 type SingleValueDur struct {
-	Exactly      *Duration  `json:"exactly"`
-	BetweenRange []Duration `json:"betweenRange"`
+	Exactly *Duration  `json:"exactly"`
+	Between []Duration `json:"between"`
 }
 
 func (s *SingleValueDur) GetValue() (time.Duration, error) {
@@ -17,12 +17,12 @@ func (s *SingleValueDur) GetValue() (time.Duration, error) {
 		return time.Duration(*s.Exactly), nil
 	}
 
-	if len(s.BetweenRange) != 2 {
-		return 0, fmt.Errorf("value of BetweenRange needs to have exactly two element as range")
+	if len(s.Between) != 2 {
+		return 0, fmt.Errorf("value of `between` needs to have exactly two element as range")
 	}
 
-	min := time.Duration(s.BetweenRange[0])
-	max := time.Duration(s.BetweenRange[1])
+	min := time.Duration(s.Between[0])
+	max := time.Duration(s.Between[1])
 
 	if min > max {
 		t := min

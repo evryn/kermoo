@@ -23,8 +23,8 @@ func GetStartCommand() *cobra.Command {
 			user_config.Prepared.Start()
 
 			for {
-				time.Sleep(1 * time.Minute)
 				logger.Log.Info("app is alive")
+				time.Sleep(1 * time.Minute)
 			}
 		},
 	}

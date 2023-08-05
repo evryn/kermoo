@@ -8,10 +8,12 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func RootPath(relevantPath string) string {
@@ -35,6 +37,8 @@ type E2E struct {
 	endedAt   time.Time
 	out       bytes.Buffer
 	cancel    context.CancelFunc
+	context   context.Context
+	timedout  bool
 }
 
 func NewE2E(t *testing.T) *E2E {
@@ -44,10 +48,17 @@ func NewE2E(t *testing.T) *E2E {
 }
 
 func (e *E2E) Start(config string, timeout time.Duration) {
-	var ctx context.Context
-	ctx, e.cancel = context.WithTimeout(context.Background(), timeout)
+	e.context, e.cancel = context.WithTimeout(context.Background(), timeout)
 
-	e.cmd = exec.CommandContext(ctx, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
+	e.cmd = exec.CommandContext(e.context, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
+
+	// This is a workaround for terminating process with child
+	// See: https://stackoverflow.com/a/71714364
+	if e.cmd.SysProcAttr == nil {
+		e.cmd.SysProcAttr = &syscall.SysProcAttr{}
+	}
+
+	e.cmd.SysProcAttr.Setpgid = true
 
 	e.cmd.Stdin = strings.NewReader(strings.Trim(config, "\t"))
 
@@ -63,6 +74,19 @@ func (e *E2E) Start(config string, timeout time.Duration) {
 
 func (e *E2E) Wait() {
 	defer e.cancel()
+
+	go func() {
+		<-e.context.Done()
+		if e.cmd.Process == nil {
+			return
+		}
+		// Kill by negative PID to kill the process group, which includes
+		// the top-level process we spawned as well as any subprocesses
+		// it spawned.
+		_ = syscall.Kill(-e.cmd.Process.Pid, syscall.SIGKILL)
+		e.timedout = true
+	}()
+
 	e.cmd.Wait()
 	e.endedAt = time.Now()
 }
@@ -70,6 +94,10 @@ func (e *E2E) Wait() {
 func (e *E2E) AssertExecutaionDuration(min time.Duration, max time.Duration) {
 	assert.GreaterOrEqual(e.t, e.endedAt.Sub(e.startedAt), min)
 	assert.LessOrEqual(e.t, e.endedAt.Sub(e.startedAt), max)
+}
+
+func (e *E2E) RequireNotTimedOut() {
+	require.False(e.t, e.timedout, "command is timedout")
 }
 
 func (e *E2E) AssertExitCode(code int) {

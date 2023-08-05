@@ -64,7 +64,7 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value.BetweenRange = []float32{float_0_1, float_0_9}
+		plan.Value.Between = []float32{float_0_1, float_0_9}
 
 		plan.Execute(planner.Callbacks{
 			PreSleep:  Recorder.RecordPreSleep,
@@ -158,7 +158,7 @@ func TestSubPlanExecution(t *testing.T) {
 		})
 
 		plan.SubPlans[0].Value.Exactly = &float_0_5
-		plan.SubPlans[1].Value.BetweenRange = []float32{float_0_1, float_0_9}
+		plan.SubPlans[1].Value.Between = []float32{float_0_1, float_0_9}
 		plan.SubPlans[2].Value.Chart = &common.Chart{
 			Bars: []float32{0.2, 0.3, 0.4},
 		}
@@ -212,7 +212,7 @@ func TestSubPlanExecution(t *testing.T) {
 		})
 
 		plan.SubPlans[0].Value.Exactly = &float_0_5
-		plan.SubPlans[1].Value.BetweenRange = []float32{float_0_1, float_0_9}
+		plan.SubPlans[1].Value.Between = []float32{float_0_1, float_0_9}
 		plan.SubPlans[2].Value.Chart = &common.Chart{
 			Bars: []float32{0.2, 0.3, 0.4},
 		}

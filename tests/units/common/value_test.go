@@ -23,7 +23,7 @@ func TestGetValue(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
 		s := &common.SingleValueF{
-			BetweenRange: []float32{min, max},
+			Between: []float32{min, max},
 		}
 
 		got, err := s.GetValue()
@@ -68,14 +68,14 @@ func TestToSingleValues(t *testing.T) {
 		max := float32(20)
 		v := common.MixedValueF{
 			SingleValueF: common.SingleValueF{
-				BetweenRange: []float32{min, max},
+				Between: []float32{min, max},
 			},
 		}
 
 		got, err := v.ToSingleValues()
 		assert.NoError(t, err)
 		assert.Len(t, got, 1)
-		assert.Equal(t, min, got[0].BetweenRange[0])
-		assert.Equal(t, max, got[0].BetweenRange[1])
+		assert.Equal(t, min, got[0].Between[0])
+		assert.Equal(t, max, got[0].Between[1])
 	})
 }

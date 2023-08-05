@@ -51,7 +51,7 @@ func (v Value) GetExecutableValues() []ExecutableValue {
 
 	return []ExecutableValue{
 		NewExecutableValue(common.SingleValueF{
-			BetweenRange: []float32{min, max},
+			Between: []float32{min, max},
 		}),
 	}
 }

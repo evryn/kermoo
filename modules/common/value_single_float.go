@@ -6,8 +6,8 @@ import (
 )
 
 type SingleValueF struct {
-	Exactly      *float32  `json:"exactly"`
-	BetweenRange []float32 `json:"betweenRange"`
+	Exactly *float32  `json:"exactly"`
+	Between []float32 `json:"between"`
 }
 
 func (s *SingleValueF) GetValue() (float32, error) {
@@ -15,12 +15,12 @@ func (s *SingleValueF) GetValue() (float32, error) {
 		return *s.Exactly, nil
 	}
 
-	if len(s.BetweenRange) != 2 {
-		return 0, fmt.Errorf("value of BetweenRange needs to have exactly two element as range")
+	if len(s.Between) != 2 {
+		return 0, fmt.Errorf("value of `between` needs to have exactly two element as range")
 	}
 
-	min := s.BetweenRange[0]
-	max := s.BetweenRange[1]
+	min := s.Between[0]
+	max := s.Between[1]
 
 	if min > max {
 		t := min

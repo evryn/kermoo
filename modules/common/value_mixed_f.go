@@ -26,14 +26,14 @@ func (v MixedValueF) ToSingleValues() ([]SingleValueF, error) {
 		return sv, nil
 	}
 
-	if len(v.BetweenRange) == 2 {
+	if len(v.Between) == 2 {
 		return []SingleValueF{{
-			BetweenRange: []float32{v.BetweenRange[0], v.BetweenRange[1]},
+			Between: []float32{v.Between[0], v.Between[1]},
 		}}, nil
 	}
 
-	if len(v.BetweenRange) > 0 {
-		return nil, fmt.Errorf("value of BetweenRange needs to have exactly two element as range")
+	if len(v.Between) != 2 {
+		return nil, fmt.Errorf("value of `between` needs to have exactly two element as range")
 	}
 
 	return nil, fmt.Errorf("no value is set")
