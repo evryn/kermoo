@@ -31,23 +31,33 @@ func (pc *PreparedConfigType) Start() {
 	}
 
 	for _, plan := range pc.Plans {
-		go plan.ExecuteAll()
+		go plan.Start()
 	}
 }
 
 func (u *PreparedConfigType) preparePlannable(plannable planner.Plannable) error {
 	desiredPlans := plannable.GetDesiredPlanNames()
 
-	if plannable.HasCustomPlan() {
+	if len(desiredPlans) == 0 {
 		planName := plannable.GetUid()
+		var dedicatedPlan *planner.Plan
 
-		customPlan := plannable.MakeCustomPlan()
-		customPlan.Name = &planName
-		customPlan.MakePrivate()
+		if plannable.HasCustomPlan() {
+			dedicatedPlan = plannable.MakeCustomPlan()
+			planName += "-custom-plan"
+		} else {
+			dedicatedPlan = plannable.MakeDefaultPlan()
+			planName += "-default-plan"
+		}
 
-		u.Plans = append(u.Plans, customPlan)
+		dedicatedPlan.Name = &planName
+		dedicatedPlan.MakePrivate()
+
+		u.Plans = append(u.Plans, dedicatedPlan)
 		desiredPlans = append(desiredPlans, planName)
 	}
+
+	logger.Log.Debug("preparing plannable", zap.String("plannable", plannable.GetUid()), zap.Any("desired_plans", desiredPlans))
 
 	for _, planName := range desiredPlans {
 		desiredPlan := u.findPlan(planName)

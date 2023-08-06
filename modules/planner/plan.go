@@ -3,30 +3,37 @@ package planner
 import (
 	"buggybox/modules/common"
 	"buggybox/modules/logger"
+	"buggybox/modules/utils"
 	"time"
 
 	"go.uber.org/zap"
 )
 
-type PlanInternal struct {
-	ExecutablePlans []*ExecutablePlan
-	Callbacks       []Callbacks
-	IsPublic        bool
-}
-
 type Plan struct {
-	Value      *common.MixedValueF `json:"value"`
-	Interval   *time.Duration      `json:"interval"`
-	Duration   *time.Duration      `json:"duration"`
-	Name       *string             `json:"name"`
-	SubPlans   []SubPlan           `json:"subPlans"`
-	internal   *PlanInternal
-	plannables []*Plannable
+	Value                  *common.MixedValueF `json:"value"`
+	Interval               *common.Duration    `json:"interval"`
+	Duration               *common.Duration    `json:"duration"`
+	Name                   *string             `json:"name"`
+	SubPlans               []SubPlan           `json:"subPlans"`
+	plannables             []*Plannable
+	currentExecutableValue *ExecutableValue
+	currentStateByChance   bool
+	isDedicated            bool
+	executablePlans        []*ExecutablePlan
 }
 
-type Callbacks struct {
-	PreSleep  func(ep *ExecutablePlan, ev *ExecutableValue) PlanSignal
-	PostSleep func(startedAt time.Time, timeSpent time.Duration) PlanSignal
+type Cycle struct {
+	ExecutablePlan  *ExecutablePlan
+	ExecutableValue *ExecutableValue
+	StartedAt       time.Time
+	TimeSpent       time.Duration
+}
+
+type HookFunc func(cycle Cycle) PlanSignal
+
+type CycleHooks struct {
+	PreSleep  *HookFunc
+	PostSleep *HookFunc
 }
 
 type PlanSignal uint32
@@ -35,10 +42,6 @@ const (
 	PLAN_SIGNAL_CONTINUE  PlanSignal = iota
 	PLAN_SIGNAL_TERMINATE PlanSignal = iota
 )
-
-func (p *Plan) SetInternal(pi *PlanInternal) {
-	p.internal = pi
-}
 
 func (p *Plan) ToSubPlan() SubPlan {
 	return SubPlan{
@@ -53,12 +56,8 @@ func (p *Plan) Assign(plannable Plannable) {
 	plannable.AssignPlan(p)
 }
 
-func (p *Plan) AddCallback(callback Callbacks) {
-	p.internal.Callbacks = append(p.internal.Callbacks, callback)
-}
-
 func (p *Plan) MakePrivate() {
-	p.internal.IsPublic = false
+	p.isDedicated = true
 }
 
 func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
@@ -99,68 +98,44 @@ func (p *Plan) Validate() error {
 	return nil
 }
 
-func (p *Plan) Execute(callbacks Callbacks) error {
-	invalid := p.Validate()
-
-	if invalid != nil {
-		return invalid
-	}
-
-	if len(p.internal.ExecutablePlans) == 0 {
-		p.internal.ExecutablePlans, _ = p.GetExecutablePlans()
-	}
-
-	for _, ep := range p.internal.ExecutablePlans {
-		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
-			for _, ev := range ep.Values {
-				logger.Log.Info("ticking plan...", zap.String("name", *p.Name))
-
-				t := time.Now()
-
-				if !ep.IsForever {
-					ep.CurrentTries++
-
-					if ep.CurrentTries > ep.TotalTries {
-						break
-					}
-				}
-
-				if callbacks.PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
-					return nil
-				}
-
-				time.Sleep(ep.Interval)
-
-				if callbacks.PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
-					return nil
-				}
-			}
-		}
-	}
-
-	return nil
+func (p *Plan) GetCurrentValue() *ExecutableValue {
+	return p.currentExecutableValue
 }
 
-func (p *Plan) ExecuteAll() error {
-	logger.Log.Info("executing plan...", zap.String("name", *p.Name))
-	logger.Log.Debug("plan details", zap.Any("plan", *p))
+func (p *Plan) GetCurrentStateByChance() bool {
+	return p.currentStateByChance
+}
 
-	if len(p.internal.ExecutablePlans) == 0 {
+func (p *Plan) Start() error {
+	if logger.Log.Level() == zap.InfoLevel {
+		logger.Log.Info("executing plan...", zap.String("name", *p.Name))
+	} else {
+		plannableNames := []string{}
+		for _, pl := range p.plannables {
+			plr := *pl
+			plannableNames = append(plannableNames, plr.GetUid())
+		}
+		logger.Log.Debug("executing plan...", zap.String("name", *p.Name), zap.Any("plan", *p), zap.Any("plannables", plannableNames))
+	}
+
+	if len(p.executablePlans) == 0 {
 		executablePlans, err := p.GetExecutablePlans()
 
 		if err != nil {
 			return err
 		}
 
-		p.internal.ExecutablePlans = executablePlans
+		p.executablePlans = executablePlans
 	}
 
-	for _, ep := range p.internal.ExecutablePlans {
+	for _, ep := range p.executablePlans {
 		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
 			for _, ev := range ep.Values {
-				t := time.Now()
+				p.currentExecutableValue = ev
+				p.currentStateByChance = utils.IsSuccessByChance(ev.GetValue())
+				startedAt := time.Now()
 
-				logger.Log.Info("executing pre-sleep hooks...", zap.String("plan", *p.Name))
+				logger.Log.Info("executing pre-sleep hooks...", zap.String("plan", *p.Name), zap.Float32("value", ev.GetValue()), zap.Bool("success_by_chance", p.GetCurrentStateByChance()))
 
 				if !ep.IsForever {
 					ep.CurrentTries++
@@ -172,8 +147,19 @@ func (p *Plan) ExecuteAll() error {
 
 				for _, p := range p.plannables {
 					plannable := *p
-					if plannable.GetPlanCallbacks().PreSleep(ep, ev) == PLAN_SIGNAL_TERMINATE {
-						return nil
+					hook := plannable.GetPlanCycleHooks().PreSleep
+					if hook != nil {
+						executable := *hook
+						value := executable(Cycle{
+							ExecutablePlan:  ep,
+							ExecutableValue: ev,
+							StartedAt:       startedAt,
+							TimeSpent:       time.Since(startedAt),
+						})
+
+						if value == PLAN_SIGNAL_TERMINATE {
+							return nil
+						}
 					}
 				}
 
@@ -183,9 +169,25 @@ func (p *Plan) ExecuteAll() error {
 
 				for _, p := range p.plannables {
 					plannable := *p
-					if plannable.GetPlanCallbacks().PostSleep(t, time.Since(t)) == PLAN_SIGNAL_TERMINATE {
-						return nil
+					hook := plannable.GetPlanCycleHooks().PostSleep
+					if hook != nil {
+						executable := *hook
+						value := executable(Cycle{
+							ExecutablePlan:  ep,
+							ExecutableValue: ev,
+							StartedAt:       startedAt,
+							TimeSpent:       time.Since(startedAt),
+						})
+
+						if value == PLAN_SIGNAL_TERMINATE {
+							return nil
+						}
 					}
+				}
+
+				if ep.Interval == 0 {
+					logger.Log.Info("pausing plan due to zero interval", zap.String("plan", *p.Name))
+					return nil
 				}
 			}
 		}
@@ -195,10 +197,6 @@ func (p *Plan) ExecuteAll() error {
 }
 
 func InitPlan(p Plan) Plan {
-	p.SetInternal(&PlanInternal{
-		IsPublic: true,
-	})
-
 	if p.Value == nil {
 		p.Value = &common.MixedValueF{}
 	}

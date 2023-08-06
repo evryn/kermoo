@@ -8,8 +8,8 @@ import (
 
 type SubPlan struct {
 	Value    *common.MixedValueF
-	Interval *time.Duration
-	Duration *time.Duration
+	Interval *common.Duration
+	Duration *common.Duration
 }
 
 func (s *SubPlan) ToExecutablePlan() (*ExecutablePlan, error) {
@@ -29,12 +29,12 @@ func (s *SubPlan) ToExecutablePlan() (*ExecutablePlan, error) {
 	}
 
 	if s.Interval != nil {
-		interval = *s.Interval
+		interval = time.Duration(*s.Interval)
 	}
 
 	ep := ExecutablePlan{
 		Values:       executableValues,
-		Interval:     interval,
+		Interval:     time.Duration(interval),
 		CurrentTries: 0,
 		TotalTries:   0,
 		IsForever:    false,
@@ -43,7 +43,7 @@ func (s *SubPlan) ToExecutablePlan() (*ExecutablePlan, error) {
 	if s.Duration == nil {
 		ep.IsForever = true
 	} else {
-		dur := *s.Duration
+		dur := time.Duration(*s.Duration)
 		ep.TotalTries = uint64(dur.Nanoseconds() / interval.Nanoseconds())
 	}
 

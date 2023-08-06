@@ -6,7 +6,6 @@ import (
 	"buggybox/modules/planner"
 	"fmt"
 	"os"
-	"time"
 
 	"go.uber.org/zap"
 )
@@ -23,14 +22,6 @@ type Process struct {
 type ProcessExit struct {
 	After common.SingleValueDur `json:"after"`
 	Code  uint                  `json:"code"`
-}
-
-func (p *Process) MustRun() {
-	plan := p.MakeCustomPlan()
-	err := plan.ExecuteAll()
-	if err != nil {
-		logger.Log.Fatal("process manager plan execution failed", zap.Error(err))
-	}
 }
 
 func (p *Process) GetUid() string {
@@ -61,21 +52,25 @@ func (p Process) Validate() error {
 	return nil
 }
 
-func (p *Process) GetPlanCallbacks() planner.Callbacks {
-	return planner.Callbacks{
-		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
-			return planner.PLAN_SIGNAL_CONTINUE
-		},
-		PostSleep: func(startedAt time.Time, timeSpent time.Duration) planner.PlanSignal {
-			logger.Log.Info("process is exiting due to the specified alive time in configuration",
-				zap.Duration("seconds_alive", timeSpent),
-				zap.Int("exit_code", int(p.Exit.Code)),
-			)
+func (p *Process) GetPlanCycleHooks() planner.CycleHooks {
+	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
+		return planner.PLAN_SIGNAL_CONTINUE
+	})
 
-			os.Exit(int(p.Exit.Code))
+	postSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
+		logger.Log.Info("process is exiting due to the specified alive time in configuration",
+			zap.Duration("seconds_alive", cycle.TimeSpent),
+			zap.Int("exit_code", int(p.Exit.Code)),
+		)
 
-			return planner.PLAN_SIGNAL_TERMINATE
-		},
+		os.Exit(int(p.Exit.Code))
+
+		return planner.PLAN_SIGNAL_TERMINATE
+	})
+
+	return planner.CycleHooks{
+		PreSleep:  &preSleep,
+		PostSleep: &postSleep,
 	}
 }
 
@@ -83,10 +78,12 @@ func (p *Process) MakeCustomPlan() *planner.Plan {
 	value, _ := p.Exit.After.GetValue()
 	name := p.GetUid()
 
+	valueDur := common.Duration(value)
+
 	plan := planner.InitPlan(planner.Plan{
 		Name:     &name,
-		Interval: &value,
-		Duration: &value,
+		Interval: &valueDur,
+		Duration: &valueDur,
 	})
 
 	// Set a dummy value since plan validation requires it
@@ -94,4 +91,8 @@ func (p *Process) MakeCustomPlan() *planner.Plan {
 	plan.Value.Exactly = &dummyValue
 
 	return &plan
+}
+
+func (p *Process) MakeDefaultPlan() *planner.Plan {
+	return nil
 }

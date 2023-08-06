@@ -24,7 +24,7 @@ type Route struct {
 }
 
 func (route *Route) GetUid() string {
-	return slug.Make(fmt.Sprintf("route-%s", strings.ReplaceAll(route.Path, "/", "slash")))
+	return slug.Make(fmt.Sprintf("route-%s", route.Path))
 }
 
 func (route *Route) GetDesiredPlanNames() []string {
@@ -40,14 +40,25 @@ func (route *Route) MakeCustomPlan() *planner.Plan {
 	return &plan
 }
 
-func (route *Route) GetPlanCallbacks() planner.Callbacks {
-	return planner.Callbacks{
-		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
-			return planner.PLAN_SIGNAL_CONTINUE
-		},
-		PostSleep: func(startedAt time.Time, timeSpent time.Duration) planner.PlanSignal {
-			return planner.PLAN_SIGNAL_TERMINATE
-		},
+// Create a lifetime-long plan to serve route
+func (route *Route) MakeDefaultPlan() *planner.Plan {
+	// Value of 1.0 indicates that the route will always
+	// be available.
+	value := float32(1.0)
+
+	plan := planner.InitPlan(planner.Plan{})
+	plan.Value.Exactly = &value
+
+	return &plan
+}
+
+func (route *Route) GetPlanCycleHooks() planner.CycleHooks {
+	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
+		return planner.PLAN_SIGNAL_CONTINUE
+	})
+
+	return planner.CycleHooks{
+		PreSleep: &preSleep,
 	}
 }
 
@@ -60,8 +71,14 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	content := route.Content.Static
+
+	if content == "" {
+		content = "Hello from Kermoo!"
+	}
+
 	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(route.Content.Static))
+	w.Write([]byte(content))
 }
 
 func (route *Route) GetMethods() ([]string, error) {
@@ -89,9 +106,7 @@ func (route *Route) GetMethods() ([]string, error) {
 }
 
 func (route *Route) Validate() error {
-	_, err := route.GetMethods()
-
-	if err != nil {
+	if _, err := route.GetMethods(); err != nil {
 		return err
 	}
 
@@ -100,7 +115,7 @@ func (route *Route) Validate() error {
 
 type RouteContent struct {
 	Static       string `json:"static"`
-	Whoami       bool   `json:"reflector"`
+	Whoami       bool   `json:"whoami"`
 	NoServerInfo bool   `json:"server_info"`
 }
 

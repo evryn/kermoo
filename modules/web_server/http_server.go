@@ -14,15 +14,19 @@ import (
 	"go.uber.org/zap"
 )
 
+type WebServerFault struct {
+	Plan     *planner.Plan `json:"plan"`
+	PlanRefs []string      `json:"planRefs"`
+}
+
 type WebServer struct {
 	planner.PlannableTrait
-	Routes        []*Route       `json:"routes"`
-	Interface     *string        `json:"interface"`
-	Port          *int32         `json:"port"`
-	InitiateAfter *time.Duration `json:"initiate_after"`
-	Plan          *planner.Plan  `json:"plan"`
-	PlanRefs      []string       `json:"plan_refs"`
-	server        *http.Server
+	Routes      []*Route        `json:"routes"`
+	Interface   *string         `json:"interface"`
+	Port        *int32          `json:"port"`
+	Fault       *WebServerFault `json:"fault"`
+	server      *http.Server
+	isListening bool
 }
 
 func (ws *WebServer) GetUid() string {
@@ -63,7 +67,8 @@ func (ws *WebServer) ListenOnBackground() error {
 	r := mux.NewRouter()
 
 	for _, route := range ws.Routes {
-		r.HandleFunc(route.Path, route.Handle).Methods(route.Methods...)
+		methods, _ := route.GetMethods()
+		r.HandleFunc(route.Path, route.Handle).Methods(methods...)
 	}
 
 	ws.server = &http.Server{
@@ -72,12 +77,21 @@ func (ws *WebServer) ListenOnBackground() error {
 	}
 
 	go func() {
-		if err := ws.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Log.Fatal(
-				"failed on listening and serving",
-				zap.Error(err),
-				zap.String("address", ws.server.Addr),
-			)
+		logger.Log.Info("listening webserver...", zap.String("webserver", ws.GetUid()))
+
+		ws.isListening = true
+		if err := ws.server.ListenAndServe(); err != nil {
+			ws.isListening = false
+
+			if err != http.ErrServerClosed {
+				logger.Log.Fatal(
+					"failed on listening and serving",
+					zap.Error(err),
+					zap.String("address", ws.server.Addr),
+				)
+			} else {
+				logger.Log.Info("webserver is down", zap.String("webserver", ws.GetUid()), zap.NamedError("reason", err))
+			}
 		}
 	}()
 
@@ -85,6 +99,7 @@ func (ws *WebServer) ListenOnBackground() error {
 }
 
 func (ws *WebServer) Stop() error {
+	logger.Log.Info("shutting down webserver...", zap.String("webserver", ws.GetUid()))
 	if ws.server == nil {
 		return nil
 	}
@@ -96,25 +111,54 @@ func (ws *WebServer) Stop() error {
 }
 
 func (ws *WebServer) HasCustomPlan() bool {
-	return ws.Plan != nil
+	return ws.Fault != nil && ws.Fault.Plan != nil
 }
 
 func (ws *WebServer) MakeCustomPlan() *planner.Plan {
-	plan := *ws.Plan
+	return ws.Fault.Plan
+}
+
+// Create a lifetime-long plan to serve webserver
+func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
+	// Value of 1.0 indicates that the webserver will always
+	// be available.
+	value := float32(1.0)
+
+	plan := planner.InitPlan(planner.Plan{})
+	plan.Value.Exactly = &value
+
 	return &plan
 }
 
 func (ws *WebServer) GetDesiredPlanNames() []string {
-	return ws.PlanRefs
+	if ws.Fault == nil {
+		return nil
+	}
+
+	return ws.Fault.PlanRefs
 }
 
-func (ws *WebServer) GetPlanCallbacks() planner.Callbacks {
-	return planner.Callbacks{
-		PreSleep: func(ep *planner.ExecutablePlan, ev *planner.ExecutableValue) planner.PlanSignal {
-			return planner.PLAN_SIGNAL_CONTINUE
-		},
-		PostSleep: func(startedAt time.Time, timeSpent time.Duration) planner.PlanSignal {
-			return planner.PLAN_SIGNAL_TERMINATE
-		},
+func (ws *WebServer) GetPlanCycleHooks() planner.CycleHooks {
+	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
+		shouldListen := true
+
+		for _, plan := range ws.GetAssignedPlans() {
+			if !plan.GetCurrentStateByChance() {
+				shouldListen = false
+				break
+			}
+		}
+
+		if shouldListen && !ws.isListening {
+			ws.ListenOnBackground()
+		} else if !shouldListen && ws.isListening {
+			ws.Stop()
+		}
+
+		return planner.PLAN_SIGNAL_CONTINUE
+	})
+
+	return planner.CycleHooks{
+		PreSleep: &preSleep,
 	}
 }

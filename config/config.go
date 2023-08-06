@@ -1,6 +1,8 @@
 package config
 
-import "time"
+import (
+	"time"
+)
 
 type PlannerDefault struct {
 	Minimum  float32

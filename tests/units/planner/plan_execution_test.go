@@ -15,10 +15,10 @@ func teardownSubTest(t *testing.T) {
 
 var (
 	name          = "My Plan"
-	interval_10ms = 10 * time.Millisecond
-	interval_30ms = 30 * time.Millisecond
-	duration_50ms = 50 * time.Millisecond
-	duration_60ms = 60 * time.Millisecond
+	interval_10ms = common.Duration(10 * time.Millisecond)
+	interval_30ms = common.Duration(30 * time.Millisecond)
+	duration_50ms = common.Duration(50 * time.Millisecond)
+	duration_60ms = common.Duration(60 * time.Millisecond)
 	float_0_1     = float32(0.1)
 	float_0_5     = float32(0.5)
 	float_0_9     = float32(0.9)
@@ -39,10 +39,8 @@ func TestSimplePlanExecution(t *testing.T) {
 
 		plan.Value.Exactly = &float_0_5
 
-		plan.Execute(planner.Callbacks{
-			PreSleep:  Recorder.RecordPreSleep,
-			PostSleep: Recorder.RecordPostSleep,
-		})
+		plan.Assign(&Recorder)
+		plan.Start()
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
@@ -66,10 +64,8 @@ func TestSimplePlanExecution(t *testing.T) {
 
 		plan.Value.Between = []float32{float_0_1, float_0_9}
 
-		plan.Execute(planner.Callbacks{
-			PreSleep:  Recorder.RecordPreSleep,
-			PostSleep: Recorder.RecordPostSleep,
-		})
+		plan.Assign(&Recorder)
+		plan.Start()
 
 		// Assert that it took around 50ms (with 2ms error)
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
@@ -98,10 +94,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			},
 		}
 
-		plan.Execute(planner.Callbacks{
-			PreSleep:  Recorder.RecordPreSleep,
-			PostSleep: Recorder.RecordPostSleep,
-		})
+		plan.Assign(&Recorder)
+		plan.Start()
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
@@ -163,10 +157,8 @@ func TestSubPlanExecution(t *testing.T) {
 			Bars: []float32{0.2, 0.3, 0.4},
 		}
 
-		plan.Execute(planner.Callbacks{
-			PreSleep:  Recorder.RecordPreSleep,
-			PostSleep: Recorder.RecordPostSleep,
-		})
+		plan.Assign(&Recorder)
+		plan.Start()
 
 		Recorder.AssertTotalTimeSpent(t,
 			(50*time.Millisecond)+(60*time.Millisecond)+(50*time.Millisecond),
@@ -221,10 +213,8 @@ func TestSubPlanExecution(t *testing.T) {
 		// just enough to test.
 		Recorder.ExecutaionCap = 20
 
-		plan.Execute(planner.Callbacks{
-			PreSleep:  Recorder.RecordPreSleep,
-			PostSleep: Recorder.RecordPostSleep,
-		})
+		plan.Assign(&Recorder)
+		plan.Start()
 
 		// Static runs 5 times for 50ms
 		// Between runs 2 times for 60ms

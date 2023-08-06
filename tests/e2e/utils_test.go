@@ -100,6 +100,10 @@ func (e *E2E) RequireNotTimedOut() {
 	require.False(e.t, e.timedout, "command is timedout")
 }
 
+func (e *E2E) RequireTimedOut() {
+	require.True(e.t, e.timedout, "command is NOT timedout")
+}
+
 func (e *E2E) AssertExitCode(code int) {
 	assert.Equal(e.t, fmt.Sprintf("exit status %d", code), e.GetLastOutputLine())
 }
