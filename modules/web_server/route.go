@@ -16,11 +16,10 @@ import (
 
 type Route struct {
 	planner.PlannableTrait
-	Path     string        `json:"path"`
-	Methods  []string      `json:"methods"`
-	Content  RouteContent  `json:"content"`
-	Plan     *planner.Plan `json:"plan"`
-	PlanRefs []string      `json:"plan_refs"`
+	Path    string       `json:"path"`
+	Methods []string     `json:"methods"`
+	Content RouteContent `json:"content"`
+	Fault   *RouteFault  `json:"fault"`
 }
 
 func (route *Route) GetUid() string {
@@ -28,16 +27,19 @@ func (route *Route) GetUid() string {
 }
 
 func (route *Route) GetDesiredPlanNames() []string {
-	return route.PlanRefs
+	if route.Fault == nil {
+		return nil
+	}
+
+	return route.Fault.PlanRefs
 }
 
 func (route *Route) HasCustomPlan() bool {
-	return route.Plan != nil
+	return route.Fault != nil && route.Fault.Plan != nil
 }
 
 func (route *Route) MakeCustomPlan() *planner.Plan {
-	plan := *route.Plan
-	return &plan
+	return route.Fault.Plan
 }
 
 // Create a lifetime-long plan to serve route
@@ -63,6 +65,22 @@ func (route *Route) GetPlanCycleHooks() planner.CycleHooks {
 }
 
 func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
+	if route.Fault != nil {
+		shouldSuccess := true
+
+		for _, plan := range route.GetAssignedPlans() {
+			if !plan.GetCurrentStateByChance() {
+				shouldSuccess = false
+				break
+			}
+		}
+
+		if !shouldSuccess {
+			route.Fault.Handle(w, r)
+			return
+		}
+	}
+
 	if route.Content.Whoami {
 		w.Header().Set("Content-Type", "application/json")
 		j := json.NewEncoder(w)
@@ -108,6 +126,12 @@ func (route *Route) GetMethods() ([]string, error) {
 func (route *Route) Validate() error {
 	if _, err := route.GetMethods(); err != nil {
 		return err
+	}
+
+	if route.Fault != nil {
+		if len(route.Fault.GetBadStatuses()) == 0 {
+			return fmt.Errorf("route has no fault status - client and/or server errors needs to be enabled")
+		}
 	}
 
 	return nil

@@ -214,6 +214,79 @@ func TestWebserverEndToEnd(t *testing.T) {
 
 		e2e.RequireTimedOut()
 	})
+
+	t.Run("route fails with simple dedicated plan", func(t *testing.T) {
+		e2e := NewE2E(t)
+
+		e2e.Start(`
+            schemaVersion: "0.1-beta"
+            webServers:
+            - port: 8080
+              routes:
+              - path: /my-probe
+                content:
+                  static: hello-world
+                fault:
+                  plan:
+                    interval: 100ms
+                    value:
+                        exactly: 0.5
+		`, 3*time.Second)
+
+		// Wait a few while for webserver to become available
+		time.Sleep(500 * time.Millisecond)
+
+		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 20*time.Millisecond)
+
+		e2e.Wait()
+
+		assert.Equal(t, float32(0), inspect.WebserverErrorRate, "there must be no webserver error - its not intended to be faulty")
+		assert.Equal(t, float32(0.0), inspect.ClientErrorRate, "there should be no client errors (4xx) since the default is disabled")
+		assert.Less(t, float32(0.1), inspect.ServerErrorRate, "there should be at least some server errors (5xx)")
+		assert.Greater(t, float32(0.9), inspect.SuccessRate, "there should be at least some failures")
+		assert.Less(t, float32(0.1), inspect.SuccessRate, "there should be at least some success")
+
+		e2e.RequireTimedOut()
+	})
+
+	t.Run("route fails with referenced plan and both client and server errors", func(t *testing.T) {
+		e2e := NewE2E(t)
+
+		e2e.Start(`
+            schemaVersion: "0.1-beta"
+            plans:
+            - name: readiness
+              interval: 100ms
+              value:
+                exactly: 0.6
+            webServers:
+            - port: 8080
+              routes:
+              - path: /my-probe
+                content:
+                  static: hello-world
+                fault:
+                  planRefs:
+                  - readiness
+                  clientErrors: true
+                  serverErrors: true
+		`, 2*time.Second)
+
+		// Wait a few while for webserver to become available
+		time.Sleep(500 * time.Millisecond)
+
+		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 50*time.Millisecond)
+
+		e2e.Wait()
+
+		assert.Equal(t, float32(0), inspect.WebserverErrorRate, "there must be no webserver error - its not intended to be faulty")
+		assert.Less(t, float32(0.1), inspect.ClientErrorRate, "there should be at least some client errors (4xx)")
+		assert.Less(t, float32(0.1), inspect.ServerErrorRate, "there should be at least some server errors (5xx)")
+		assert.Greater(t, float32(0.9), inspect.SuccessRate, "there should be at least some failures")
+		assert.Less(t, float32(0.1), inspect.SuccessRate, "there should be at least some success")
+
+		e2e.RequireTimedOut()
+	})
 }
 
 func AssertHttpResponseContains(t *testing.T, method string, url string, expectedText string) {
@@ -243,6 +316,52 @@ func GetWebserverSuccessRate(t *testing.T, method string, url string, sleep time
 	}
 
 	return float32(success) / float32(100)
+}
+
+type RouteInspection struct {
+	SuccessRate        float32
+	AverageDelay       time.Duration
+	WebserverErrorRate float32
+	ClientErrorRate    float32
+	ServerErrorRate    float32
+}
+
+func InspectRoute(t *testing.T, method string, url string, sleep time.Duration) RouteInspection {
+	total := 100
+	totalDelay := time.Duration(0)
+	success := 0
+	clientErrors := 0
+	serverErrors := 0
+	webserverErrors := 0
+
+	for i := 0; i < total; i++ {
+		t1 := time.Now()
+		_, resp, _ := sendRequest(method, url, nil)
+
+		totalDelay += time.Since(t1)
+
+		if resp == nil {
+			webserverErrors++
+		} else {
+			if resp.StatusCode >= 400 && resp.StatusCode < 500 {
+				clientErrors++
+			} else if resp.StatusCode >= 500 && resp.StatusCode < 600 {
+				serverErrors++
+			} else {
+				success++
+			}
+		}
+
+		time.Sleep(sleep)
+	}
+
+	return RouteInspection{
+		SuccessRate:        float32(success) / float32(total),
+		AverageDelay:       time.Duration(totalDelay.Nanoseconds() / int64(total)),
+		WebserverErrorRate: float32(webserverErrors) / float32(total),
+		ClientErrorRate:    float32(clientErrors) / float32(total),
+		ServerErrorRate:    float32(serverErrors) / float32(total),
+	}
 }
 
 func sendRequest(method, url string, body []byte) (string, *http.Response, error) {
