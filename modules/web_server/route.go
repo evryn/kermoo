@@ -126,10 +126,10 @@ func (rc *RouteContent) GetReflectionContent(r *http.Request) ReflectorResponse 
 
 	if !rc.NoServerInfo {
 		server = ServerInfo{
-			Hostname: os.Getenv("HOSTNAME"),
-			// TODO: InitializedAt:   time.InitialTime.Format(time.RFC3339Nano),
-			CurrentTime: now.Format(time.RFC3339Nano),
-			// TODO: UptimeSeconds:   int64(now.Sub(*Time.InitialTime).Seconds()),
+			Hostname:        os.Getenv("HOSTNAME"),
+			InitializedAt:   config.InitializedAt.Format(time.RFC3339Nano),
+			CurrentTime:     now.Format(time.RFC3339Nano),
+			UptimeSeconds:   int64(now.Sub(config.InitializedAt).Seconds()),
 			InterfaceIps:    utils.GetIpList(),
 			BuggyboxVersion: config.BuildVersion,
 		}

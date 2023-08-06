@@ -39,6 +39,7 @@ type E2E struct {
 	cancel    context.CancelFunc
 	context   context.Context
 	timedout  bool
+	envs      []string
 }
 
 func NewE2E(t *testing.T) *E2E {
@@ -47,10 +48,17 @@ func NewE2E(t *testing.T) *E2E {
 	}
 }
 
+func (e *E2E) WithEnv(env string) {
+	e.envs = append(e.envs, env)
+}
+
 func (e *E2E) Start(config string, timeout time.Duration) {
 	e.context, e.cancel = context.WithTimeout(context.Background(), timeout)
 
 	e.cmd = exec.CommandContext(e.context, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
+
+	e.cmd.Env = os.Environ()
+	e.cmd.Env = append(e.cmd.Env, e.envs...)
 
 	// This is a workaround for terminating process with child
 	// See: https://stackoverflow.com/a/71714364
@@ -108,7 +116,11 @@ func (e *E2E) AssertExitCode(code int) {
 	assert.Equal(e.t, fmt.Sprintf("exit status %d", code), e.GetLastOutputLine())
 }
 
+func (e *E2E) GetOutput() string {
+	return strings.Trim(e.out.String(), "\n")
+}
+
 func (e *E2E) GetLastOutputLine() string {
-	lines := strings.Split(strings.Trim(e.out.String(), "\n"), "\n")
+	lines := strings.Split(e.GetOutput(), "\n")
 	return lines[len(lines)-1]
 }

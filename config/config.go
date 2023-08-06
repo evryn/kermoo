@@ -38,3 +38,5 @@ var (
 		},
 	}
 )
+
+var InitializedAt time.Time
