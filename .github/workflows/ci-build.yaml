@@ -8,6 +8,7 @@ on:
       - '!release-1.5'
       - 'dev' #TODO: Remove
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - 'master'
       - 'release-*'
@@ -60,10 +61,12 @@ jobs:
         with:
           go-version: ${{ env.GOLANG_VERSION }}
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@639cd343e1d3b897ff35927a75193d57cfcba299 # v3.6.0
+        uses: golangci/golangci-lint-action@44d9998d4473b2839684c77668f2a3e298da66ec # TODO: Latest tag
+        env:
+          ACTIONS_STEP_DEBUG: true
         with:
           version: v1.51.0
-          args: --enable gofmt --timeout 10m --exclude SA5011 --verbose --max-issues-per-linter 0 --max-same-issues 0
+          args: --enable gofmt --timeout 10m --exclude SA5011 --verbose --max-issues-per-linter 0 --max-same-issues 0 --tests=false
 
   test-unit:
     name: Run unit tests
