@@ -4,7 +4,7 @@ mod-download-local:
 
 .PHONY: build-local
 build-local:
-	GODEBUG="tarinsecurepath=0,zipinsecurepath=0" go build -v `go list ./... | grep -v 'test/e2e'`
+	GODEBUG="tarinsecurepath=0,zipinsecurepath=0" go build -v
 
 .PHONY: test-with-coverage
 test-with-coverage:
