@@ -2,6 +2,7 @@ package webserver_test
 
 import (
 	"buggybox/config"
+	"buggybox/modules/logger"
 	"buggybox/modules/web_server"
 	"encoding/json"
 	"io"
@@ -14,6 +15,8 @@ import (
 
 // Testing routes
 func TestRoutes(t *testing.T) {
+	logger.MustInitLogger("fatal")
+
 	t.Run("test web server with static route", func(t *testing.T) {
 
 		// Define the routes for the server
