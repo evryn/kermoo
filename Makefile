@@ -6,6 +6,6 @@ mod-download-local:
 build-local:
 	GODEBUG="tarinsecurepath=0,zipinsecurepath=0" go build -v
 
-.PHONY: test-with-coverage
+.PHONY: test-unit-with-coverage
 test-with-coverage:
-	go test -race -coverprofile=coverage.out -covermode=atomic
+	go test -race -coverprofile=coverage.out -covermode=atomic -v ./tests/units/... -coverpkg=./...
