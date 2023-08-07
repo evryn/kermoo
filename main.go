@@ -1,7 +1,9 @@
 package main
 
 import (
-	"buggybox/commands"
+	"kermoo/commands"
+	"kermoo/config"
+	"kermoo/modules/state"
 	"time"
 )
 
@@ -16,6 +18,9 @@ var (
 )
 
 func main() {
+
+	config.InitializedAt = time.Now()
+	state.AppInitiatedAt = time.Now()
 	commands.ExecuteRootCommand()
 
 	//parseArgs()

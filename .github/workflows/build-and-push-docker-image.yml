@@ -1,0 +1,116 @@
+name: Build and publish a Docker image
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  build:
+    name: Build & push docker image
+    runs-on: ubuntu-latest
+    env:
+      TEST_IMAGE_TAG: ${{ github.repository }}:test
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+        
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      -
+        name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            evryn/kermoo
+            ghcr.io/evryn/kermoo
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
+          labels: |
+            org.opencontainers.image.vendor=Evryn
+            org.opencontainers.image.authors=Amirreza Nasiri <nasiri.amirreza.96@gmail.com> and contributors
+            maintainer=Amirreza Nasiri <nasiri.amirreza.96@gmail.com>
+            org.label-schema.schema-version=1.0
+            org.label-schema.vcs-url=https://github.com/${{ github.repository }}.git
+            org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 kermoo start fixed
+            org.label-schema.docker.cmd.help=docker exec -it $CONTAINER kermoo --help
+
+      -
+        name: Build and run tests
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          target: test
+          build-args: |
+            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      -
+        name: Build and export to Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          load: true
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ${{ env.TEST_IMAGE_TAG }}
+          build-args: |
+            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      -
+        name: Test image functionality
+        uses: plexsystems/container-structure-test-action@v0.1.0
+        with:
+          image: ${{ env.TEST_IMAGE_TAG }}
+          config: container-structure-test.yaml
+
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      -
+        name: Build and push
+        uses: docker/build-push-action@v4
+        if: ${{ github.ref_type == 'tag' }}
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          # push: ${{ github.event.base_ref =='refs/heads/main' && github.ref_type == 'tag' && !startsWith(github.ref, 'refs/tags/v0.')}}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+

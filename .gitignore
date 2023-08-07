@@ -1,3 +1,6 @@
 .idea
 .vs
+.vscode
+.dev
 docker-compose.yml
+coverage.out
