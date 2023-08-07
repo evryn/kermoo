@@ -8,6 +8,7 @@ on:
       - '!release-1.5'
       - 'dev' #TODO: Remove
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - 'master'
       - 'release-*'
