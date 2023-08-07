@@ -53,5 +53,9 @@ func (RouteFault *RouteFault) Handle(w http.ResponseWriter, r *http.Request) {
 	randomError := statuses[rand.Intn(len(statuses))]
 
 	w.WriteHeader(randomError.Code)
-	w.Write([]byte(randomError.Description))
+	_, err := w.Write([]byte(randomError.Description))
+
+	if err != nil {
+		panic(err)
+	}
 }

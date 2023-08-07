@@ -85,7 +85,11 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		j := json.NewEncoder(w)
 		j.SetIndent("", "  ")
-		j.Encode(route.Content.GetReflectionContent(r))
+		err := j.Encode(route.Content.GetReflectionContent(r))
+
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
@@ -96,7 +100,11 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(content))
+	_, err := w.Write([]byte(content))
+
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (route *Route) GetMethods() ([]string, error) {

@@ -150,9 +150,13 @@ func (ws *WebServer) GetPlanCycleHooks() planner.CycleHooks {
 		}
 
 		if shouldListen && !ws.isListening {
-			ws.ListenOnBackground()
+			if err := ws.ListenOnBackground(); err != nil {
+				logger.Log.Error("error while listening to webserver", zap.Error(err))
+			}
 		} else if !shouldListen && ws.isListening {
-			ws.Stop()
+			if err := ws.Stop(); err != nil {
+				logger.Log.Error("error while stopping webserver", zap.Error(err))
+			}
 		}
 
 		return planner.PLAN_SIGNAL_CONTINUE

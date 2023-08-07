@@ -106,7 +106,7 @@ func (p *Plan) GetCurrentStateByChance() bool {
 	return p.currentStateByChance
 }
 
-func (p *Plan) Start() error {
+func (p *Plan) Start() {
 	if logger.Log.Level() == zap.InfoLevel {
 		logger.Log.Info("executing plan...", zap.String("name", *p.Name))
 	} else {
@@ -119,11 +119,7 @@ func (p *Plan) Start() error {
 	}
 
 	if len(p.executablePlans) == 0 {
-		executablePlans, err := p.GetExecutablePlans()
-
-		if err != nil {
-			return err
-		}
+		executablePlans, _ := p.GetExecutablePlans()
 
 		p.executablePlans = executablePlans
 	}
@@ -158,7 +154,7 @@ func (p *Plan) Start() error {
 						})
 
 						if value == PLAN_SIGNAL_TERMINATE {
-							return nil
+							return
 						}
 					}
 				}
@@ -180,20 +176,18 @@ func (p *Plan) Start() error {
 						})
 
 						if value == PLAN_SIGNAL_TERMINATE {
-							return nil
+							return
 						}
 					}
 				}
 
 				if ep.Interval == 0 {
 					logger.Log.Info("pausing plan due to zero interval", zap.String("plan", *p.Name))
-					return nil
+					return
 				}
 			}
 		}
 	}
-
-	return nil
 }
 
 func InitPlan(p Plan) Plan {

@@ -2,7 +2,6 @@ package commands
 
 import (
 	"buggybox/config"
-	"fmt"
 
 	"github.com/spf13/cobra"
 )
@@ -16,17 +15,17 @@ func ExecuteRootCommand() {
 
 	rootCommand.AddCommand(GetStartCommand())
 	rootCommand.AddCommand(GetVersionCommand())
-	rootCommand.Execute()
+	_ = rootCommand.Execute()
 }
 
-func printSignature() {
-	fmt.Println(`
-	     ░░         
-       ▒▒    ▓▓  ██
-          ░░ ██    
-     ▓▓    ▓▓        
-       ▓▓▒▒   ░░   
-	`)
+// func printSignature() {
+// 	fmt.Println(`
+// 	     ░░
+//        ▒▒    ▓▓  ██
+//           ░░ ██
+//      ▓▓    ▓▓
+//        ▓▓▒▒   ░░
+// 	`)
 
-	fmt.Printf("%s %s\n", config.AppTitle, config.BuildVersion)
-}
+// 	fmt.Printf("%s %s\n", config.AppTitle, config.BuildVersion)
+// }
