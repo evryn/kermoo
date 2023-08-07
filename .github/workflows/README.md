@@ -8,3 +8,5 @@
 | init-release.yaml  | Build manifests and version then create a PR for release branch|
 | release.yaml       | Build images, cli-binaries, provenances, and post actions      |
 | update-snyk.yaml   | Scheduled snyk reports                                         |
+
+Note: This actions are heavily borrowed from ArgoCD repository.
