@@ -1,14 +1,15 @@
 name: Generate Snyk report
 on:
   push:
+    branches:
+      - 'main'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - 'main'
-      - 'release-*'
-  workflow_dispatch: {}
   schedule:
     - cron: '0 0 * * *' # every midnight
+
 jobs:
   security:
     runs-on: ubuntu-latest
