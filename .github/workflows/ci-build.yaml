@@ -62,6 +62,8 @@ jobs:
           go-version: ${{ env.GOLANG_VERSION }}
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@639cd343e1d3b897ff35927a75193d57cfcba299 # v3.6.0
+        env:
+          ACTIONS_STEP_DEBUG: true
         with:
           version: v1.51.0
           args: --enable gofmt --timeout 10m --exclude SA5011 --verbose --max-issues-per-linter 0 --max-same-issues 0 --tests=false
