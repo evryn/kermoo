@@ -1,8 +1,8 @@
 package web_server
 
 import (
-	"buggybox/modules/common"
-	"buggybox/modules/planner"
+	"kermoo/modules/common"
+	"kermoo/modules/planner"
 	"math/rand"
 	"net/http"
 )

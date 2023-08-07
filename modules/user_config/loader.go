@@ -2,10 +2,10 @@ package user_config
 
 import (
 	"bufio"
-	"buggybox/modules/logger"
-	"buggybox/modules/utils"
 	"encoding/json"
 	"fmt"
+	"kermoo/modules/logger"
+	"kermoo/modules/utils"
 	"os"
 
 	"go.uber.org/zap"

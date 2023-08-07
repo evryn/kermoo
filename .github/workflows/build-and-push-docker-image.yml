@@ -33,8 +33,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            evryn/buggybox
-            ghcr.io/evryn/buggybox
+            evryn/kermoo
+            ghcr.io/evryn/kermoo
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -45,8 +45,8 @@ jobs:
             maintainer=Amirreza Nasiri <nasiri.amirreza.96@gmail.com>
             org.label-schema.schema-version=1.0
             org.label-schema.vcs-url=https://github.com/${{ github.repository }}.git
-            org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 buggybox start fixed
-            org.label-schema.docker.cmd.help=docker exec -it $CONTAINER buggybox --help
+            org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 kermoo start fixed
+            org.label-schema.docker.cmd.help=docker exec -it $CONTAINER kermoo --help
 
       -
         name: Build and run tests

@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"buggybox/modules/logger"
-	"buggybox/modules/user_config"
+	"kermoo/modules/logger"
+	"kermoo/modules/user_config"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -11,7 +11,7 @@ import (
 func GetStartCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start",
-		Short: "Start the BuggyBox foreground service",
+		Short: "Start the Kermoo foreground service",
 		Run: func(cmd *cobra.Command, args []string) {
 			filename, _ := cmd.Flags().GetString("filename")
 			verbosity, _ := cmd.Flags().GetString("verbosity")

@@ -1,4 +1,4 @@
-module buggybox
+module kermoo
 
 go 1.20
 

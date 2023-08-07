@@ -1,11 +1,11 @@
 package webserver_test
 
 import (
-	"buggybox/config"
-	"buggybox/modules/logger"
-	"buggybox/modules/web_server"
 	"encoding/json"
 	"io"
+	"kermoo/config"
+	"kermoo/modules/logger"
+	"kermoo/modules/web_server"
 	"net/http"
 	"testing"
 	"time"
@@ -97,7 +97,7 @@ func TestRoutes(t *testing.T) {
 		assert.NoError(t, json.Unmarshal([]byte(body), &response))
 
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Equal(t, config.BuildVersion, response.Server.BuggyboxVersion)
+		assert.Equal(t, config.BuildVersion, response.Server.KermooVersion)
 		assert.Equal(t, "/info", response.Request.Path)
 	})
 }

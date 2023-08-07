@@ -1,10 +1,10 @@
 package process
 
 import (
-	"buggybox/modules/common"
-	"buggybox/modules/logger"
-	"buggybox/modules/planner"
 	"fmt"
+	"kermoo/modules/common"
+	"kermoo/modules/logger"
+	"kermoo/modules/planner"
 	"os"
 
 	"go.uber.org/zap"

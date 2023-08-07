@@ -1,7 +1,7 @@
 package common_test
 
 import (
-	"buggybox/modules/common"
+	"kermoo/modules/common"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

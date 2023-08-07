@@ -1,8 +1,8 @@
 package common
 
 import (
-	"buggybox/modules/utils"
 	"fmt"
+	"kermoo/modules/utils"
 )
 
 type SingleValueF struct {

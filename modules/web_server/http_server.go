@@ -1,11 +1,11 @@
 package web_server
 
 import (
-	"buggybox/config"
-	"buggybox/modules/logger"
-	"buggybox/modules/planner"
 	"context"
 	"fmt"
+	"kermoo/config"
+	"kermoo/modules/logger"
+	"kermoo/modules/planner"
 	"net/http"
 	"time"
 

@@ -1,11 +1,11 @@
 package web_server
 
 import (
-	"buggybox/config"
-	"buggybox/modules/planner"
-	"buggybox/modules/utils"
 	"encoding/json"
 	"fmt"
+	"kermoo/config"
+	"kermoo/modules/planner"
+	"kermoo/modules/utils"
 	"net/http"
 	"os"
 	"strings"
@@ -158,12 +158,12 @@ func (rc *RouteContent) GetReflectionContent(r *http.Request) ReflectorResponse 
 
 	if !rc.NoServerInfo {
 		server = ServerInfo{
-			Hostname:        os.Getenv("HOSTNAME"),
-			InitializedAt:   config.InitializedAt.Format(time.RFC3339Nano),
-			CurrentTime:     now.Format(time.RFC3339Nano),
-			UptimeSeconds:   int64(now.Sub(config.InitializedAt).Seconds()),
-			InterfaceIps:    utils.GetIpList(),
-			BuggyboxVersion: config.BuildVersion,
+			Hostname:      os.Getenv("HOSTNAME"),
+			InitializedAt: config.InitializedAt.Format(time.RFC3339Nano),
+			CurrentTime:   now.Format(time.RFC3339Nano),
+			UptimeSeconds: int64(now.Sub(config.InitializedAt).Seconds()),
+			InterfaceIps:  utils.GetIpList(),
+			KermooVersion: config.BuildVersion,
 		}
 	}
 
@@ -186,12 +186,12 @@ type ReflectorResponse struct {
 }
 
 type ServerInfo struct {
-	Hostname        string   `json:"hostname"`
-	InitializedAt   string   `json:"initialized_at"`
-	CurrentTime     string   `json:"current_time"`
-	UptimeSeconds   int64    `json:"uptime_seconds"`
-	InterfaceIps    []string `json:"interface_ips"`
-	BuggyboxVersion string   `json:"buggybox_version"`
+	Hostname      string   `json:"hostname"`
+	InitializedAt string   `json:"initialized_at"`
+	CurrentTime   string   `json:"current_time"`
+	UptimeSeconds int64    `json:"uptime_seconds"`
+	InterfaceIps  []string `json:"interface_ips"`
+	KermooVersion string   `json:"kermoo_version"`
 }
 
 type RequestInfo struct {

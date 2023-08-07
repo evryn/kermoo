@@ -1,12 +1,12 @@
 package user_config
 
 import (
-	"buggybox/modules/logger"
-	"buggybox/modules/planner"
-	"buggybox/modules/process"
-	"buggybox/modules/utils"
-	"buggybox/modules/web_server"
 	"fmt"
+	"kermoo/modules/logger"
+	"kermoo/modules/planner"
+	"kermoo/modules/process"
+	"kermoo/modules/utils"
+	"kermoo/modules/web_server"
 	"strings"
 	"time"
 

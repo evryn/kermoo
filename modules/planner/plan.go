@@ -1,9 +1,9 @@
 package planner
 
 import (
-	"buggybox/modules/common"
-	"buggybox/modules/logger"
-	"buggybox/modules/utils"
+	"kermoo/modules/common"
+	"kermoo/modules/logger"
+	"kermoo/modules/utils"
 	"time"
 
 	"go.uber.org/zap"

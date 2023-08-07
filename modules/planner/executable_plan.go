@@ -1,7 +1,7 @@
 package planner
 
 import (
-	"buggybox/modules/common"
+	"kermoo/modules/common"
 	"time"
 )
 

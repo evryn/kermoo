@@ -1,9 +1,9 @@
 package planner_test
 
 import (
-	"buggybox/modules/common"
-	"buggybox/modules/logger"
-	"buggybox/modules/planner"
+	"kermoo/modules/common"
+	"kermoo/modules/logger"
+	"kermoo/modules/planner"
 
 	"testing"
 	"time"

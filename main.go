@@ -1,9 +1,9 @@
 package main
 
 import (
-	"buggybox/commands"
-	"buggybox/config"
-	"buggybox/modules/state"
+	"kermoo/commands"
+	"kermoo/config"
+	"kermoo/modules/state"
 	"time"
 )
 

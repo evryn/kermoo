@@ -1,10 +1,10 @@
 package user_config
 
 import (
-	"buggybox/modules/planner"
-	"buggybox/modules/process"
-	"buggybox/modules/web_server"
 	"fmt"
+	"kermoo/modules/planner"
+	"kermoo/modules/process"
+	"kermoo/modules/web_server"
 )
 
 type UserConfigType struct {

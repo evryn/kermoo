@@ -1,7 +1,7 @@
 package planner_test
 
 import (
-	"buggybox/modules/planner"
+	"kermoo/modules/planner"
 	"testing"
 	"time"
 

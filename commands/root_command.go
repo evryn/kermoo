@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"buggybox/config"
+	"kermoo/config"
 
 	"github.com/spf13/cobra"
 )
@@ -9,7 +9,7 @@ import (
 func ExecuteRootCommand() {
 
 	rootCommand := &cobra.Command{
-		Use:   "buggybox",
+		Use:   "kermoo",
 		Short: config.AppDescription,
 	}
 

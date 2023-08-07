@@ -1,8 +1,8 @@
 package planner
 
 import (
-	"buggybox/config"
-	"buggybox/modules/common"
+	"kermoo/config"
+	"kermoo/modules/common"
 )
 
 type Value struct {

@@ -1,7 +1,7 @@
 package utils_test
 
 import (
-	"buggybox/modules/utils"
+	"kermoo/modules/utils"
 	"testing"
 	"time"
 

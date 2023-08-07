@@ -1,11 +1,11 @@
 package e2e_test
 
 import (
-	"buggybox/modules/web_server"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"kermoo/modules/web_server"
 	"net/http"
 	"testing"
 	"time"

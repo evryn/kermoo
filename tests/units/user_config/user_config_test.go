@@ -1,8 +1,8 @@
 package user_config_test
 
 import (
-	"buggybox/modules/logger"
-	"buggybox/modules/user_config"
+	"kermoo/modules/logger"
+	"kermoo/modules/user_config"
 	"os"
 	"testing"
 
