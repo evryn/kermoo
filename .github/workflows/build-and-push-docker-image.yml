@@ -35,6 +35,7 @@ jobs:
           images: |
             evryn/kermoo
             ghcr.io/evryn/kermoo
+            quay.io/evryn/kermoo
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -47,18 +48,6 @@ jobs:
             org.label-schema.vcs-url=https://github.com/${{ github.repository }}.git
             org.label-schema.docker.cmd=docker run -d -p 8080:8080 -p 5000:5000 kermoo start fixed
             org.label-schema.docker.cmd.help=docker exec -it $CONTAINER kermoo --help
-
-      -
-        name: Build and run tests
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          load: true
-          target: test
-          build-args: |
-            BUILD_VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-            BUILD_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
 
       -
         name: Build and export to Docker
@@ -97,6 +86,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to Quay.io
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
 
       -
         name: Build and push
