@@ -7,6 +7,8 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - 'main'
+  release:
+    types: [created]
 
 env:
   # Golang version to use across CI steps
@@ -17,7 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
+  packages: write
 
 jobs:
   # Build app to ensure its buildable and cache the assets used to build 
@@ -57,8 +60,6 @@ jobs:
           go-version: ${{ env.GOLANG_VERSION }}
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@44d9998d4473b2839684c77668f2a3e298da66ec # TODO: Latest tag
-        env:
-          ACTIONS_STEP_DEBUG: true
         with:
           version: v1.51.0
           args: --enable gofmt --timeout 10m --exclude SA5011 --verbose --max-issues-per-linter 0 --max-same-issues 0 --tests=false
@@ -107,11 +108,6 @@ jobs:
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: code-coverage
-      #- name: Get test result artifact
-      #  uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
-      #  with:
-      #    name: test-results
-      #    path: test-results
       - name: Upload code coverage information to codecov.io
         uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         with:
@@ -123,3 +119,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'release' }}
+    needs:
+      - build-go
+      - lint-go
+      - analyze
+      - test-unit
+    strategy:
+      matrix:
+        goos:
+        - linux
+        - windows
+        goarch:
+        - "386"
+        - amd64
+        - arm64
+        exclude:
+        - goarch: arm64
+          goos: windows
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+    - name: Build and upload binaries to release
+      uses: wangyoucao577/go-release-action@0aa3e4818bacdeab4f9a97f768d3a54734a5852e # v1.38
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: ${{ env.GOLANG_VERSION }}
+        binary_name: kermoo
+        extra_files: LICENSE README.md
+    
