@@ -9,3 +9,7 @@ build-local:
 .PHONY: test-unit-with-coverage
 test-with-coverage:
 	go test -race -coverprofile=coverage.out -covermode=atomic -v ./tests/units/... -coverpkg=./...
+
+.PHONY: test-e2e
+test-with-coverage:
+	go test -v ./tests/e2e/...
