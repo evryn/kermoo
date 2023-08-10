@@ -270,12 +270,12 @@ func TestWebserverEndToEnd(t *testing.T) {
                   - readiness
                   clientErrors: true
                   serverErrors: true
-		`, 2*time.Second)
+		`, 5*time.Second)
 
 		// Wait a few while for webserver to become available
 		time.Sleep(500 * time.Millisecond)
 
-		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 50*time.Millisecond)
+		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 30*time.Millisecond)
 
 		e2e.Wait()
 
