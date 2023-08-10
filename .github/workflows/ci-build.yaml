@@ -146,6 +146,7 @@ jobs:
       - lint-go
       - analyze
       - test-unit
+      - test-e2e
     strategy:
       matrix:
         goos:
