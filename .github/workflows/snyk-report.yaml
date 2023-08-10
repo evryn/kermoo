@@ -1,12 +1,17 @@
 name: Generate Snyk report
 on:
   push:
+    # Secrets aren't available for dependabot on push. https://docs.github.com/en/enterprise-cloud@latest/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/troubleshooting-the-codeql-workflow#error-403-resource-not-accessible-by-integration-when-using-dependabot
+    branches-ignore:
+      - 'dependabot/**'
+      - 'cherry-pick-*'
     branches:
       - 'main'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - 'main'
+    
   schedule:
     - cron: '0 0 * * *' # every midnight
 
