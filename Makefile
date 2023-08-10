@@ -11,5 +11,5 @@ test-with-coverage:
 	go test -race -coverprofile=coverage.out -covermode=atomic -v ./tests/units/... -coverpkg=./...
 
 .PHONY: test-e2e
-test-with-coverage:
+test-e2e:
 	go test -v ./tests/e2e/...
