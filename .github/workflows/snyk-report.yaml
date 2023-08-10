@@ -1,10 +1,6 @@
 name: Generate Snyk report
 on:
   push:
-    # Secrets aren't available for dependabot on push. https://docs.github.com/en/enterprise-cloud@latest/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/troubleshooting-the-codeql-workflow#error-403-resource-not-accessible-by-integration-when-using-dependabot
-    branches-ignore:
-      - 'dependabot/**'
-      - 'cherry-pick-*'
     branches:
       - 'main'
   pull_request:
@@ -18,6 +14,7 @@ on:
 jobs:
   snyk-golang:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
     - uses: actions/checkout@master
     - name: Run Snyk to check for vulnerabilities
@@ -33,6 +30,7 @@ jobs:
         sarif_file: snyk.sarif
   snyk-docker:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
     - uses: actions/checkout@v2
     - name: Build a Docker image
