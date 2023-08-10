@@ -28,6 +28,7 @@ jobs:
       uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: snyk.sarif
+        
   snyk-docker:
     runs-on: ubuntu-latest
     if: ${{ github.actor != 'dependabot[bot]' }}
