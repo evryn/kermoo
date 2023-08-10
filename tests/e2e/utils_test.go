@@ -55,7 +55,13 @@ func (e *E2E) WithEnv(env string) {
 func (e *E2E) Start(config string, timeout time.Duration) {
 	e.context, e.cancel = context.WithTimeout(context.Background(), timeout)
 
-	e.cmd = exec.CommandContext(e.context, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
+	kermooBinary := os.Getenv("KERMOO_BINARY")
+
+	if kermooBinary != "" {
+		e.cmd = exec.CommandContext(e.context, kermooBinary, "start", "-v", "debug", "-f", "-")
+	} else {
+		e.cmd = exec.CommandContext(e.context, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
+	}
 
 	e.cmd.Env = os.Environ()
 	e.cmd.Env = append(e.cmd.Env, e.envs...)
