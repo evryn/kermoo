@@ -2,14 +2,13 @@ name: Build and publish a Docker image
 on:
   push:
     branches:
-      - '*'
+      - 'main'
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v*'
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
-      - '*'
-  release:
-    types: [created]
+      - 'main'
 
 jobs:
   build:
