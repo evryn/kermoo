@@ -3,12 +3,12 @@ on:
   push:
     branches:
       - 'main'
+    tags:
+      - 'v*'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - 'main'
-  release:
-    types: [created]
 
 env:
   # Golang version to use across CI steps
@@ -137,38 +137,62 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  releases-matrix:
-    name: Release Go Binary
+  # releases-matrix:
+  #   name: Release Go Binary
+  #   runs-on: ubuntu-22.04
+  #   if: ${{ github.event_name == 'release' }}
+  #   needs:
+  #     - build-go
+  #     - lint-go
+  #     - analyze
+  #     - test-unit
+  #     - test-e2e
+  #   strategy:
+  #     matrix:
+  #       goos:
+  #       - linux
+  #       - windows
+  #       goarch:
+  #       - "386"
+  #       - amd64
+  #       - arm64
+  #       exclude:
+  #       - goarch: arm64
+  #         goos: windows
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+  #   - name: Build and upload binaries to release
+  #     uses: wangyoucao577/go-release-action@0aa3e4818bacdeab4f9a97f768d3a54734a5852e # v1.38
+  #     with:
+  #       github_token: ${{ secrets.GITHUB_TOKEN }}
+  #       goos: ${{ matrix.goos }}
+  #       goarch: ${{ matrix.goarch }}
+  #       goversion: ${{ env.GOLANG_VERSION }}
+  #       binary_name: kermoo
+  #       extra_files: LICENSE README.md
+
+  goreleaser:
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'release' }}
+    if: startsWith(github.ref, 'refs/tags/v')
     needs:
-      - build-go
-      - lint-go
-      - analyze
-      - test-unit
-      - test-e2e
-    strategy:
-      matrix:
-        goos:
-        - linux
-        - windows
-        goarch:
-        - "386"
-        - amd64
-        - arm64
-        exclude:
-        - goarch: arm64
-          goos: windows
+       - build-go
+       - lint-go
+       - analyze
+       - test-unit
+       - test-e2e
     steps:
-    - name: Checkout code
-      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-    - name: Build and upload binaries to release
-      uses: wangyoucao577/go-release-action@0aa3e4818bacdeab4f9a97f768d3a54734a5852e # v1.38
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        goversion: ${{ env.GOLANG_VERSION }}
-        binary_name: kermoo
-        extra_files: LICENSE README.md
-    
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GOLANG_VERSION }}
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          version: v1.20.0
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
