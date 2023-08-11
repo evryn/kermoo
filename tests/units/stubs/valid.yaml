@@ -2,5 +2,5 @@ schemaVersion: "0.1-beta"
 process:
   exit:
     after:
-      betweenRange: [10ms, 1000ms]
+      between: [10ms, 1000ms]
     code: 2

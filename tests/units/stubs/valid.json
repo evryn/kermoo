@@ -3,7 +3,7 @@
   "process": {
       "exit": {
         "after": {
-          "betweenRange": [
+          "between": [
               "10ms",
               "1000ms"
           ]
