@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
@@ -52,16 +54,71 @@ func (e *E2E) WithEnv(env string) {
 	e.envs = append(e.envs, env)
 }
 
+// Get exit code from command process if binary is used
+// or parse the last output line to determine the exit code.
+func (e *E2E) GetExitCode() (int, error) {
+	if e.GetKermooBinaryPath() != "" {
+		return e.cmd.ProcessState.ExitCode(), nil
+	}
+
+	re, err := regexp.Compile(`\d+`)
+	if err != nil {
+		return 0, fmt.Errorf("error compiling regex: %v", err)
+	}
+
+	// Find the first match in the string
+	lastLine := e.GetLastOutputLine()
+	match := re.FindString(lastLine)
+	if match == "" {
+		return 0, fmt.Errorf("no match found: %s", lastLine)
+	}
+
+	// Convert the matched string to an integer
+	i, err := strconv.Atoi(match)
+	if err != nil {
+		return 0, fmt.Errorf("error converting exit code string to int: %v", err)
+	}
+
+	return i, nil
+}
+
+func (e *E2E) GetFileLogWriter() *os.File {
+	logDir := RootPath("e2e-test-results")
+
+	if err := os.MkdirAll(logDir, 0755); err != nil {
+		panic(err)
+	}
+
+	name := strings.ReplaceAll(e.t.Name(), "/", "_")
+
+	file, err := os.OpenFile(logDir+"/"+name+".log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	if err != nil {
+		panic(err)
+	}
+	// defer file.Close()
+
+	file.Write([]byte("prepared.\n"))
+
+	// io.Writer to append content to the file
+	return file
+}
+
+func (e *E2E) GetKermooBinaryPath() string {
+	return os.Getenv("KERMOO_BINARY")
+}
+
 func (e *E2E) Start(config string, timeout time.Duration) {
+	if e.GetKermooBinaryPath() != "" {
+		e.StartBinary(config, timeout)
+	} else {
+		e.StartBuild(config, timeout)
+	}
+}
+
+func (e *E2E) StartBuild(config string, timeout time.Duration) {
 	e.context, e.cancel = context.WithTimeout(context.Background(), timeout)
 
-	kermooBinary := os.Getenv("KERMOO_BINARY")
-
-	if kermooBinary != "" {
-		e.cmd = exec.CommandContext(e.context, kermooBinary, "start", "-v", "debug", "-f", "-")
-	} else {
-		e.cmd = exec.CommandContext(e.context, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
-	}
+	e.cmd = exec.CommandContext(e.context, "go", "run", RootPath("main.go"), "start", "-v", "debug", "-f", "-")
 
 	e.cmd.Env = os.Environ()
 	e.cmd.Env = append(e.cmd.Env, e.envs...)
@@ -84,6 +141,29 @@ func (e *E2E) Start(config string, timeout time.Duration) {
 	e.startedAt = time.Now()
 
 	assert.NoError(e.t, e.cmd.Start())
+}
+
+func (e *E2E) StartBinary(config string, timeout time.Duration) {
+	e.context, e.cancel = context.WithTimeout(context.Background(), timeout)
+
+	var mw io.Writer
+
+	e.cmd = exec.CommandContext(e.context, e.GetKermooBinaryPath(), "start", "-v", "debug", "-f", "-")
+
+	//mw = io.MultiWriter(os.Stdout, e.GetFileLogWriter(), &e.out)
+	mw = io.MultiWriter(e.GetFileLogWriter(), &e.out)
+
+	e.cmd.Env = os.Environ()
+	e.cmd.Env = append(e.cmd.Env, e.envs...)
+
+	e.cmd.Stdin = strings.NewReader(strings.Trim(config, "\t"))
+
+	e.cmd.Stdout = mw
+	e.cmd.Stderr = mw
+
+	e.startedAt = time.Now()
+
+	require.NoError(e.t, e.cmd.Start())
 }
 
 func (e *E2E) Wait() {
@@ -118,8 +198,12 @@ func (e *E2E) RequireTimedOut() {
 	require.True(e.t, e.timedout, "command is NOT timedout")
 }
 
-func (e *E2E) AssertExitCode(code int) {
-	assert.Equal(e.t, fmt.Sprintf("exit status %d", code), e.GetLastOutputLine())
+func (e *E2E) AssertExitCode(expectedCode int) {
+	exitCode, err := e.GetExitCode()
+
+	require.Nil(e.t, err)
+
+	assert.Equal(e.t, expectedCode, exitCode)
 }
 
 func (e *E2E) GetOutput() string {
