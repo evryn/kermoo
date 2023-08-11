@@ -15,7 +15,7 @@ type UserConfigType struct {
 }
 
 func (u *UserConfigType) Validate() error {
-	if u.SchemaVersion != "0.1-beta" {
+	if u.SchemaVersion != "" && u.SchemaVersion != "0.1-beta" {
 		return fmt.Errorf("schema version is not supported")
 	}
 
