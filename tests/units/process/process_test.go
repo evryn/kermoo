@@ -6,21 +6,9 @@ import (
 	"kermoo/modules/utils"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
-
-// Mock implementation of planner.PlannableTrait for testing purposes
-type MockPlannableTrait struct{}
-
-func (m MockPlannableTrait) Plan() error {
-	return nil
-}
-
-// Mock implementation of common.SingleValueDur for testing purposes
-type MockSingleValueDur struct{}
-
-func (d MockSingleValueDur) GetValue() (time.Duration, error) {
-	return 0, nil
-}
 
 func TestProcess_Validate(t *testing.T) {
 	tests := []struct {
@@ -102,4 +90,22 @@ func TestProcess_Validate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestProcess_MakeCustomPlan(t *testing.T) {
+	process := process.Process{
+		Delay: nil,
+		Exit: &process.ProcessExit{
+			After: common.SingleValueDur{
+				Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
+			},
+		},
+	}
+
+	plan := process.MakeCustomPlan()
+
+	assert.Equal(t, "process-manager", *plan.Name)
+	assert.Equal(t, time.Second, time.Duration(*plan.Duration))
+	assert.Equal(t, time.Second, time.Duration(*plan.Interval))
+	assert.Equal(t, float32(1.0), *plan.Value.Exactly)
 }
