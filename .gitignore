@@ -5,3 +5,4 @@
 docker-compose.yml
 coverage.out
 e2e-test-results
+**/__debug_bin
