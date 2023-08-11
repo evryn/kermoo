@@ -142,3 +142,7 @@ func IsSuccessByChance(chance float32) bool {
 	r := rand.New(source)
 	return r.Float32() < chance
 }
+
+func NewP[T any](value T) *T {
+	return &value
+}
