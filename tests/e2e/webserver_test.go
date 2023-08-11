@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"kermoo/modules/web_server"
 	"net/http"
 	"testing"
@@ -19,7 +19,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             webServers:
             - port: 8080
               routes:
@@ -40,7 +39,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             webServers:
             - port: 8000
               interface: 127.0.0.1
@@ -67,7 +65,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 
 		e2e.WithEnv("HOSTNAME=container-123")
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             webServers:
             - port: 8000
               interface: 127.0.0.1
@@ -98,7 +95,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             webServers:
             - port: 8080
               routes:
@@ -129,7 +125,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             plans:
             - name: disaster
               interval: 100ms
@@ -163,7 +158,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             plans:
             - name: disaster
               subPlans:
@@ -219,7 +213,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             webServers:
             - port: 8080
               routes:
@@ -253,7 +246,6 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             plans:
             - name: readiness
               interval: 100ms
@@ -379,7 +371,7 @@ func sendRequest(method, url string, body []byte) (string, *http.Response, error
 	defer resp.Body.Close()
 
 	// Read the response
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		panic(err)
 	}

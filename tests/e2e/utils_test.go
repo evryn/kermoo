@@ -95,7 +95,6 @@ func (e *E2E) GetFileLogWriter() *os.File {
 	if err != nil {
 		panic(err)
 	}
-	// defer file.Close()
 
 	file.Write([]byte("prepared.\n"))
 
