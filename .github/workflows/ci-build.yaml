@@ -12,7 +12,7 @@ on:
 
 env:
   # Golang version to use across CI steps
-  GOLANG_VERSION: '1.20'
+  GOLANG_VERSION: '1.20.5'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -104,10 +104,26 @@ jobs:
         with:
           path: ~/.cache/go-build
           key: ${{ runner.os }}-go-build-v1-${{ github.run_id }}
-      - name: Download all Go modules
+      -
+        name: Download all Go modules
         run: make mod-download-local
-      - name: Compile all packages
+      -
+        name: Compile all packages
         run: make test-e2e
+        id: e2e-testing-step
+      -
+        name: Generate E2E log artifacts
+        if: always()
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        with:
+          name: e2e-test-results
+          path: e2e-test-results
+      # -
+      #   name: Fail of tests are failed
+      #   if: ${{ steps.e2e-testing-step.outcome == 'failure' }}
+      #   run: |
+      #     echo "E2E tests failed. See the step details and inspect logs artifact."
+      #     exit 1
 
   analyze:
     name: Process & analyze test artifacts

@@ -109,14 +109,18 @@ func convertMapKeysToString(m map[interface{}]interface{}) map[string]interface{
 
 func GetDuplicates(items []string) []string {
 	itemCount := make(map[string]int)
+	var order []string
 	duplicates := []string{}
 
 	for _, item := range items {
+		if itemCount[item] == 0 {
+			order = append(order, item) // Save the order of first appearance
+		}
 		itemCount[item]++
 	}
 
-	for item, count := range itemCount {
-		if count > 1 {
+	for _, item := range order {
+		if itemCount[item] > 1 {
 			duplicates = append(duplicates, item)
 		}
 	}

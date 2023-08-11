@@ -12,4 +12,6 @@ test-with-coverage:
 
 .PHONY: test-e2e
 test-e2e:
-	go test -v ./tests/e2e/...
+	rm -rf e2e-test-results
+	go build -v -o /tmp/kermoo .
+	KERMOO_BINARY="/tmp/kermoo" go test -v ./tests/e2e/...

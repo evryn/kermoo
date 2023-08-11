@@ -4,3 +4,4 @@
 .dev
 docker-compose.yml
 coverage.out
+e2e-test-results

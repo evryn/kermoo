@@ -10,7 +10,6 @@ func TestProcessManagerEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             process:
               exit:
                 after:
@@ -29,7 +28,6 @@ func TestProcessManagerEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             process:
               exit:
                 after:
@@ -50,7 +48,6 @@ func TestProcessManagerEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             process:
               exit:
                 after:
@@ -69,7 +66,6 @@ func TestProcessManagerEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            schemaVersion: "0.1-beta"
             process:
               exit:
                 after:
