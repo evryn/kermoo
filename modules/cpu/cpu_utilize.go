@@ -11,9 +11,8 @@ type CpuUtilize struct {
 	Plan     *planner.Plan `json:"plan"`
 	PlanRefs []string      `json:"planRefs"`
 
-	ctx          context.Context
-	cancel       context.CancelFunc
-	currentUsage float32
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func (cu *CpuUtilize) Start(usage float32) {
