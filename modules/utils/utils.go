@@ -8,6 +8,7 @@ import (
 
 	"math/rand"
 
+	"github.com/shirou/gopsutil/cpu"
 	"gopkg.in/yaml.v3"
 )
 
@@ -146,3 +147,31 @@ func IsSuccessByChance(chance float32) bool {
 func NewP[T any](value T) *T {
 	return &value
 }
+
+func GetCpuUsage(duration time.Duration) (float32, error) {
+	percentages, err := cpu.Percent(duration, false)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return float32(percentages[0]) / 100.0, nil
+}
+
+// func GetCpuUsage(duration time.Duration) (float32, error) {
+// 	percentages, err := cpu.Percent(duration, true)
+
+// 	if err != nil {
+// 		return 0, err
+// 	}
+
+// 	// The percentages slice contains usage percentages for each core.
+// 	// Calculate the average CPU usage across all cores.
+// 	totalUsage := float32(0)
+// 	for _, usage := range percentages {
+// 		totalUsage += float32(usage)
+// 	}
+// 	averageUsage := totalUsage / float32(len(percentages)) / 100.0
+
+// 	return averageUsage, nil
+// }

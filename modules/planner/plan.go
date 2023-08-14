@@ -141,8 +141,8 @@ func (p *Plan) Start() {
 					}
 				}
 
-				for _, p := range p.plannables {
-					plannable := *p
+				for _, pl := range p.plannables {
+					plannable := *pl
 					hook := plannable.GetPlanCycleHooks().PreSleep
 					if hook != nil {
 						executable := *hook
@@ -154,6 +154,7 @@ func (p *Plan) Start() {
 						})
 
 						if value == PLAN_SIGNAL_TERMINATE {
+							logger.Log.Info("terminating plan by signal", zap.String("plan", *p.Name), zap.String("cause", plannable.GetUid()))
 							return
 						}
 					}
@@ -163,8 +164,8 @@ func (p *Plan) Start() {
 
 				logger.Log.Info("executing post-sleep hooks...", zap.String("plan", *p.Name))
 
-				for _, p := range p.plannables {
-					plannable := *p
+				for _, pl := range p.plannables {
+					plannable := *pl
 					hook := plannable.GetPlanCycleHooks().PostSleep
 					if hook != nil {
 						executable := *hook
@@ -176,6 +177,7 @@ func (p *Plan) Start() {
 						})
 
 						if value == PLAN_SIGNAL_TERMINATE {
+							logger.Log.Info("terminating plan by signal", zap.String("plan", *p.Name), zap.String("cause", plannable.GetUid()))
 							return
 						}
 					}

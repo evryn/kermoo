@@ -2,14 +2,16 @@ package user_config
 
 import (
 	"fmt"
+	"kermoo/modules/cpu"
 	"kermoo/modules/planner"
 	"kermoo/modules/process"
 	"kermoo/modules/web_server"
 )
 
 type UserConfigType struct {
-	SchemaVersion string                  `json:"schemaVersion"`
-	Process       *process.Process        `json:"process"`
+	SchemaVersion string           `json:"schemaVersion"`
+	Process       *process.Process `json:"process"`
+	Cpu           *cpu.Cpu
 	Plans         []*planner.Plan         `json:"plans"`
 	WebServers    []*web_server.WebServer `json:"webServers"`
 }
@@ -36,7 +38,18 @@ func (u *UserConfigType) GetPreparedConfig() (*PreparedConfigType, error) {
 		prepared.Process = u.Process
 
 		if err := prepared.preparePlannable(u.Process); err != nil {
-			return nil, fmt.Errorf("unable to prepare manager: %v", err)
+			return nil, fmt.Errorf("unable to prepare process manager: %v", err)
+		}
+	}
+
+	// Prepare CPU Manager
+	if u.Cpu != nil {
+		if err := u.Cpu.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid cpu manager: %v", err)
+		}
+
+		if err := prepared.preparePlannable(u.Cpu); err != nil {
+			return nil, fmt.Errorf("unable to prepare cpu manager: %v", err)
 		}
 	}
 

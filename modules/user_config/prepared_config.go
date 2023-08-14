@@ -2,6 +2,7 @@ package user_config
 
 import (
 	"fmt"
+	"kermoo/modules/cpu"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
 	"kermoo/modules/process"
@@ -18,6 +19,7 @@ var Prepared PreparedConfigType
 type PreparedConfigType struct {
 	SchemaVersion string
 	Process       *process.Process
+	Cpu           *cpu.Cpu
 	Plans         []*planner.Plan
 	WebServers    []*web_server.WebServer
 }
@@ -102,6 +104,12 @@ func (pc *PreparedConfigType) Validate() error {
 
 	if err := pc.Process.Validate(); err != nil {
 		return fmt.Errorf("process manager is invalid: %v", err)
+	}
+
+	if pc.Cpu != nil {
+		if err := pc.Cpu.Validate(); err != nil {
+			return fmt.Errorf("cpu manager is invalid: %v", err)
+		}
 	}
 
 	for _, webServer := range pc.WebServers {
