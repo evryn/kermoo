@@ -17,19 +17,48 @@ func TestCpuEndToEnd(t *testing.T) {
             cpu:
               utilize:
                 plan:
-                  interval: 1000ms
+                  interval: 100ms
                   value:
-                    exactly: 0.3
+                    exactly: 0.7
 		`, 3*time.Second)
 
 		// Wait a few while
 		time.Sleep(500 * time.Millisecond)
 
-		percentage, err := utils.GetCpuUsage(100 * time.Millisecond)
+		percentage, err := utils.GetCpuUsage(500 * time.Millisecond)
 		require.NoError(t, err)
 
-		assert.GreaterOrEqual(t, float32(0.6), percentage)
-		assert.LessOrEqual(t, float32(0.4), percentage)
+		assert.GreaterOrEqual(t, float32(0.9), percentage)
+		assert.LessOrEqual(t, float32(0.6), percentage)
+
+		e2e.Wait()
+
+		e2e.RequireTimedOut()
+	})
+
+	t.Run("works with a referenced utilization plan", func(t *testing.T) {
+		e2e := NewE2E(t)
+
+		e2e.Start(`
+            plans:
+            - name: spike
+              interval: 100ms
+              value:
+                exactly: 0.7
+            cpu:
+              utilize:
+                planRefs:
+                - spike
+		`, 3*time.Second)
+
+		// Wait a few while
+		time.Sleep(500 * time.Millisecond)
+
+		percentage, err := utils.GetCpuUsage(500 * time.Millisecond)
+		require.NoError(t, err)
+
+		assert.GreaterOrEqual(t, float32(0.9), percentage)
+		assert.LessOrEqual(t, float32(0.6), percentage)
 
 		e2e.Wait()
 

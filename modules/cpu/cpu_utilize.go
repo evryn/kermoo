@@ -2,13 +2,9 @@ package cpu
 
 import (
 	"context"
-	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/utils"
 	"runtime"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 type CpuUtilize struct {
@@ -23,21 +19,7 @@ type CpuUtilize struct {
 func (cu *CpuUtilize) Start(usage float32) {
 	cu.ctx, cu.cancel = context.WithCancel(context.Background())
 
-	go cu.updateCpuUsage(cu.ctx)
-
-	coreCount := runtime.NumCPU()
-
-	go func() {
-		for {
-			logger.Log.Debug("usage", zap.Float32("usage", cu.currentUsage))
-			time.Sleep(5 * time.Millisecond)
-		}
-	}()
-
-	for i := 0; i < coreCount; i++ {
-		time.Sleep(1 * time.Millisecond)
-		go cu.utilize(cu.ctx, usage)
-	}
+	cu.runCpuLoad(runtime.NumCPU(), int(usage*100))
 }
 
 func (cu *CpuUtilize) Stop() {
@@ -45,43 +27,36 @@ func (cu *CpuUtilize) Stop() {
 	time.Sleep(1 * time.Millisecond)
 }
 
-func (cu *CpuUtilize) utilize(ctx context.Context, targetUsage float32) {
-	logger.Log.Debug("started utilization goroutine")
+// runCpuLoad run CPU load in specify cores count and percentage
+// Borrowed from: https://github.com/0Delta/gocpuload/blob/master/cpu_load.go
+func (cu *CpuUtilize) runCpuLoad(coresCount int, percentage int) {
+	runtime.GOMAXPROCS(coresCount)
 
-	for {
-		if cu.currentUsage < targetUsage {
-			for i := 0; i < 100000; i++ {
+	// 1 unit = 100 ms may be the best
+	unitHundresOfMicrosecond := 1000
+	runMicrosecond := unitHundresOfMicrosecond * percentage
+	sleepMicrosecond := unitHundresOfMicrosecond*100 - runMicrosecond
+
+	for i := 0; i < coresCount; i++ {
+		go func(ctx context.Context) {
+			runtime.LockOSThread()
+			// endless loop
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					begin := time.Now()
+					for {
+						// run 100%
+						if time.Since(begin) > time.Duration(runMicrosecond)*time.Microsecond {
+							break
+						}
+					}
+					// sleep
+					time.Sleep(time.Duration(sleepMicrosecond) * time.Microsecond)
+				}
 			}
-		} else {
-			time.Sleep(1 * time.Millisecond)
-		}
-
-		select {
-		case <-ctx.Done():
-			logger.Log.Debug("ending utilization goroutine")
-			return
-		default:
-		}
-	}
-}
-
-func (cu *CpuUtilize) updateCpuUsage(ctx context.Context) {
-	var err error
-
-	for {
-		cu.currentUsage, err = utils.GetCpuUsage(0)
-
-		if err != nil {
-			logger.Log.Fatal("error getting cpu usage", zap.Error(err))
-		}
-
-		time.Sleep(10 * time.Millisecond)
-
-		select {
-		case <-ctx.Done():
-			logger.Log.Debug("ending cpu usage updater")
-			return
-		default:
-		}
+		}(cu.ctx)
 	}
 }
