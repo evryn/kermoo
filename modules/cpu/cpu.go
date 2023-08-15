@@ -10,8 +10,7 @@ var _ planner.Plannable = &Cpu{}
 
 type Cpu struct {
 	planner.PlannableTrait
-	Utilize  CpuUtilize `json:"utilize"`
-	AllCores bool       `json:"allCores"`
+	Utilize CpuUtilize `json:"utilize"`
 }
 
 func (c *Cpu) GetUid() string {
@@ -36,7 +35,9 @@ func (c Cpu) Validate() error {
 	}
 
 	if c.Utilize.Plan != nil {
-		return c.Utilize.Plan.Validate()
+		if err := c.Utilize.Plan.Validate(); err != nil {
+			return fmt.Errorf("plan validation failed: %v", err)
+		}
 	}
 
 	return nil
