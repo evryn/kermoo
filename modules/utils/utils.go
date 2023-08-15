@@ -59,6 +59,10 @@ func RandomFloat(min float32, max float32) float32 {
 	return min + rand.Float32()*(max-min)
 }
 
+func RandomInt64(min, max int64) int64 {
+	return min + rand.Int63n(max-min+1)
+}
+
 func RandomDuration(min, max time.Duration) (*time.Duration, error) {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
@@ -157,21 +161,3 @@ func GetCpuUsage(duration time.Duration) (float32, error) {
 
 	return float32(percentages[0]) / 100.0, nil
 }
-
-// func GetCpuUsage(duration time.Duration) (float32, error) {
-// 	percentages, err := cpu.Percent(duration, true)
-
-// 	if err != nil {
-// 		return 0, err
-// 	}
-
-// 	// The percentages slice contains usage percentages for each core.
-// 	// Calculate the average CPU usage across all cores.
-// 	totalUsage := float32(0)
-// 	for _, usage := range percentages {
-// 		totalUsage += float32(usage)
-// 	}
-// 	averageUsage := totalUsage / float32(len(percentages)) / 100.0
-
-// 	return averageUsage, nil
-// }

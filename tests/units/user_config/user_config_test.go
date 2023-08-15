@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLoadUserConfig(t *testing.T) {
@@ -108,20 +109,20 @@ func TestLoadUserConfig(t *testing.T) {
 			uc, err := user_config.LoadUserConfig(tc.filename)
 
 			if tc.isError {
-				assert.Error(t, err)
+				require.Error(t, err)
 				if err != nil {
 					assert.Contains(t, err.Error(), tc.errMsg)
 				}
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				pc, err := uc.GetPreparedConfig()
 
-				assert.NoError(t, err, "prepared config is problematic")
+				require.NoError(t, err, "prepared config is problematic")
 
 				err = pc.Validate()
 
-				assert.NoError(t, err, "prepared config is invalid")
+				require.NoError(t, err, "prepared config is invalid")
 			}
 
 		})

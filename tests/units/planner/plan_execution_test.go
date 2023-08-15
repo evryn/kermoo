@@ -4,9 +4,12 @@ import (
 	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
+	"kermoo/modules/utils"
 
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func teardownSubTest(t *testing.T) {
@@ -37,9 +40,16 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value.Exactly = &float_0_5
+		plan.Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Exactly: utils.NewP[float32](0.5),
+			},
+		}
 
 		plan.Assign(&Recorder)
+
+		require.NoError(t, plan.Validate())
+
 		plan.Start()
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
@@ -62,9 +72,16 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value.Between = []float32{float_0_1, float_0_9}
+		plan.Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Between: []float32{0.1, 0.9},
+			},
+		}
 
 		plan.Assign(&Recorder)
+
+		require.NoError(t, plan.Validate())
+
 		plan.Start()
 
 		// Assert that it took around 50ms (with 2ms error)
@@ -95,6 +112,9 @@ func TestSimplePlanExecution(t *testing.T) {
 		}
 
 		plan.Assign(&Recorder)
+
+		require.NoError(t, plan.Validate())
+
 		plan.Start()
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
@@ -151,13 +171,26 @@ func TestSubPlanExecution(t *testing.T) {
 			},
 		})
 
-		plan.SubPlans[0].Value.Exactly = &float_0_5
-		plan.SubPlans[1].Value.Between = []float32{float_0_1, float_0_9}
-		plan.SubPlans[2].Value.Chart = &common.Chart{
-			Bars: []float32{0.2, 0.3, 0.4},
+		plan.SubPlans[0].Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Exactly: utils.NewP[float32](0.5),
+			},
+		}
+		plan.SubPlans[1].Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Between: []float32{0.1, 0.9},
+			},
+		}
+		plan.SubPlans[2].Value = &common.MixedValueF{
+			Chart: &common.Chart{
+				Bars: []float32{0.2, 0.3, 0.4},
+			},
 		}
 
 		plan.Assign(&Recorder)
+
+		require.NoError(t, plan.Validate())
+
 		plan.Start()
 
 		Recorder.AssertTotalTimeSpent(t,
@@ -203,10 +236,20 @@ func TestSubPlanExecution(t *testing.T) {
 			},
 		})
 
-		plan.SubPlans[0].Value.Exactly = &float_0_5
-		plan.SubPlans[1].Value.Between = []float32{float_0_1, float_0_9}
-		plan.SubPlans[2].Value.Chart = &common.Chart{
-			Bars: []float32{0.2, 0.3, 0.4},
+		plan.SubPlans[0].Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Exactly: utils.NewP[float32](0.5),
+			},
+		}
+		plan.SubPlans[1].Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Between: []float32{0.1, 0.9},
+			},
+		}
+		plan.SubPlans[2].Value = &common.MixedValueF{
+			Chart: &common.Chart{
+				Bars: []float32{0.2, 0.3, 0.4},
+			},
 		}
 
 		// Limit the execution to 20 times. It's here to preven the real inifnit number of executions -
@@ -214,6 +257,9 @@ func TestSubPlanExecution(t *testing.T) {
 		Recorder.ExecutaionCap = 20
 
 		plan.Assign(&Recorder)
+
+		require.NoError(t, plan.Validate())
+
 		plan.Start()
 
 		// Static runs 5 times for 50ms

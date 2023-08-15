@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type PlanRecorder struct {
@@ -33,7 +34,7 @@ func (r *PlanRecorder) Reset() {
 }
 
 func (r *PlanRecorder) AssertExpectedValues(t *testing.T, expectedValues []ExpectedExecutionValue) {
-	assert.Len(t, r.Executions, len(expectedValues))
+	require.Len(t, r.Executions, len(expectedValues))
 
 	for i, ev := range expectedValues {
 		v := r.Executions[i].Cycles.ExecutableValue

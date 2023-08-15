@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
+	"kermoo/modules/utils"
 	"net/http"
 	"time"
 
@@ -120,12 +122,14 @@ func (ws *WebServer) MakeCustomPlan() *planner.Plan {
 
 // Create a lifetime-long plan to serve webserver
 func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
-	// Value of 1.0 indicates that the webserver will always
-	// be available.
-	value := float32(1.0)
-
 	plan := planner.InitPlan(planner.Plan{})
-	plan.Value.Exactly = &value
+
+	// Value of 1.0 indicates that the webserver will always be available.
+	plan.Value = &common.MixedValueF{
+		SingleValueF: common.SingleValueF{
+			Exactly: utils.NewP[float32](1.0),
+		},
+	}
 
 	return &plan
 }
