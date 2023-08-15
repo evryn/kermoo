@@ -1,6 +1,7 @@
 package planner
 
 import (
+	"fmt"
 	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/utils"
@@ -11,6 +12,7 @@ import (
 
 type Plan struct {
 	Value                  *common.MixedValueF `json:"value"`
+	Size                   *common.MixedSize   `json:"size"`
 	Interval               *common.Duration    `json:"interval"`
 	Duration               *common.Duration    `json:"duration"`
 	Name                   *string             `json:"name"`
@@ -46,6 +48,7 @@ const (
 func (p *Plan) ToSubPlan() SubPlan {
 	return SubPlan{
 		Value:    p.Value,
+		Size:     p.Size,
 		Interval: p.Interval,
 		Duration: p.Duration,
 	}
@@ -66,7 +69,7 @@ func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
 		executablePlan, err := subPlan.ToExecutablePlan()
 
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to convert plan itself to executable plan: %v", err)
 		}
 
 		return []*ExecutablePlan{executablePlan}, nil
@@ -79,7 +82,7 @@ func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
 		executablePlan, err := sp.ToExecutablePlan()
 
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to convert subplan to executable plan: %v", err)
 		}
 
 		ep = append(ep, executablePlan)
@@ -92,7 +95,7 @@ func (p *Plan) Validate() error {
 	_, err := p.GetExecutablePlans()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to generate executable plans: %v", err)
 	}
 
 	return nil
@@ -193,9 +196,5 @@ func (p *Plan) Start() {
 }
 
 func InitPlan(p Plan) Plan {
-	if p.Value == nil {
-		p.Value = &common.MixedValueF{}
-	}
-
 	return p
 }

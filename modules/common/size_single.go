@@ -5,12 +5,12 @@ import (
 	"kermoo/modules/utils"
 )
 
-type SingleValueF struct {
-	Exactly *float32  `json:"exactly"`
-	Between []float32 `json:"between"`
+type SingleSize struct {
+	Exactly *Size  `json:"exactly"`
+	Between []Size `json:"between"`
 }
 
-func (s *SingleValueF) GetValue() (float32, error) {
+func (s *SingleSize) GetSize() (Size, error) {
 	if s.Exactly != nil {
 		return *s.Exactly, nil
 	}
@@ -28,11 +28,11 @@ func (s *SingleValueF) GetValue() (float32, error) {
 		max = t
 	}
 
-	return utils.RandomFloat(min, max), nil
+	return Size(utils.RandomInt64(min.ToBytes(), max.ToBytes())), nil
 }
 
-func MakeZeroSingleValueF() SingleValueF {
-	return SingleValueF{
-		Exactly: utils.NewP[float32](0),
+func MakeZeroSize() SingleSize {
+	return SingleSize{
+		Exactly: utils.NewP[Size](0),
 	}
 }

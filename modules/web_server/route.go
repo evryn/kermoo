@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/common"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
 	"net/http"
@@ -44,12 +45,14 @@ func (route *Route) MakeCustomPlan() *planner.Plan {
 
 // Create a lifetime-long plan to serve route
 func (route *Route) MakeDefaultPlan() *planner.Plan {
-	// Value of 1.0 indicates that the route will always
-	// be available.
-	value := float32(1.0)
-
 	plan := planner.InitPlan(planner.Plan{})
-	plan.Value.Exactly = &value
+
+	// Value of 1.0 indicates that the route will always be available.
+	plan.Value = &common.MixedValueF{
+		SingleValueF: common.SingleValueF{
+			Exactly: utils.NewP[float32](1.0),
+		},
+	}
 
 	return &plan
 }

@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/docker/go-units v0.5.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gosimple/slug v1.13.1 // indirect

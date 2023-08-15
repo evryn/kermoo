@@ -1,12 +1,14 @@
 package cpu_test
 
 import (
+	"kermoo/modules/common"
 	"kermoo/modules/cpu"
 	"kermoo/modules/planner"
 	"testing"
 
 	// Replace with the actual package path for common
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidate(t *testing.T) {
@@ -30,13 +32,18 @@ func TestValidate(t *testing.T) {
 
 	t.Run("should return error when plan validation fails", func(t *testing.T) {
 		plan := planner.InitPlan(planner.Plan{})
+		plan.Value = &common.MixedValueF{
+			SingleValueF: common.SingleValueF{
+				Between: []float32{0.1},
+			},
+		}
 		cpu := cpu.Cpu{
 			Utilize: cpu.CpuUtilize{
 				Plan: &plan,
 			},
 		}
 		err := cpu.Validate()
-		assert.NotNil(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "plan validation")
 	})
 }

@@ -5,6 +5,7 @@ import (
 	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
+	"kermoo/modules/utils"
 	"os"
 
 	"go.uber.org/zap"
@@ -87,8 +88,11 @@ func (p *Process) MakeCustomPlan() *planner.Plan {
 	})
 
 	// Set a dummy value since plan validation requires it
-	dummyValue := float32(1.0)
-	plan.Value.Exactly = &dummyValue
+	plan.Value = &common.MixedValueF{
+		SingleValueF: common.SingleValueF{
+			Exactly: utils.NewP[float32](1.0),
+		},
+	}
 
 	return &plan
 }
