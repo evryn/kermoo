@@ -26,6 +26,10 @@ func (cu *CpuUtilize) Stop() {
 	time.Sleep(1 * time.Millisecond)
 }
 
+func (cu *CpuUtilize) GetContextAndCancel() (context.Context, context.CancelFunc) {
+	return cu.ctx, cu.cancel
+}
+
 // runCpuLoad run CPU load in specify cores count and percentage
 // Borrowed from: https://github.com/0Delta/gocpuload/blob/master/cpu_load.go
 func (cu *CpuUtilize) runCpuLoad(coresCount int, percentage int) {
