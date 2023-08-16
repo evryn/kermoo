@@ -21,7 +21,7 @@ func TestValidate(t *testing.T) {
 
 	t.Run("should return error when plan refs contain more than one element", func(t *testing.T) {
 		cpu := cpu.Cpu{
-			Utilize: cpu.CpuUtilize{
+			Load: cpu.CpuLoader{
 				PlanRefs: []string{"ref1", "ref2"},
 			},
 		}
@@ -38,7 +38,7 @@ func TestValidate(t *testing.T) {
 			},
 		}
 		cpu := cpu.Cpu{
-			Utilize: cpu.CpuUtilize{
+			Load: cpu.CpuLoader{
 				Plan: &plan,
 			},
 		}
@@ -56,7 +56,7 @@ func TestGetUid(t *testing.T) {
 func TestHasCustomPlan(t *testing.T) {
 	t.Run("with custom plan", func(t *testing.T) {
 		c := &cpu.Cpu{
-			Utilize: cpu.CpuUtilize{
+			Load: cpu.CpuLoader{
 				Plan: &planner.Plan{},
 			},
 		}
@@ -72,7 +72,7 @@ func TestHasCustomPlan(t *testing.T) {
 func TestGetDesiredPlanNames(t *testing.T) {
 	planRefs := []string{"plan1", "plan2"}
 	c := cpu.Cpu{
-		Utilize: cpu.CpuUtilize{
+		Load: cpu.CpuLoader{
 			PlanRefs: planRefs,
 		},
 	}
@@ -82,7 +82,7 @@ func TestGetDesiredPlanNames(t *testing.T) {
 func TestMakeCustomPlan(t *testing.T) {
 	plan := &planner.Plan{}
 	c := &cpu.Cpu{
-		Utilize: cpu.CpuUtilize{
+		Load: cpu.CpuLoader{
 			Plan: plan,
 		},
 	}
