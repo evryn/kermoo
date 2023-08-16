@@ -10,7 +10,7 @@ var _ planner.Plannable = &Cpu{}
 
 type Cpu struct {
 	planner.PlannableTrait
-	Utilize CpuUtilize `json:"utilize"`
+	Load CpuLoader `json:"load"`
 }
 
 func (c *Cpu) GetName() string {
@@ -18,24 +18,24 @@ func (c *Cpu) GetName() string {
 }
 
 func (c *Cpu) HasInlinePlan() bool {
-	return c.Utilize.Plan != nil
+	return c.Load.Plan != nil
 }
 
 func (c Cpu) GetDesiredPlanNames() []string {
-	return c.Utilize.PlanRefs
+	return c.Load.PlanRefs
 }
 
 func (c Cpu) Validate() error {
-	if len(c.Utilize.PlanRefs) == 0 && c.Utilize.Plan == nil {
+	if len(c.Load.PlanRefs) == 0 && c.Load.Plan == nil {
 		return fmt.Errorf("no plan or plan refs is set")
 	}
 
-	if len(c.Utilize.PlanRefs) > 1 {
+	if len(c.Load.PlanRefs) > 1 {
 		return fmt.Errorf("plan refs can not contain more than one element for cpu utilization")
 	}
 
-	if c.Utilize.Plan != nil {
-		if err := c.Utilize.Plan.Validate(); err != nil {
+	if c.Load.Plan != nil {
+		if err := c.Load.Plan.Validate(); err != nil {
 			return fmt.Errorf("plan validation failed: %v", err)
 		}
 	}
@@ -45,12 +45,12 @@ func (c Cpu) Validate() error {
 
 func (c *Cpu) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		c.Utilize.Start(c.GetAssignedPlans()[0].GetCurrentValue().GetValue())
+		c.Load.Start(c.GetAssignedPlans()[0].GetCurrentValue().GetValue())
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 
 	postSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		c.Utilize.Stop()
+		c.Load.Stop()
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 
@@ -61,7 +61,7 @@ func (c *Cpu) GetPlanCycleHooks() planner.CycleHooks {
 }
 
 func (c *Cpu) MakeInlinePlan() *planner.Plan {
-	return c.Utilize.Plan
+	return c.Load.Plan
 }
 
 func (c *Cpu) MakeDefaultPlan() *planner.Plan {

@@ -10,7 +10,7 @@ package memory
 
 // type Memory struct {
 // 	planner.PlannableTrait
-// 	Utilize MemoryUtilize `json:"utilize"`
+// 	Leak MemoryUtilize `json:"utilize"`
 // }
 
 // func (m *Memory) GetUid() string {

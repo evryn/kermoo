@@ -8,7 +8,7 @@ import (
 )
 
 func TestStart(t *testing.T) {
-	cu := &cpu.CpuUtilize{}
+	cu := &cpu.CpuLoader{}
 
 	usage := float32(0.5)
 	cu.Start(usage)
@@ -30,7 +30,7 @@ func TestStart(t *testing.T) {
 }
 
 func TestStop(t *testing.T) {
-	cu := &cpu.CpuUtilize{}
+	cu := &cpu.CpuLoader{}
 	cu.Start(float32(0.5))
 
 	// Stop and check that the context is canceled

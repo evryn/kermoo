@@ -15,7 +15,7 @@ func TestCpuEndToEnd(t *testing.T) {
 
 		e2e.Start(`
             cpu:
-              utilize:
+              load:
                 plan:
                   interval: 100ms
                   value:
@@ -46,7 +46,7 @@ func TestCpuEndToEnd(t *testing.T) {
               value:
                 exactly: 0.7
             cpu:
-              utilize:
+              load:
                 planRefs:
                 - spike
 		`, 3*time.Second)
