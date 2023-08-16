@@ -10,7 +10,7 @@ import (
 )
 
 type PlanRecorder struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	TotalTimeSpent time.Duration
 	Executions     []Execution
 	ExecutaionCap  int

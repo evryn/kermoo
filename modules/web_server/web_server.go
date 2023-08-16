@@ -22,7 +22,7 @@ type WebServerFault struct {
 }
 
 type WebServer struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	Routes      []*Route        `json:"routes"`
 	Interface   *string         `json:"interface"`
 	Port        *int32          `json:"port"`
@@ -122,7 +122,7 @@ func (ws *WebServer) MakeInlinePlan() *planner.Plan {
 
 // Create a lifetime-long plan to serve webserver
 func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
-	plan := planner.InitPlan(planner.Plan{})
+	plan := planner.NewPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the webserver will always be available.
 	plan.Value = &values.MultiFloat{

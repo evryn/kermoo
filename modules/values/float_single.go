@@ -31,7 +31,7 @@ func (s *SingleFloat) ToFloat() (float32, error) {
 	return utils.RandomFloatBetween(min, max), nil
 }
 
-func MakeZeroSingleValueF() SingleFloat {
+func NewZeroFloat() SingleFloat {
 	return SingleFloat{
 		Exactly: utils.NewP[float32](0),
 	}

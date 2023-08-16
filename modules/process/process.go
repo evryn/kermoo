@@ -15,7 +15,7 @@ import (
 var _ planner.Plannable = &Process{}
 
 type Process struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	Delay *values.SingleDuration `json:"delay"`
 	Exit  *ProcessExit           `json:"exit"`
 }
@@ -81,7 +81,7 @@ func (p *Process) MakeInlinePlan() *planner.Plan {
 
 	valueDur := values.Duration(value)
 
-	plan := planner.InitPlan(planner.Plan{
+	plan := planner.NewPlan(planner.Plan{
 		Name:     &name,
 		Interval: &valueDur,
 		Duration: &valueDur,

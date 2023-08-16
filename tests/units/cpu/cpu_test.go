@@ -31,7 +31,7 @@ func TestValidate(t *testing.T) {
 	})
 
 	t.Run("should return error when plan validation fails", func(t *testing.T) {
-		plan := planner.InitPlan(planner.Plan{})
+		plan := planner.NewPlan(planner.Plan{})
 		plan.Value = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1},
