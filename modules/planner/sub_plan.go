@@ -8,10 +8,10 @@ import (
 )
 
 type SubPlan struct {
-	Value    *values.MultiFloat `json:"value"`
-	Size     *values.MultiSize  `json:"size"`
-	Interval *values.Duration   `json:"interval"`
-	Duration *values.Duration   `json:"duration"`
+	Percentage *values.MultiFloat `json:"percentage"`
+	Size       *values.MultiSize  `json:"size"`
+	Interval   *values.Duration   `json:"interval"`
+	Duration   *values.Duration   `json:"duration"`
 }
 
 func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
@@ -33,8 +33,8 @@ func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 		}
 	}
 
-	if s.Value != nil {
-		singleValues, err = s.Value.ToSingleFloats()
+	if s.Percentage != nil {
+		singleValues, err = s.Percentage.ToSingleFloats()
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert value to single values: %v", err)

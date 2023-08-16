@@ -31,7 +31,7 @@ var (
 func TestSimplePlanExecution(t *testing.T) {
 	logger.MustInitLogger("fatal")
 
-	t.Run("executes simple plan with static value", func(t *testing.T) {
+	t.Run("executes simple plan with static percentage", func(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
@@ -40,7 +40,7 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &values.MultiFloat{
+		plan.Percentage = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
@@ -72,7 +72,7 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &values.MultiFloat{
+		plan.Percentage = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
@@ -105,7 +105,7 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &values.MultiFloat{
+		plan.Percentage = &values.MultiFloat{
 			Chart: &values.FloatChart{
 				Bars: []float32{0, 0.3, 0.7},
 			},
@@ -154,34 +154,34 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value:    &values.MultiFloat{},
-					Interval: &interval_10ms,
-					Duration: &duration_50ms,
+					Percentage: &values.MultiFloat{},
+					Interval:   &interval_10ms,
+					Duration:   &duration_50ms,
 				},
 				{
-					Value:    &values.MultiFloat{},
-					Interval: &interval_30ms,
-					Duration: &duration_60ms,
+					Percentage: &values.MultiFloat{},
+					Interval:   &interval_30ms,
+					Duration:   &duration_60ms,
 				},
 				{
-					Value:    &values.MultiFloat{},
-					Interval: &interval_10ms,
-					Duration: &duration_50ms,
+					Percentage: &values.MultiFloat{},
+					Interval:   &interval_10ms,
+					Duration:   &duration_50ms,
 				},
 			},
 		})
 
-		plan.SubPlans[0].Value = &values.MultiFloat{
+		plan.SubPlans[0].Percentage = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
-		plan.SubPlans[1].Value = &values.MultiFloat{
+		plan.SubPlans[1].Percentage = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
-		plan.SubPlans[2].Value = &values.MultiFloat{
+		plan.SubPlans[2].Percentage = &values.MultiFloat{
 			Chart: &values.FloatChart{
 				Bars: []float32{0.2, 0.3, 0.4},
 			},
@@ -220,33 +220,33 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value:    &values.MultiFloat{},
-					Interval: &interval_10ms,
-					Duration: &duration_50ms,
+					Percentage: &values.MultiFloat{},
+					Interval:   &interval_10ms,
+					Duration:   &duration_50ms,
 				},
 				{
-					Value:    &values.MultiFloat{},
-					Interval: &interval_30ms,
-					Duration: &duration_60ms,
+					Percentage: &values.MultiFloat{},
+					Interval:   &interval_30ms,
+					Duration:   &duration_60ms,
 				},
 				{
-					Value:    &values.MultiFloat{},
-					Interval: &interval_10ms,
+					Percentage: &values.MultiFloat{},
+					Interval:   &interval_10ms,
 				},
 			},
 		})
 
-		plan.SubPlans[0].Value = &values.MultiFloat{
+		plan.SubPlans[0].Percentage = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
-		plan.SubPlans[1].Value = &values.MultiFloat{
+		plan.SubPlans[1].Percentage = &values.MultiFloat{
 			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
-		plan.SubPlans[2].Value = &values.MultiFloat{
+		plan.SubPlans[2].Percentage = &values.MultiFloat{
 			Chart: &values.FloatChart{
 				Bars: []float32{0.2, 0.3, 0.4},
 			},

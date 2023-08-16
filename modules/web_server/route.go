@@ -48,7 +48,7 @@ func (route *Route) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the route will always be available.
-	plan.Value = &values.MultiFloat{
+	plan.Percentage = &values.MultiFloat{
 		SingleFloat: values.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},

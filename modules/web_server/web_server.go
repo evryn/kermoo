@@ -125,7 +125,7 @@ func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the webserver will always be available.
-	plan.Value = &values.MultiFloat{
+	plan.Percentage = &values.MultiFloat{
 		SingleFloat: values.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},

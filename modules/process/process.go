@@ -88,7 +88,7 @@ func (p *Process) MakeInlinePlan() *planner.Plan {
 	})
 
 	// Set a dummy value since plan validation requires it
-	plan.Value = &values.MultiFloat{
+	plan.Percentage = &values.MultiFloat{
 		SingleFloat: values.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},

@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetValue(t *testing.T) {
-	t.Run("value is exactly set", func(t *testing.T) {
+	t.Run("percentage is exactly set", func(t *testing.T) {
 		val := float32(42)
 		s := &values.SingleFloat{
 			Exactly: &val,
@@ -19,7 +19,7 @@ func TestGetValue(t *testing.T) {
 		assert.Equal(t, val, got)
 	})
 
-	t.Run("value is a range", func(t *testing.T) {
+	t.Run("percentage is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
 		s := &values.SingleFloat{
@@ -34,7 +34,7 @@ func TestGetValue(t *testing.T) {
 }
 
 func TestToSingleValues(t *testing.T) {
-	t.Run("value is exactly set", func(t *testing.T) {
+	t.Run("percentage is exactly set", func(t *testing.T) {
 		val := float32(42)
 		v := values.MultiFloat{
 			SingleFloat: values.SingleFloat{
@@ -48,7 +48,7 @@ func TestToSingleValues(t *testing.T) {
 		assert.Equal(t, val, *got[0].Exactly)
 	})
 
-	t.Run("value is a chart", func(t *testing.T) {
+	t.Run("percentage is a chart", func(t *testing.T) {
 		bars := []float32{1, 2, 3}
 
 		v := values.MultiFloat{
@@ -63,7 +63,7 @@ func TestToSingleValues(t *testing.T) {
 		}
 	})
 
-	t.Run("value is a range", func(t *testing.T) {
+	t.Run("percentage is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
 		v := values.MultiFloat{

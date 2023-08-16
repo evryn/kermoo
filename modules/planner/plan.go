@@ -11,7 +11,7 @@ import (
 )
 
 type Plan struct {
-	Value                  *values.MultiFloat `json:"value"`
+	Percentage             *values.MultiFloat `json:"percentage"`
 	Size                   *values.MultiSize  `json:"size"`
 	Interval               *values.Duration   `json:"interval"`
 	Duration               *values.Duration   `json:"duration"`
@@ -47,10 +47,10 @@ const (
 
 func (p *Plan) ToSubPlan() SubPlan {
 	return SubPlan{
-		Value:    p.Value,
-		Size:     p.Size,
-		Interval: p.Interval,
-		Duration: p.Duration,
+		Percentage: p.Percentage,
+		Size:       p.Size,
+		Interval:   p.Interval,
+		Duration:   p.Duration,
 	}
 }
 

@@ -18,7 +18,7 @@ func TestCpuEndToEnd(t *testing.T) {
               load:
                 plan:
                   interval: 100ms
-                  value:
+                  percentage:
                     exactly: 0.7
 		`, 3*time.Second)
 
@@ -43,7 +43,7 @@ func TestCpuEndToEnd(t *testing.T) {
             plans:
             - name: spike
               interval: 100ms
-              value:
+              percentage:
                 exactly: 0.7
             cpu:
               load:
