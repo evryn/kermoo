@@ -1,7 +1,7 @@
 package planner
 
 import (
-	"kermoo/modules/common"
+	"kermoo/modules/values"
 	"time"
 )
 
@@ -14,9 +14,9 @@ type ExecutablePlan struct {
 }
 
 type ExecutableValue struct {
-	templateValue common.SingleFloat
-	templateSize  common.SingleSize
-	targetSize    *common.Size
+	templateValue values.SingleFloat
+	templateSize  values.SingleSize
+	targetSize    *values.Size
 	targetValue   *float32
 }
 
@@ -29,7 +29,7 @@ func (v *ExecutableValue) GetValue() float32 {
 	return *v.targetValue
 }
 
-func (v *ExecutableValue) GetSize() common.Size {
+func (v *ExecutableValue) GetSize() values.Size {
 	if v.targetSize == nil {
 		value, _ := v.templateSize.ToSize()
 		v.targetSize = &value
@@ -38,7 +38,7 @@ func (v *ExecutableValue) GetSize() common.Size {
 	return *v.targetSize
 }
 
-func NewExecutableValue(value common.SingleFloat, size common.SingleSize) ExecutableValue {
+func NewExecutableValue(value values.SingleFloat, size values.SingleSize) ExecutableValue {
 	return ExecutableValue{
 		templateValue: value,
 		templateSize:  size,

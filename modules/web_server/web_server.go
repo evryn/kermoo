@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"kermoo/config"
-	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"net/http"
 	"time"
 
@@ -125,8 +125,8 @@ func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
 	plan := planner.InitPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the webserver will always be available.
-	plan.Value = &common.MultiFloat{
-		SingleFloat: common.SingleFloat{
+	plan.Value = &values.MultiFloat{
+		SingleFloat: values.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},
 	}

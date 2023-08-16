@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"kermoo/config"
-	"kermoo/modules/common"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"net/http"
 	"os"
 	"strings"
@@ -48,8 +48,8 @@ func (route *Route) MakeDefaultPlan() *planner.Plan {
 	plan := planner.InitPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the route will always be available.
-	plan.Value = &common.MultiFloat{
-		SingleFloat: common.SingleFloat{
+	plan.Value = &values.MultiFloat{
+		SingleFloat: values.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},
 	}

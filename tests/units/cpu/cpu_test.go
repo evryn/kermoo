@@ -1,12 +1,12 @@
 package cpu_test
 
 import (
-	"kermoo/modules/common"
 	"kermoo/modules/cpu"
 	"kermoo/modules/planner"
+	"kermoo/modules/values"
 	"testing"
 
-	// Replace with the actual package path for common
+	// Replace with the actual package path for values
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -32,8 +32,8 @@ func TestValidate(t *testing.T) {
 
 	t.Run("should return error when plan validation fails", func(t *testing.T) {
 		plan := planner.InitPlan(planner.Plan{})
-		plan.Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1},
 			},
 		}

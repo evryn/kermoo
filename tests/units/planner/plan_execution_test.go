@@ -1,10 +1,10 @@
 package planner_test
 
 import (
-	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
+	"kermoo/modules/values"
 
 	"testing"
 	"time"
@@ -18,10 +18,10 @@ func teardownSubTest(t *testing.T) {
 
 var (
 	name          = "My Plan"
-	interval_10ms = common.Duration(10 * time.Millisecond)
-	interval_30ms = common.Duration(30 * time.Millisecond)
-	duration_50ms = common.Duration(50 * time.Millisecond)
-	duration_60ms = common.Duration(60 * time.Millisecond)
+	interval_10ms = values.Duration(10 * time.Millisecond)
+	interval_30ms = values.Duration(30 * time.Millisecond)
+	duration_50ms = values.Duration(50 * time.Millisecond)
+	duration_60ms = values.Duration(60 * time.Millisecond)
 	float_0_1     = float32(0.1)
 	float_0_5     = float32(0.5)
 	float_0_9     = float32(0.9)
@@ -40,8 +40,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
@@ -72,8 +72,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
@@ -105,8 +105,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &common.MultiFloat{
-			Chart: &common.FloatChart{
+		plan.Value = &values.MultiFloat{
+			Chart: &values.FloatChart{
 				Bars: []float32{0, 0.3, 0.7},
 			},
 		}
@@ -154,35 +154,35 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value:    &common.MultiFloat{},
+					Value:    &values.MultiFloat{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value:    &common.MultiFloat{},
+					Value:    &values.MultiFloat{},
 					Interval: &interval_30ms,
 					Duration: &duration_60ms,
 				},
 				{
-					Value:    &common.MultiFloat{},
+					Value:    &values.MultiFloat{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 			},
 		})
 
-		plan.SubPlans[0].Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.SubPlans[0].Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
-		plan.SubPlans[1].Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.SubPlans[1].Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
-		plan.SubPlans[2].Value = &common.MultiFloat{
-			Chart: &common.FloatChart{
+		plan.SubPlans[2].Value = &values.MultiFloat{
+			Chart: &values.FloatChart{
 				Bars: []float32{0.2, 0.3, 0.4},
 			},
 		}
@@ -220,34 +220,34 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value:    &common.MultiFloat{},
+					Value:    &values.MultiFloat{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value:    &common.MultiFloat{},
+					Value:    &values.MultiFloat{},
 					Interval: &interval_30ms,
 					Duration: &duration_60ms,
 				},
 				{
-					Value:    &common.MultiFloat{},
+					Value:    &values.MultiFloat{},
 					Interval: &interval_10ms,
 				},
 			},
 		})
 
-		plan.SubPlans[0].Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.SubPlans[0].Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
-		plan.SubPlans[1].Value = &common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		plan.SubPlans[1].Value = &values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
-		plan.SubPlans[2].Value = &common.MultiFloat{
-			Chart: &common.FloatChart{
+		plan.SubPlans[2].Value = &values.MultiFloat{
+			Chart: &values.FloatChart{
 				Bars: []float32{0.2, 0.3, 0.4},
 			},
 		}
