@@ -56,23 +56,23 @@ func (u *UserConfigType) GetPreparedConfig() (*PreparedConfigType, error) {
 	for _, ws := range u.WebServers {
 		// Prepare Web Server
 		if err := ws.Validate(); err != nil {
-			return nil, fmt.Errorf("invalid webserver %s: %v", ws.GetUid(), err)
+			return nil, fmt.Errorf("invalid webserver %s: %v", ws.GetName(), err)
 		}
 
 		prepared.WebServers = append(prepared.WebServers, ws)
 
 		if err := prepared.preparePlannable(ws); err != nil {
-			return nil, fmt.Errorf("unable to prepare webserver %s: %v", ws.GetUid(), err)
+			return nil, fmt.Errorf("unable to prepare webserver %s: %v", ws.GetName(), err)
 		}
 
 		for _, route := range ws.Routes {
 			// Prepare Routes
 			if err := route.Validate(); err != nil {
-				return nil, fmt.Errorf("invalid route %s for webserver %s: %v", route.GetUid(), ws.GetUid(), err)
+				return nil, fmt.Errorf("invalid route %s for webserver %s: %v", route.GetName(), ws.GetName(), err)
 			}
 
 			if err := prepared.preparePlannable(route); err != nil {
-				return nil, fmt.Errorf("unable to prepare route %s webserver %s: %v", route.GetUid(), ws.GetUid(), err)
+				return nil, fmt.Errorf("unable to prepare route %s webserver %s: %v", route.GetName(), ws.GetName(), err)
 			}
 		}
 	}

@@ -14,7 +14,7 @@ func TestGetValue(t *testing.T) {
 			Exactly: &val,
 		}
 
-		got, err := s.GetValue()
+		got, err := s.ToFloat()
 		assert.NoError(t, err)
 		assert.Equal(t, val, got)
 	})
@@ -26,7 +26,7 @@ func TestGetValue(t *testing.T) {
 			Between: []float32{min, max},
 		}
 
-		got, err := s.GetValue()
+		got, err := s.ToFloat()
 		assert.NoError(t, err)
 		assert.GreaterOrEqual(t, got, min)
 		assert.LessOrEqual(t, got, max)
@@ -42,7 +42,7 @@ func TestToSingleValues(t *testing.T) {
 			},
 		}
 
-		got, err := v.ToSingleValues()
+		got, err := v.ToSingleFloats()
 		assert.NoError(t, err)
 		assert.Len(t, got, 1)
 		assert.Equal(t, val, *got[0].Exactly)
@@ -55,7 +55,7 @@ func TestToSingleValues(t *testing.T) {
 			Chart: &common.FloatChart{Bars: bars},
 		}
 
-		got, err := v.ToSingleValues()
+		got, err := v.ToSingleFloats()
 		assert.NoError(t, err)
 		assert.Len(t, got, len(bars))
 		for i, bar := range bars {
@@ -72,7 +72,7 @@ func TestToSingleValues(t *testing.T) {
 			},
 		}
 
-		got, err := v.ToSingleValues()
+		got, err := v.ToSingleFloats()
 		assert.NoError(t, err)
 		assert.Len(t, got, 1)
 		assert.Equal(t, min, got[0].Between[0])

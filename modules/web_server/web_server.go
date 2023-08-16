@@ -31,7 +31,7 @@ type WebServer struct {
 	isListening bool
 }
 
-func (ws *WebServer) GetUid() string {
+func (ws *WebServer) GetName() string {
 	return slug.Make(fmt.Sprintf("webserver-%s-%d", ws.GetInterface(), ws.GetPort()))
 }
 
@@ -79,7 +79,7 @@ func (ws *WebServer) ListenOnBackground() error {
 	}
 
 	go func() {
-		logger.Log.Info("listening webserver...", zap.String("webserver", ws.GetUid()))
+		logger.Log.Info("listening webserver...", zap.String("webserver", ws.GetName()))
 
 		ws.isListening = true
 		if err := ws.server.ListenAndServe(); err != nil {
@@ -92,7 +92,7 @@ func (ws *WebServer) ListenOnBackground() error {
 					zap.String("address", ws.server.Addr),
 				)
 			} else {
-				logger.Log.Info("webserver is down", zap.String("webserver", ws.GetUid()), zap.NamedError("reason", err))
+				logger.Log.Info("webserver is down", zap.String("webserver", ws.GetName()), zap.NamedError("reason", err))
 			}
 		}
 	}()
@@ -101,7 +101,7 @@ func (ws *WebServer) ListenOnBackground() error {
 }
 
 func (ws *WebServer) Stop() error {
-	logger.Log.Info("shutting down webserver...", zap.String("webserver", ws.GetUid()))
+	logger.Log.Info("shutting down webserver...", zap.String("webserver", ws.GetName()))
 	if ws.server == nil {
 		return nil
 	}
@@ -112,11 +112,11 @@ func (ws *WebServer) Stop() error {
 	return ws.server.Shutdown(ctx)
 }
 
-func (ws *WebServer) HasCustomPlan() bool {
+func (ws *WebServer) HasInlinePlan() bool {
 	return ws.Fault != nil && ws.Fault.Plan != nil
 }
 
-func (ws *WebServer) MakeCustomPlan() *planner.Plan {
+func (ws *WebServer) MakeInlinePlan() *planner.Plan {
 	return ws.Fault.Plan
 }
 

@@ -10,7 +10,7 @@ type SingleFloat struct {
 	Between []float32 `json:"between"`
 }
 
-func (s *SingleFloat) GetValue() (float32, error) {
+func (s *SingleFloat) ToFloat() (float32, error) {
 	if s.Exactly != nil {
 		return *s.Exactly, nil
 	}
@@ -28,7 +28,7 @@ func (s *SingleFloat) GetValue() (float32, error) {
 		max = t
 	}
 
-	return utils.RandomFloat(min, max), nil
+	return utils.RandomFloatBetween(min, max), nil
 }
 
 func MakeZeroSingleValueF() SingleFloat {

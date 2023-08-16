@@ -11,7 +11,7 @@ type MemoryUtilize struct {
 }
 
 func (mu *MemoryUtilize) Start(bytes int64) {
-	mu.leakedData
+	//mu.leakedData
 }
 
 func (mu *MemoryUtilize) Stop() {

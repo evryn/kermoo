@@ -7,7 +7,7 @@ type MultiFloat struct {
 	Chart *FloatChart `json:"chart"`
 }
 
-func (v MultiFloat) ToSingleValues() ([]SingleFloat, error) {
+func (v MultiFloat) ToSingleFloats() ([]SingleFloat, error) {
 	if v.Exactly != nil {
 		return []SingleFloat{{
 			Exactly: v.Exactly,

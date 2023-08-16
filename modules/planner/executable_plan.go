@@ -22,7 +22,7 @@ type ExecutableValue struct {
 
 func (v *ExecutableValue) GetValue() float32 {
 	if v.targetValue == nil {
-		value, _ := v.templateValue.GetValue()
+		value, _ := v.templateValue.ToFloat()
 		v.targetValue = &value
 	}
 
@@ -31,7 +31,7 @@ func (v *ExecutableValue) GetValue() float32 {
 
 func (v *ExecutableValue) GetSize() common.Size {
 	if v.targetSize == nil {
-		value, _ := v.templateSize.GetSize()
+		value, _ := v.templateSize.ToSize()
 		v.targetSize = &value
 	}
 

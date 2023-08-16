@@ -1,9 +1,9 @@
 package planner
 
 type Plannable interface {
-	GetUid() string
-	HasCustomPlan() bool
-	MakeCustomPlan() *Plan
+	GetName() string
+	HasInlinePlan() bool
+	MakeInlinePlan() *Plan
 	MakeDefaultPlan() *Plan
 	AssignPlan(*Plan)
 	GetDesiredPlanNames() []string

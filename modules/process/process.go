@@ -25,11 +25,11 @@ type ProcessExit struct {
 	Code  uint                  `json:"code"`
 }
 
-func (p *Process) GetUid() string {
+func (p *Process) GetName() string {
 	return "process-manager"
 }
 
-func (p *Process) HasCustomPlan() bool {
+func (p *Process) HasInlinePlan() bool {
 	return p.Exit != nil
 }
 
@@ -39,13 +39,13 @@ func (p Process) GetDesiredPlanNames() []string {
 
 func (p Process) Validate() error {
 	if p.Delay != nil {
-		if _, err := p.Delay.GetValue(); err != nil {
+		if _, err := p.Delay.ToStandardDuration(); err != nil {
 			return fmt.Errorf("unable to get delay duration: %v", err)
 		}
 	}
 
 	if p.Exit != nil {
-		if _, err := p.Exit.After.GetValue(); err != nil {
+		if _, err := p.Exit.After.ToStandardDuration(); err != nil {
 			return fmt.Errorf("unable to get exit duration: %v", err)
 		}
 	}
@@ -75,9 +75,9 @@ func (p *Process) GetPlanCycleHooks() planner.CycleHooks {
 	}
 }
 
-func (p *Process) MakeCustomPlan() *planner.Plan {
-	value, _ := p.Exit.After.GetValue()
-	name := p.GetUid()
+func (p *Process) MakeInlinePlan() *planner.Plan {
+	value, _ := p.Exit.After.ToStandardDuration()
+	name := p.GetName()
 
 	valueDur := common.Duration(value)
 

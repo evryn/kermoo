@@ -10,7 +10,7 @@ type SingleSize struct {
 	Between []Size `json:"between"`
 }
 
-func (s *SingleSize) GetSize() (Size, error) {
+func (s *SingleSize) ToSize() (Size, error) {
 	if s.Exactly != nil {
 		return *s.Exactly, nil
 	}
@@ -28,7 +28,7 @@ func (s *SingleSize) GetSize() (Size, error) {
 		max = t
 	}
 
-	return Size(utils.RandomInt64(min.ToBytes(), max.ToBytes())), nil
+	return Size(utils.RandomIntBetween(min.ToBytes(), max.ToBytes())), nil
 }
 
 func MakeZeroSize() SingleSize {

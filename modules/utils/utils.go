@@ -55,15 +55,15 @@ func GetIpList() []string {
 	return list
 }
 
-func RandomFloat(min float32, max float32) float32 {
+func RandomFloatBetween(min, max float32) float32 {
 	return min + rand.Float32()*(max-min)
 }
 
-func RandomInt64(min, max int64) int64 {
+func RandomIntBetween(min, max int64) int64 {
 	return min + rand.Int63n(max-min+1)
 }
 
-func RandomDuration(min, max time.Duration) (*time.Duration, error) {
+func RandomDurationBetween(min, max time.Duration) (*time.Duration, error) {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
 
