@@ -10,7 +10,7 @@ import (
 func TestGetValue(t *testing.T) {
 	t.Run("value is exactly set", func(t *testing.T) {
 		val := float32(42)
-		s := &common.SingleValueF{
+		s := &common.SingleFloat{
 			Exactly: &val,
 		}
 
@@ -22,7 +22,7 @@ func TestGetValue(t *testing.T) {
 	t.Run("value is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
-		s := &common.SingleValueF{
+		s := &common.SingleFloat{
 			Between: []float32{min, max},
 		}
 
@@ -36,8 +36,8 @@ func TestGetValue(t *testing.T) {
 func TestToSingleValues(t *testing.T) {
 	t.Run("value is exactly set", func(t *testing.T) {
 		val := float32(42)
-		v := common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		v := common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Exactly: &val,
 			},
 		}
@@ -51,8 +51,8 @@ func TestToSingleValues(t *testing.T) {
 	t.Run("value is a chart", func(t *testing.T) {
 		bars := []float32{1, 2, 3}
 
-		v := common.MixedValueF{
-			Chart: &common.Chart{Bars: bars},
+		v := common.MultiFloat{
+			Chart: &common.FloatChart{Bars: bars},
 		}
 
 		got, err := v.ToSingleValues()
@@ -66,8 +66,8 @@ func TestToSingleValues(t *testing.T) {
 	t.Run("value is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
-		v := common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		v := common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Between: []float32{min, max},
 			},
 		}

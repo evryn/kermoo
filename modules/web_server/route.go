@@ -48,8 +48,8 @@ func (route *Route) MakeDefaultPlan() *planner.Plan {
 	plan := planner.InitPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the route will always be available.
-	plan.Value = &common.MixedValueF{
-		SingleValueF: common.SingleValueF{
+	plan.Value = &common.MultiFloat{
+		SingleFloat: common.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},
 	}

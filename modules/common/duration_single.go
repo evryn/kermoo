@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-type SingleValueDur struct {
+type SingleDuration struct {
 	Exactly *Duration  `json:"exactly"`
 	Between []Duration `json:"between"`
 }
 
-func (s *SingleValueDur) GetValue() (time.Duration, error) {
+func (s *SingleDuration) GetValue() (time.Duration, error) {
 
 	if s.Exactly != nil {
 		return time.Duration(*s.Exactly), nil
