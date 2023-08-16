@@ -50,8 +50,8 @@ func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 	}
 
 	for i := 0; i < count; i++ {
-		value := values.MakeZeroSingleValueF()
-		size := values.MakeZeroSize()
+		value := values.NewZeroFloat()
+		size := values.NewZeroSize()
 
 		if len(singleValues) >= i+1 {
 			value = singleValues[i]

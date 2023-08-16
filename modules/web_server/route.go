@@ -16,7 +16,7 @@ import (
 )
 
 type Route struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	Path    string       `json:"path"`
 	Methods []string     `json:"methods"`
 	Content RouteContent `json:"content"`
@@ -45,7 +45,7 @@ func (route *Route) MakeInlinePlan() *planner.Plan {
 
 // Create a lifetime-long plan to serve route
 func (route *Route) MakeDefaultPlan() *planner.Plan {
-	plan := planner.InitPlan(planner.Plan{})
+	plan := planner.NewPlan(planner.Plan{})
 
 	// Value of 1.0 indicates that the route will always be available.
 	plan.Value = &values.MultiFloat{

@@ -9,7 +9,7 @@ import (
 var _ planner.Plannable = &Cpu{}
 
 type Cpu struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	Load CpuLoader `json:"load"`
 }
 

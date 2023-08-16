@@ -34,7 +34,7 @@ func TestSimplePlanExecution(t *testing.T) {
 	t.Run("executes simple plan with static value", func(t *testing.T) {
 		defer teardownSubTest(t)
 
-		plan := planner.InitPlan(planner.Plan{
+		plan := planner.NewPlan(planner.Plan{
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
@@ -66,7 +66,7 @@ func TestSimplePlanExecution(t *testing.T) {
 	t.Run("executes simple plan with minimum and maximum value", func(t *testing.T) {
 		defer teardownSubTest(t)
 
-		plan := planner.InitPlan(planner.Plan{
+		plan := planner.NewPlan(planner.Plan{
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
@@ -99,7 +99,7 @@ func TestSimplePlanExecution(t *testing.T) {
 	t.Run("executes simple plan with chart bar", func(t *testing.T) {
 		defer teardownSubTest(t)
 
-		plan := planner.InitPlan(planner.Plan{
+		plan := planner.NewPlan(planner.Plan{
 			Interval: &interval_10ms,
 			Duration: &duration_50ms,
 			Name:     &name,
@@ -150,7 +150,7 @@ func TestSubPlanExecution(t *testing.T) {
 
 	t.Run("executes sub plan with specific duration", func(t *testing.T) {
 		defer teardownSubTest(t)
-		plan := planner.InitPlan(planner.Plan{
+		plan := planner.NewPlan(planner.Plan{
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
@@ -216,7 +216,7 @@ func TestSubPlanExecution(t *testing.T) {
 
 	t.Run("executes sub plan with inifinit duration", func(t *testing.T) {
 		defer teardownSubTest(t)
-		plan := planner.InitPlan(planner.Plan{
+		plan := planner.NewPlan(planner.Plan{
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{

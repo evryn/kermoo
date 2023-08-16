@@ -31,7 +31,7 @@ func (s *SingleSize) ToSize() (Size, error) {
 	return Size(utils.RandomIntBetween(min.ToBytes(), max.ToBytes())), nil
 }
 
-func MakeZeroSize() SingleSize {
+func NewZeroSize() SingleSize {
 	return SingleSize{
 		Exactly: utils.NewP[Size](0),
 	}

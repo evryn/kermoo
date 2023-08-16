@@ -195,6 +195,6 @@ func (p *Plan) Start() {
 	}
 }
 
-func InitPlan(p Plan) Plan {
+func NewPlan(p Plan) Plan {
 	return p
 }
