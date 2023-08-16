@@ -107,5 +107,5 @@ func TestProcess_MakeCustomPlan(t *testing.T) {
 	assert.Equal(t, "process-manager", *plan.Name)
 	assert.Equal(t, time.Second, time.Duration(*plan.Duration))
 	assert.Equal(t, time.Second, time.Duration(*plan.Interval))
-	assert.Equal(t, float32(1.0), *plan.Value.Exactly)
+	assert.Equal(t, float32(1.0), *plan.Percentage.Exactly)
 }
