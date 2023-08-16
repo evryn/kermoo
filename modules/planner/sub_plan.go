@@ -8,10 +8,10 @@ import (
 )
 
 type SubPlan struct {
-	Value    *common.MixedValueF `json:"value"`
-	Size     *common.MixedSize   `json:"size"`
-	Interval *common.Duration    `json:"interval"`
-	Duration *common.Duration    `json:"duration"`
+	Value    *common.MultiFloat `json:"value"`
+	Size     *common.MultiSize  `json:"size"`
+	Interval *common.Duration   `json:"interval"`
+	Duration *common.Duration   `json:"duration"`
 }
 
 func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
@@ -19,7 +19,7 @@ func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 	var err error
 	var executableValues []*ExecutableValue
 	var singleSizes []common.SingleSize
-	var singleValues []common.SingleValueF
+	var singleValues []common.SingleFloat
 
 	if s.Size != nil {
 		singleSizes, err = s.Size.ToSingleSizes()

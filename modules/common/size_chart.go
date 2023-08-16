@@ -1,5 +1,5 @@
 package common
 
-type ChartSize struct {
+type SizeChart struct {
 	Bars []Size `json:"bars"`
 }

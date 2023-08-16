@@ -40,8 +40,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		plan.Value = &common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
@@ -72,8 +72,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		plan.Value = &common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
@@ -105,8 +105,8 @@ func TestSimplePlanExecution(t *testing.T) {
 			Name:     &name,
 		})
 
-		plan.Value = &common.MixedValueF{
-			Chart: &common.Chart{
+		plan.Value = &common.MultiFloat{
+			Chart: &common.FloatChart{
 				Bars: []float32{0, 0.3, 0.7},
 			},
 		}
@@ -154,35 +154,35 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value:    &common.MixedValueF{},
+					Value:    &common.MultiFloat{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value:    &common.MixedValueF{},
+					Value:    &common.MultiFloat{},
 					Interval: &interval_30ms,
 					Duration: &duration_60ms,
 				},
 				{
-					Value:    &common.MixedValueF{},
+					Value:    &common.MultiFloat{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 			},
 		})
 
-		plan.SubPlans[0].Value = &common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		plan.SubPlans[0].Value = &common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
-		plan.SubPlans[1].Value = &common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		plan.SubPlans[1].Value = &common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
-		plan.SubPlans[2].Value = &common.MixedValueF{
-			Chart: &common.Chart{
+		plan.SubPlans[2].Value = &common.MultiFloat{
+			Chart: &common.FloatChart{
 				Bars: []float32{0.2, 0.3, 0.4},
 			},
 		}
@@ -220,34 +220,34 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Value:    &common.MixedValueF{},
+					Value:    &common.MultiFloat{},
 					Interval: &interval_10ms,
 					Duration: &duration_50ms,
 				},
 				{
-					Value:    &common.MixedValueF{},
+					Value:    &common.MultiFloat{},
 					Interval: &interval_30ms,
 					Duration: &duration_60ms,
 				},
 				{
-					Value:    &common.MixedValueF{},
+					Value:    &common.MultiFloat{},
 					Interval: &interval_10ms,
 				},
 			},
 		})
 
-		plan.SubPlans[0].Value = &common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		plan.SubPlans[0].Value = &common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Exactly: utils.NewP[float32](0.5),
 			},
 		}
-		plan.SubPlans[1].Value = &common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		plan.SubPlans[1].Value = &common.MultiFloat{
+			SingleFloat: common.SingleFloat{
 				Between: []float32{0.1, 0.9},
 			},
 		}
-		plan.SubPlans[2].Value = &common.MixedValueF{
-			Chart: &common.Chart{
+		plan.SubPlans[2].Value = &common.MultiFloat{
+			Chart: &common.FloatChart{
 				Bars: []float32{0.2, 0.3, 0.4},
 			},
 		}

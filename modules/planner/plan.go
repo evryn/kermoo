@@ -11,12 +11,12 @@ import (
 )
 
 type Plan struct {
-	Value                  *common.MixedValueF `json:"value"`
-	Size                   *common.MixedSize   `json:"size"`
-	Interval               *common.Duration    `json:"interval"`
-	Duration               *common.Duration    `json:"duration"`
-	Name                   *string             `json:"name"`
-	SubPlans               []SubPlan           `json:"subPlans"`
+	Value                  *common.MultiFloat `json:"value"`
+	Size                   *common.MultiSize  `json:"size"`
+	Interval               *common.Duration   `json:"interval"`
+	Duration               *common.Duration   `json:"duration"`
+	Name                   *string            `json:"name"`
+	SubPlans               []SubPlan          `json:"subPlans"`
 	plannables             []*Plannable
 	currentExecutableValue *ExecutableValue
 	currentStateByChance   bool

@@ -16,12 +16,12 @@ var _ planner.Plannable = &Process{}
 
 type Process struct {
 	planner.PlannableTrait
-	Delay *common.SingleValueDur `json:"delay"`
+	Delay *common.SingleDuration `json:"delay"`
 	Exit  *ProcessExit           `json:"exit"`
 }
 
 type ProcessExit struct {
-	After common.SingleValueDur `json:"after"`
+	After common.SingleDuration `json:"after"`
 	Code  uint                  `json:"code"`
 }
 
@@ -88,8 +88,8 @@ func (p *Process) MakeCustomPlan() *planner.Plan {
 	})
 
 	// Set a dummy value since plan validation requires it
-	plan.Value = &common.MixedValueF{
-		SingleValueF: common.SingleValueF{
+	plan.Value = &common.MultiFloat{
+		SingleFloat: common.SingleFloat{
 			Exactly: utils.NewP[float32](1.0),
 		},
 	}

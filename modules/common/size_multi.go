@@ -2,12 +2,12 @@ package common
 
 import "fmt"
 
-type MixedSize struct {
+type MultiSize struct {
 	SingleSize
-	Chart *ChartSize `json:"chart"`
+	Chart *SizeChart `json:"chart"`
 }
 
-func (v MixedSize) ToSingleSizes() ([]SingleSize, error) {
+func (v MultiSize) ToSingleSizes() ([]SingleSize, error) {
 	if v.Exactly != nil {
 		return []SingleSize{{
 			Exactly: v.Exactly,

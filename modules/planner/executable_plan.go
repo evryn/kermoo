@@ -14,7 +14,7 @@ type ExecutablePlan struct {
 }
 
 type ExecutableValue struct {
-	templateValue common.SingleValueF
+	templateValue common.SingleFloat
 	templateSize  common.SingleSize
 	targetSize    *common.Size
 	targetValue   *float32
@@ -38,7 +38,7 @@ func (v *ExecutableValue) GetSize() common.Size {
 	return *v.targetSize
 }
 
-func NewExecutableValue(value common.SingleValueF, size common.SingleSize) ExecutableValue {
+func NewExecutableValue(value common.SingleFloat, size common.SingleSize) ExecutableValue {
 	return ExecutableValue{
 		templateValue: value,
 		templateSize:  size,

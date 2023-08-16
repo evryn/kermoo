@@ -27,7 +27,7 @@ func TestProcess_Validate(t *testing.T) {
 		{
 			name: "valid with delay",
 			process: process.Process{
-				Delay: &common.SingleValueDur{
+				Delay: &common.SingleDuration{
 					Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
 				},
 				Exit: nil,
@@ -39,7 +39,7 @@ func TestProcess_Validate(t *testing.T) {
 			process: process.Process{
 				Delay: nil,
 				Exit: &process.ProcessExit{
-					After: common.SingleValueDur{
+					After: common.SingleDuration{
 						Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
 					},
 				},
@@ -49,7 +49,7 @@ func TestProcess_Validate(t *testing.T) {
 		{
 			name: "invalid with bad delay duration (between with single value)",
 			process: process.Process{
-				Delay: &common.SingleValueDur{
+				Delay: &common.SingleDuration{
 					Between: []common.Duration{common.Duration(time.Second)},
 				},
 				Exit: nil,
@@ -61,7 +61,7 @@ func TestProcess_Validate(t *testing.T) {
 			process: process.Process{
 				Delay: nil,
 				Exit: &process.ProcessExit{
-					After: common.SingleValueDur{
+					After: common.SingleDuration{
 						Between: []common.Duration{common.Duration(time.Second)},
 					},
 					Code: 0,
@@ -74,7 +74,7 @@ func TestProcess_Validate(t *testing.T) {
 			process: process.Process{
 				Delay: nil,
 				Exit: &process.ProcessExit{
-					After: common.SingleValueDur{},
+					After: common.SingleDuration{},
 					Code:  0,
 				},
 			},
@@ -96,7 +96,7 @@ func TestProcess_MakeCustomPlan(t *testing.T) {
 	process := process.Process{
 		Delay: nil,
 		Exit: &process.ProcessExit{
-			After: common.SingleValueDur{
+			After: common.SingleDuration{
 				Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
 			},
 		},
