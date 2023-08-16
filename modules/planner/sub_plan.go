@@ -3,23 +3,23 @@ package planner
 import (
 	"fmt"
 	"kermoo/config"
-	"kermoo/modules/common"
+	"kermoo/modules/values"
 	"time"
 )
 
 type SubPlan struct {
-	Value    *common.MultiFloat `json:"value"`
-	Size     *common.MultiSize  `json:"size"`
-	Interval *common.Duration   `json:"interval"`
-	Duration *common.Duration   `json:"duration"`
+	Value    *values.MultiFloat `json:"value"`
+	Size     *values.MultiSize  `json:"size"`
+	Interval *values.Duration   `json:"interval"`
+	Duration *values.Duration   `json:"duration"`
 }
 
 func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 	count := 0
 	var err error
 	var executableValues []*ExecutableValue
-	var singleSizes []common.SingleSize
-	var singleValues []common.SingleFloat
+	var singleSizes []values.SingleSize
+	var singleValues []values.SingleFloat
 
 	if s.Size != nil {
 		singleSizes, err = s.Size.ToSingleSizes()
@@ -50,8 +50,8 @@ func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 	}
 
 	for i := 0; i < count; i++ {
-		value := common.MakeZeroSingleValueF()
-		size := common.MakeZeroSize()
+		value := values.MakeZeroSingleValueF()
+		size := values.MakeZeroSize()
 
 		if len(singleValues) >= i+1 {
 			value = singleValues[i]

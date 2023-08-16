@@ -1,24 +1,24 @@
-package common
+package values
 
 import "fmt"
 
-type MultiSize struct {
-	SingleSize
-	Chart *SizeChart `json:"chart"`
+type MultiFloat struct {
+	SingleFloat
+	Chart *FloatChart `json:"chart"`
 }
 
-func (v MultiSize) ToSingleSizes() ([]SingleSize, error) {
+func (v MultiFloat) ToSingleFloats() ([]SingleFloat, error) {
 	if v.Exactly != nil {
-		return []SingleSize{{
+		return []SingleFloat{{
 			Exactly: v.Exactly,
 		}}, nil
 	}
 
 	if v.Chart != nil && len(v.Chart.Bars) > 0 {
-		var sv []SingleSize
+		var sv []SingleFloat
 
 		for i := range v.Chart.Bars {
-			sv = append(sv, SingleSize{
+			sv = append(sv, SingleFloat{
 				Exactly: &v.Chart.Bars[i],
 			})
 		}
@@ -27,8 +27,8 @@ func (v MultiSize) ToSingleSizes() ([]SingleSize, error) {
 	}
 
 	if len(v.Between) == 2 {
-		return []SingleSize{{
-			Between: []Size{v.Between[0], v.Between[1]},
+		return []SingleFloat{{
+			Between: []float32{v.Between[0], v.Between[1]},
 		}}, nil
 	}
 

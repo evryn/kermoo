@@ -1,7 +1,7 @@
-package common_test
+package values_test
 
 import (
-	"kermoo/modules/common"
+	"kermoo/modules/values"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,7 +10,7 @@ import (
 func TestGetValue(t *testing.T) {
 	t.Run("value is exactly set", func(t *testing.T) {
 		val := float32(42)
-		s := &common.SingleFloat{
+		s := &values.SingleFloat{
 			Exactly: &val,
 		}
 
@@ -22,7 +22,7 @@ func TestGetValue(t *testing.T) {
 	t.Run("value is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
-		s := &common.SingleFloat{
+		s := &values.SingleFloat{
 			Between: []float32{min, max},
 		}
 
@@ -36,8 +36,8 @@ func TestGetValue(t *testing.T) {
 func TestToSingleValues(t *testing.T) {
 	t.Run("value is exactly set", func(t *testing.T) {
 		val := float32(42)
-		v := common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		v := values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Exactly: &val,
 			},
 		}
@@ -51,8 +51,8 @@ func TestToSingleValues(t *testing.T) {
 	t.Run("value is a chart", func(t *testing.T) {
 		bars := []float32{1, 2, 3}
 
-		v := common.MultiFloat{
-			Chart: &common.FloatChart{Bars: bars},
+		v := values.MultiFloat{
+			Chart: &values.FloatChart{Bars: bars},
 		}
 
 		got, err := v.ToSingleFloats()
@@ -66,8 +66,8 @@ func TestToSingleValues(t *testing.T) {
 	t.Run("value is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
-		v := common.MultiFloat{
-			SingleFloat: common.SingleFloat{
+		v := values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Between: []float32{min, max},
 			},
 		}

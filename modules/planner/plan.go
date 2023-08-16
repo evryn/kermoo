@@ -2,19 +2,19 @@ package planner
 
 import (
 	"fmt"
-	"kermoo/modules/common"
 	"kermoo/modules/logger"
 	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"time"
 
 	"go.uber.org/zap"
 )
 
 type Plan struct {
-	Value                  *common.MultiFloat `json:"value"`
-	Size                   *common.MultiSize  `json:"size"`
-	Interval               *common.Duration   `json:"interval"`
-	Duration               *common.Duration   `json:"duration"`
+	Value                  *values.MultiFloat `json:"value"`
+	Size                   *values.MultiSize  `json:"size"`
+	Interval               *values.Duration   `json:"interval"`
+	Duration               *values.Duration   `json:"duration"`
 	Name                   *string            `json:"name"`
 	SubPlans               []SubPlan          `json:"subPlans"`
 	plannables             []*Plannable
