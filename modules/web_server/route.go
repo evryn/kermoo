@@ -23,7 +23,7 @@ type Route struct {
 	Fault   *RouteFault  `json:"fault"`
 }
 
-func (route *Route) GetUid() string {
+func (route *Route) GetName() string {
 	return slug.Make(fmt.Sprintf("route-%s", route.Path))
 }
 
@@ -35,11 +35,11 @@ func (route *Route) GetDesiredPlanNames() []string {
 	return route.Fault.PlanRefs
 }
 
-func (route *Route) HasCustomPlan() bool {
+func (route *Route) HasInlinePlan() bool {
 	return route.Fault != nil && route.Fault.Plan != nil
 }
 
-func (route *Route) MakeCustomPlan() *planner.Plan {
+func (route *Route) MakeInlinePlan() *planner.Plan {
 	return route.Fault.Plan
 }
 

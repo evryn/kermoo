@@ -34,7 +34,7 @@ func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 	}
 
 	if s.Value != nil {
-		singleValues, err = s.Value.ToSingleValues()
+		singleValues, err = s.Value.ToSingleFloats()
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert value to single values: %v", err)

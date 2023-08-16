@@ -102,7 +102,7 @@ func TestProcess_MakeCustomPlan(t *testing.T) {
 		},
 	}
 
-	plan := process.MakeCustomPlan()
+	plan := process.MakeInlinePlan()
 
 	assert.Equal(t, "process-manager", *plan.Name)
 	assert.Equal(t, time.Second, time.Duration(*plan.Duration))

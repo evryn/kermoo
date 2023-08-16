@@ -116,7 +116,7 @@ func (p *Plan) Start() {
 		plannableNames := []string{}
 		for _, pl := range p.plannables {
 			plr := *pl
-			plannableNames = append(plannableNames, plr.GetUid())
+			plannableNames = append(plannableNames, plr.GetName())
 		}
 		logger.Log.Debug("executing plan...", zap.String("name", *p.Name), zap.Any("plan", *p), zap.Any("plannables", plannableNames))
 	}
@@ -157,7 +157,7 @@ func (p *Plan) Start() {
 						})
 
 						if value == PLAN_SIGNAL_TERMINATE {
-							logger.Log.Info("terminating plan by signal", zap.String("plan", *p.Name), zap.String("cause", plannable.GetUid()))
+							logger.Log.Info("terminating plan by signal", zap.String("plan", *p.Name), zap.String("cause", plannable.GetName()))
 							return
 						}
 					}
@@ -180,7 +180,7 @@ func (p *Plan) Start() {
 						})
 
 						if value == PLAN_SIGNAL_TERMINATE {
-							logger.Log.Info("terminating plan by signal", zap.String("plan", *p.Name), zap.String("cause", plannable.GetUid()))
+							logger.Log.Info("terminating plan by signal", zap.String("plan", *p.Name), zap.String("cause", plannable.GetName()))
 							return
 						}
 					}

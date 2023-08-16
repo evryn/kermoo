@@ -13,11 +13,11 @@ type Cpu struct {
 	Utilize CpuUtilize `json:"utilize"`
 }
 
-func (c *Cpu) GetUid() string {
+func (c *Cpu) GetName() string {
 	return "cpu-manager"
 }
 
-func (c *Cpu) HasCustomPlan() bool {
+func (c *Cpu) HasInlinePlan() bool {
 	return c.Utilize.Plan != nil
 }
 
@@ -60,7 +60,7 @@ func (c *Cpu) GetPlanCycleHooks() planner.CycleHooks {
 	}
 }
 
-func (c *Cpu) MakeCustomPlan() *planner.Plan {
+func (c *Cpu) MakeInlinePlan() *planner.Plan {
 	return c.Utilize.Plan
 }
 

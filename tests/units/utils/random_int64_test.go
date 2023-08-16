@@ -19,7 +19,7 @@ func TestRandomInt64(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := utils.RandomInt64(tt.min, tt.max)
+		got := utils.RandomIntBetween(tt.min, tt.max)
 		assert.GreaterOrEqual(t, tt.max, got)
 		assert.LessOrEqual(t, tt.min, got)
 	}

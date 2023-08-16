@@ -50,7 +50,7 @@ func TestValidate(t *testing.T) {
 
 func TestGetUid(t *testing.T) {
 	c := &cpu.Cpu{}
-	assert.Equal(t, "cpu-manager", c.GetUid())
+	assert.Equal(t, "cpu-manager", c.GetName())
 }
 
 func TestHasCustomPlan(t *testing.T) {
@@ -60,12 +60,12 @@ func TestHasCustomPlan(t *testing.T) {
 				Plan: &planner.Plan{},
 			},
 		}
-		assert.True(t, c.HasCustomPlan())
+		assert.True(t, c.HasInlinePlan())
 	})
 
 	t.Run("without custom plan", func(t *testing.T) {
 		c := &cpu.Cpu{}
-		assert.False(t, c.HasCustomPlan())
+		assert.False(t, c.HasInlinePlan())
 	})
 }
 
@@ -86,7 +86,7 @@ func TestMakeCustomPlan(t *testing.T) {
 			Plan: plan,
 		},
 	}
-	assert.Equal(t, plan, c.MakeCustomPlan())
+	assert.Equal(t, plan, c.MakeInlinePlan())
 }
 
 func TestMakeDefaultPlan(t *testing.T) {

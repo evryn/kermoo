@@ -57,7 +57,7 @@ func (r *PlanRecorder) AssertTotalTimeSpent(t *testing.T, expectedDuration time.
 	)
 }
 
-func (r *PlanRecorder) GetUid() string {
+func (r *PlanRecorder) GetName() string {
 	return "recorder"
 }
 
@@ -65,11 +65,11 @@ func (r *PlanRecorder) GetDesiredPlanNames() []string {
 	return nil
 }
 
-func (r *PlanRecorder) HasCustomPlan() bool {
+func (r *PlanRecorder) HasInlinePlan() bool {
 	return false
 }
 
-func (r *PlanRecorder) MakeCustomPlan() *planner.Plan {
+func (r *PlanRecorder) MakeInlinePlan() *planner.Plan {
 	return nil
 }
 
