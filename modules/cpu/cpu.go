@@ -45,7 +45,8 @@ func (c Cpu) Validate() error {
 
 func (c *Cpu) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		c.Load.Start(c.GetAssignedPlans()[0].GetCurrentValue().GetValue())
+		percentage, _ := c.GetAssignedPlans()[0].GetCurrentValue().Percentage.ToFloat()
+		c.Load.Start(percentage)
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 

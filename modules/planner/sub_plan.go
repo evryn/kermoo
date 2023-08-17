@@ -3,8 +3,12 @@ package planner
 import (
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/logger"
+	"kermoo/modules/utils"
 	"kermoo/modules/values"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type SubPlan struct {
@@ -12,12 +16,29 @@ type SubPlan struct {
 	Size       *values.MultiSize  `json:"size"`
 	Interval   *values.Duration   `json:"interval"`
 	Duration   *values.Duration   `json:"duration"`
+
+	cycleValues  []CycleValue
+	relatedPlan  *Plan
+	totalCycles  uint64
+	currentCycle uint64
 }
 
-func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
+type CycleValue struct {
+	Percentage               values.SingleFloat
+	Size                     values.SingleSize
+	ComputedPercentageChance *bool
+}
+
+func (cv *CycleValue) ComputeStaticValues() {
+	value, _ := cv.Percentage.ToFloat()
+	computedPercentageChance := utils.IsSuccessByChance(value)
+	cv.ComputedPercentageChance = &computedPercentageChance
+}
+
+func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
 	count := 0
 	var err error
-	var executableValues []*ExecutableValue
+	var cycleValues []CycleValue
 	var singleSizes []values.SingleSize
 	var singleValues []values.SingleFloat
 
@@ -50,51 +71,139 @@ func (s *SubPlan) BuildExecutableValues() ([]*ExecutableValue, error) {
 	}
 
 	for i := 0; i < count; i++ {
-		value := values.NewZeroFloat()
+		percentage := values.NewZeroFloat()
 		size := values.NewZeroSize()
 
 		if len(singleValues) >= i+1 {
-			value = singleValues[i]
+			percentage = singleValues[i]
 		}
 
 		if len(singleSizes) >= i+1 {
 			size = singleSizes[i]
 		}
 
-		ev := NewExecutableValue(value, size)
-		executableValues = append(executableValues, &ev)
+		cycleValues = append(cycleValues, CycleValue{
+			Percentage: percentage,
+			Size:       size,
+		})
 	}
 
-	return executableValues, nil
+	return cycleValues, nil
 }
 
-func (s *SubPlan) ToExecutablePlan() (*ExecutablePlan, error) {
-	interval := config.Default.Planner.Interval
+func (s *SubPlan) getInterval() time.Duration {
+	if s.Interval != nil {
+		return time.Duration(*s.Interval)
+	}
 
-	executableValues, err := s.BuildExecutableValues()
+	return config.Default.Planner.Interval
+}
+
+func (s *SubPlan) computeRequiredCycles() uint64 {
+	dur := time.Duration(*s.Duration)
+	return uint64(dur.Nanoseconds() / s.getInterval().Nanoseconds())
+}
+
+func (s *SubPlan) SetPlan(plan *Plan) {
+	s.relatedPlan = plan
+}
+
+// Prepare makes the sub plan ready for execution
+func (s *SubPlan) Prepare() error {
+	var err error
+
+	if !s.isEndless() {
+		s.totalCycles = s.computeRequiredCycles()
+	}
+	s.cycleValues, err = s.computeCycleValues()
 
 	if err != nil {
-		return nil, fmt.Errorf("error building executable values: %v", err)
+		return err
 	}
 
-	if s.Interval != nil {
-		interval = time.Duration(*s.Interval)
+	return nil
+}
+
+func (s *SubPlan) Execute() {
+	for {
+		for _, cycleValue := range s.cycleValues {
+			if !s.NextCycle() {
+				return
+			}
+
+			startedAt := time.Now()
+
+			cycleValue.ComputeStaticValues()
+			s.relatedPlan.SetCurrentValue(cycleValue)
+
+			logger.Log.Info("executing preSleep hooks...", zap.String("plan", *s.relatedPlan.Name))
+			if !s.RunPlannableHooks(startedAt, cycleValue, "preSleep") {
+				logger.Log.Info("terminating plan by signal", zap.String("plan", *s.relatedPlan.Name))
+				return
+			}
+
+			time.Sleep(s.getInterval())
+
+			logger.Log.Info("executing postSleep hooks...", zap.String("plan", *s.relatedPlan.Name))
+			if !s.RunPlannableHooks(startedAt, cycleValue, "postSleep") {
+				logger.Log.Info("terminating plan by signal", zap.String("plan", *s.relatedPlan.Name))
+				return
+			}
+
+			if s.getInterval() == 0 {
+				logger.Log.Info("pausing plan due to zero interval", zap.String("plan", *s.relatedPlan.Name))
+				return
+			}
+		}
+	}
+}
+
+func (s *SubPlan) Validate() error {
+	return s.Prepare()
+}
+
+func (s *SubPlan) isEndless() bool {
+	return s.Duration == nil
+}
+
+func (s *SubPlan) NextCycle() bool {
+	if s.isEndless() {
+		return true
 	}
 
-	ep := ExecutablePlan{
-		Values:       executableValues,
-		Interval:     time.Duration(interval),
-		CurrentTries: 0,
-		TotalTries:   0,
-		IsForever:    false,
+	if s.currentCycle >= s.totalCycles {
+		return false
 	}
 
-	if s.Duration == nil {
-		ep.IsForever = true
-	} else {
-		dur := time.Duration(*s.Duration)
-		ep.TotalTries = uint64(dur.Nanoseconds() / interval.Nanoseconds())
+	s.currentCycle++
+
+	return true
+}
+
+func (s *SubPlan) RunPlannableHooks(startedAt time.Time, cv CycleValue, hookType string) bool {
+	for _, pl := range s.relatedPlan.plannables {
+		plannable := *pl
+
+		var hook *HookFunc
+		if hookType == "preSleep" {
+			hook = plannable.GetPlanCycleHooks().PreSleep
+		} else {
+			hook = plannable.GetPlanCycleHooks().PostSleep
+		}
+
+		if hook != nil {
+			executable := *hook
+			value := executable(Cycle{
+				Value:     cv,
+				StartedAt: startedAt,
+				TimeSpent: time.Since(startedAt),
+			})
+
+			if value == PLAN_SIGNAL_TERMINATE {
+				return false
+			}
+		}
 	}
 
-	return &ep, nil
+	return true
 }

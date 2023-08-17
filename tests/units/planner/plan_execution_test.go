@@ -54,12 +54,12 @@ func TestSimplePlanExecution(t *testing.T) {
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
-		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
+		Recorder.AssertCycleValues(t, []planner.CycleValue{
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
 		})
 	})
 
@@ -87,12 +87,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		// Assert that it took around 50ms (with 2ms error)
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
-		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
+		Recorder.AssertCycleValues(t, []planner.CycleValue{
+			NewCycleValue(0.1, 0.9, 0, 0),
+			NewCycleValue(0.1, 0.9, 0, 0),
+			NewCycleValue(0.1, 0.9, 0, 0),
+			NewCycleValue(0.1, 0.9, 0, 0),
+			NewCycleValue(0.1, 0.9, 0, 0),
 		})
 	})
 
@@ -119,12 +119,12 @@ func TestSimplePlanExecution(t *testing.T) {
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
-		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
-			{Static: 0},
-			{Static: 0.3},
-			{Static: 0.7},
-			{Static: 0},
-			{Static: 0.3},
+		Recorder.AssertCycleValues(t, []planner.CycleValue{
+			NewCycleValue(0, 0, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
+			NewCycleValue(0.7, 0.7, 0, 0),
+			NewCycleValue(0, 0, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
 		})
 	})
 
@@ -198,19 +198,21 @@ func TestSubPlanExecution(t *testing.T) {
 			acceptedError,
 		)
 
-		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{Static: 0.2},
-			{Static: 0.3},
-			{Static: 0.4},
-			{Static: 0.2},
-			{Static: 0.3},
+		Recorder.AssertCycleValues(t, []planner.CycleValue{
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+
+			NewCycleValue(0.1, 0.9, 0, 0),
+			NewCycleValue(0.1, 0.9, 0, 0),
+
+			NewCycleValue(0.2, 0.2, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
+			NewCycleValue(0.4, 0.4, 0, 0),
+			NewCycleValue(0.2, 0.2, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
 		})
 	})
 
@@ -270,28 +272,33 @@ func TestSubPlanExecution(t *testing.T) {
 			acceptedError,
 		)
 
-		Recorder.AssertExpectedValues(t, []ExpectedExecutionValue{
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{Static: 0.5},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{IsBetween: true, Minimum: 0.1, Maximum: 0.9},
-			{Static: 0.2},
-			{Static: 0.3},
-			{Static: 0.4},
-			{Static: 0.2},
-			{Static: 0.3},
-			{Static: 0.4},
-			{Static: 0.2},
-			{Static: 0.3},
-			{Static: 0.4},
-			{Static: 0.2},
-			{Static: 0.3},
-			{Static: 0.4},
-			{Static: 0.2},
-		})
+		Recorder.AssertCycleValues(t, []planner.CycleValue{
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
+			NewCycleValue(0.5, 0.5, 0, 0),
 
+			NewCycleValue(0.1, 0.9, 0, 0),
+			NewCycleValue(0.1, 0.9, 0, 0),
+
+			NewCycleValue(0.2, 0.2, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
+			NewCycleValue(0.4, 0.4, 0, 0),
+
+			NewCycleValue(0.2, 0.2, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
+			NewCycleValue(0.4, 0.4, 0, 0),
+
+			NewCycleValue(0.2, 0.2, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
+			NewCycleValue(0.4, 0.4, 0, 0),
+
+			NewCycleValue(0.2, 0.2, 0, 0),
+			NewCycleValue(0.3, 0.3, 0, 0),
+			NewCycleValue(0.4, 0.4, 0, 0),
+
+			NewCycleValue(0.2, 0.2, 0, 0),
+		})
 	})
 }

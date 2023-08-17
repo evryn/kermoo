@@ -31,6 +31,18 @@ func (s *SingleFloat) ToFloat() (float32, error) {
 	return utils.RandomFloatBetween(min, max), nil
 }
 
+func (s *SingleFloat) ToFloatRange() (float32, float32, error) {
+	if s.Exactly != nil {
+		return *s.Exactly, *s.Exactly, nil
+	}
+
+	if len(s.Between) != 2 {
+		return 0, 0, fmt.Errorf("value of `between` needs to have exactly two element as range")
+	}
+
+	return s.Between[0], s.Between[1], nil
+}
+
 func NewZeroFloat() SingleFloat {
 	return SingleFloat{
 		Exactly: utils.NewP[float32](0),

@@ -72,7 +72,7 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 		shouldSuccess := true
 
 		for _, plan := range route.GetAssignedPlans() {
-			if !plan.GetCurrentStateByChance() {
+			if !*plan.GetCurrentValue().ComputedPercentageChance {
 				shouldSuccess = false
 				break
 			}
