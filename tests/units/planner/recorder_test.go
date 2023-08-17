@@ -2,6 +2,7 @@ package planner_test
 
 import (
 	"kermoo/modules/planner"
+	"kermoo/modules/values"
 	"testing"
 	"time"
 
@@ -12,40 +13,28 @@ import (
 type PlanRecorder struct {
 	planner.CanAssignPlan
 	TotalTimeSpent time.Duration
-	Executions     []Execution
+	Cycles         []planner.Cycle
 	ExecutaionCap  int
 }
 
-type Execution struct {
-	TimeSpent time.Duration
-	Cycles    planner.Cycle
-}
-
-type ExpectedExecutionValue struct {
-	Static    float32
-	Minimum   float32
-	Maximum   float32
-	IsBetween bool
-}
-
 func (r *PlanRecorder) Reset() {
-	r.Executions = []Execution{}
+	r.Cycles = []planner.Cycle{}
 	r.TotalTimeSpent = 0
 }
 
-func (r *PlanRecorder) AssertExpectedValues(t *testing.T, expectedValues []ExpectedExecutionValue) {
-	require.Len(t, r.Executions, len(expectedValues))
+func (r *PlanRecorder) AssertCycleValues(t *testing.T, expectedCycleValues []planner.CycleValue) {
+	require.Len(t, r.Cycles, len(expectedCycleValues))
 
-	for i, ev := range expectedValues {
-		v := r.Executions[i].Cycles.ExecutableValue
+	for i, ev := range expectedCycleValues {
+		actualPercentage, _ := r.Cycles[i].Value.Percentage.ToFloat()
+		minPercentage, maxPercentage, _ := ev.Percentage.ToFloatRange()
+		assert.GreaterOrEqual(t, maxPercentage, actualPercentage)
+		assert.LessOrEqual(t, minPercentage, actualPercentage)
 
-		if ev.IsBetween {
-			assert.GreaterOrEqual(t, v.GetValue(), ev.Minimum)
-			assert.LessOrEqual(t, v.GetValue(), ev.Maximum)
-			assert.Equal(t, v.GetValue(), v.GetValue(), "Ranged values should always get similar result which is determined by the first attempt to retrieve the value.")
-		} else {
-			assert.Equal(t, ev.Static, v.GetValue())
-		}
+		actualSize, _ := r.Cycles[i].Value.Size.ToSize()
+		minSize, maxSize, _ := ev.Size.ToSizeRange()
+		assert.GreaterOrEqual(t, maxSize, actualSize)
+		assert.LessOrEqual(t, minSize, actualSize)
 	}
 }
 
@@ -79,18 +68,16 @@ func (r *PlanRecorder) MakeDefaultPlan() *planner.Plan {
 
 func (r *PlanRecorder) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		r.Executions = append(r.Executions, Execution{
-			Cycles: cycle,
-		})
+		r.Cycles = append(r.Cycles, cycle)
 
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 
 	postSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		r.Executions[len(r.Executions)-1].TimeSpent = cycle.TimeSpent
+		r.Cycles[len(r.Cycles)-1].TimeSpent = cycle.TimeSpent
 		r.TotalTimeSpent += cycle.TimeSpent
 
-		if r.ExecutaionCap != 0 && len(r.Executions) == r.ExecutaionCap {
+		if r.ExecutaionCap != 0 && len(r.Cycles) == r.ExecutaionCap {
 			return planner.PLAN_SIGNAL_TERMINATE
 		}
 
@@ -100,6 +87,17 @@ func (r *PlanRecorder) GetPlanCycleHooks() planner.CycleHooks {
 	return planner.CycleHooks{
 		PreSleep:  &preSleep,
 		PostSleep: &postSleep,
+	}
+}
+
+func NewCycleValue(minPercentage, maxPercentage float32, minSize, maxSize values.Size) planner.CycleValue {
+	return planner.CycleValue{
+		Percentage: values.SingleFloat{
+			Between: []float32{minPercentage, maxPercentage},
+		},
+		Size: values.SingleSize{
+			Between: []values.Size{minSize, maxSize},
+		},
 	}
 }
 

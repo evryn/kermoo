@@ -147,7 +147,7 @@ func (ws *WebServer) GetPlanCycleHooks() planner.CycleHooks {
 		shouldListen := true
 
 		for _, plan := range ws.GetAssignedPlans() {
-			if !plan.GetCurrentStateByChance() {
+			if !*plan.GetCurrentValue().ComputedPercentageChance {
 				shouldListen = false
 				break
 			}
