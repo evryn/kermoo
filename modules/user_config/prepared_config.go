@@ -84,17 +84,25 @@ func (u *PreparedConfigType) findPlan(name string) *planner.Plan {
 	return nil
 }
 
-func (pc *PreparedConfigType) Validate() error {
+func (pc *PreparedConfigType) validateDuplicateApps() error {
 	dups := pc.findDuplicateApps()
 	if len(dups) > 0 {
 		return fmt.Errorf("there are duplicate sub-apps: %s", strings.Join(dups, ", "))
 	}
 
-	dups = pc.findDuplicatePlans()
+	return nil
+}
+
+func (pc *PreparedConfigType) validateDuplicatePlans() error {
+	dups := pc.findDuplicatePlans()
 	if len(dups) > 0 {
 		return fmt.Errorf("there are duplicate plans: %s", strings.Join(dups, ", "))
 	}
 
+	return nil
+}
+
+func (pc *PreparedConfigType) validatePlans() error {
 	for _, plan := range pc.Plans {
 		err := plan.Validate()
 		if err != nil {
@@ -102,16 +110,34 @@ func (pc *PreparedConfigType) Validate() error {
 		}
 	}
 
+	return nil
+}
+
+func (pc *PreparedConfigType) validateProcess() error {
+	if pc.Process == nil {
+		return nil
+	}
+
 	if err := pc.Process.Validate(); err != nil {
 		return fmt.Errorf("process manager is invalid: %v", err)
 	}
 
-	if pc.Cpu != nil {
-		if err := pc.Cpu.Validate(); err != nil {
-			return fmt.Errorf("cpu manager is invalid: %v", err)
-		}
+	return nil
+}
+
+func (pc *PreparedConfigType) validateCpu() error {
+	if pc.Cpu == nil {
+		return nil
 	}
 
+	if err := pc.Cpu.Validate(); err != nil {
+		return fmt.Errorf("cpu manager is invalid: %v", err)
+	}
+
+	return nil
+}
+
+func (pc *PreparedConfigType) validateWebservers() error {
 	for _, webServer := range pc.WebServers {
 		err := webServer.Validate()
 		if err != nil {
@@ -125,6 +151,34 @@ func (pc *PreparedConfigType) Validate() error {
 				return fmt.Errorf("route %s is invalid for webserver %s: %v", route.Path, webServer.GetName(), err)
 			}
 		}
+	}
+
+	return nil
+}
+
+func (pc *PreparedConfigType) Validate() error {
+	if err := pc.validateDuplicateApps(); err != nil {
+		return err
+	}
+
+	if err := pc.validateDuplicatePlans(); err != nil {
+		return err
+	}
+
+	if err := pc.validatePlans(); err != nil {
+		return err
+	}
+
+	if err := pc.validateProcess(); err != nil {
+		return err
+	}
+
+	if err := pc.validateCpu(); err != nil {
+		return err
+	}
+
+	if err := pc.validateWebservers(); err != nil {
+		return err
 	}
 
 	return nil

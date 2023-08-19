@@ -142,16 +142,22 @@ func (ws *WebServer) GetDesiredPlanNames() []string {
 	return ws.Fault.PlanRefs
 }
 
+func (ws *WebServer) getPlanPercentageChance() bool {
+	shouldListen := true
+
+	for _, plan := range ws.GetAssignedPlans() {
+		if !*plan.GetCurrentValue().ComputedPercentageChance {
+			shouldListen = false
+			break
+		}
+	}
+
+	return shouldListen
+}
+
 func (ws *WebServer) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		shouldListen := true
-
-		for _, plan := range ws.GetAssignedPlans() {
-			if !*plan.GetCurrentValue().ComputedPercentageChance {
-				shouldListen = false
-				break
-			}
-		}
+		shouldListen := ws.getPlanPercentageChance()
 
 		if shouldListen && !ws.isListening {
 			if err := ws.ListenOnBackground(); err != nil {

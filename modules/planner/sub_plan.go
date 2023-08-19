@@ -35,12 +35,9 @@ func (cv *CycleValue) ComputeStaticValues() {
 	cv.ComputedPercentageChance = &computedPercentageChance
 }
 
-func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
-	count := 0
+func (s *SubPlan) getSingleSizes() ([]values.SingleSize, error) {
 	var err error
-	var cycleValues []CycleValue
 	var singleSizes []values.SingleSize
-	var singleValues []values.SingleFloat
 
 	if s.Size != nil {
 		singleSizes, err = s.Size.ToSingleSizes()
@@ -48,25 +45,51 @@ func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert size to single values: %v", err)
 		}
-
-		if len(singleSizes) > count {
-			count = len(singleSizes)
-		}
 	}
 
+	return singleSizes, nil
+}
+
+func (s *SubPlan) getSinglePercentages() ([]values.SingleFloat, error) {
+	var err error
+	var singlePercentages []values.SingleFloat
+
 	if s.Percentage != nil {
-		singleValues, err = s.Percentage.ToSingleFloats()
+		singlePercentages, err = s.Percentage.ToSingleFloats()
 
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert value to single values: %v", err)
 		}
-
-		if len(singleValues) > count {
-			count = len(singleValues)
-		}
 	}
 
-	if len(singleSizes) > 0 && len(singleValues) > 0 && len(singleSizes) != len(singleValues) {
+	return singlePercentages, nil
+}
+
+func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
+	count := 0
+	var cycleValues []CycleValue
+
+	singleSizes, err := s.getSingleSizes()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert size to single values: %v", err)
+	}
+
+	if len(singleSizes) > count {
+		count = len(singleSizes)
+	}
+
+	singlePercentages, err := s.getSinglePercentages()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert value to single values: %v", err)
+	}
+
+	if len(singlePercentages) > count {
+		count = len(singlePercentages)
+	}
+
+	if len(singleSizes) > 0 && len(singlePercentages) > 0 && len(singleSizes) != len(singlePercentages) {
 		return nil, fmt.Errorf("both size and values are set while the count of individual steps does not match together")
 	}
 
@@ -74,8 +97,8 @@ func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
 		percentage := values.NewZeroFloat()
 		size := values.NewZeroSize()
 
-		if len(singleValues) >= i+1 {
-			percentage = singleValues[i]
+		if len(singlePercentages) >= i+1 {
+			percentage = singlePercentages[i]
 		}
 
 		if len(singleSizes) >= i+1 {
