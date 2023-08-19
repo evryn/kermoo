@@ -9,6 +9,7 @@ import (
 	"math/rand"
 
 	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/mem"
 	"gopkg.in/yaml.v3"
 )
 
@@ -160,4 +161,14 @@ func GetCpuUsage(duration time.Duration) (float32, error) {
 	}
 
 	return float32(percentages[0]) / 100.0, nil
+}
+
+func GetMemoryUsage() (uint64, error) {
+	vmem, err := mem.VirtualMemory()
+
+	if err != nil {
+		return 0, nil
+	}
+
+	return uint64(vmem.Used), nil
 }
