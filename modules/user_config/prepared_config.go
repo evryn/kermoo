@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kermoo/modules/cpu"
 	"kermoo/modules/logger"
+	"kermoo/modules/memory"
 	"kermoo/modules/planner"
 	"kermoo/modules/process"
 	"kermoo/modules/utils"
@@ -20,6 +21,7 @@ type PreparedConfigType struct {
 	SchemaVersion string
 	Process       *process.Process
 	Cpu           *cpu.Cpu
+	Memory        *memory.Memory
 	Plans         []*planner.Plan
 	WebServers    []*web_server.WebServer
 }
@@ -137,6 +139,18 @@ func (pc *PreparedConfigType) validateCpu() error {
 	return nil
 }
 
+func (pc *PreparedConfigType) validateMemory() error {
+	if pc.Memory == nil {
+		return nil
+	}
+
+	if err := pc.Memory.Leak.Validate(); err != nil {
+		return fmt.Errorf("memory leaker is invalid: %v", err)
+	}
+
+	return nil
+}
+
 func (pc *PreparedConfigType) validateWebservers() error {
 	for _, webServer := range pc.WebServers {
 		err := webServer.Validate()
@@ -174,6 +188,10 @@ func (pc *PreparedConfigType) Validate() error {
 	}
 
 	if err := pc.validateCpu(); err != nil {
+		return err
+	}
+
+	if err := pc.validateMemory(); err != nil {
 		return err
 	}
 
