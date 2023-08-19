@@ -1,9 +1,9 @@
 package process_test
 
 import (
-	"kermoo/modules/common"
 	"kermoo/modules/process"
 	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"testing"
 	"time"
 
@@ -27,8 +27,8 @@ func TestProcess_Validate(t *testing.T) {
 		{
 			name: "valid with delay",
 			process: process.Process{
-				Delay: &common.SingleValueDur{
-					Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
+				Delay: &values.SingleDuration{
+					Exactly: utils.NewP[values.Duration](values.Duration(time.Second)),
 				},
 				Exit: nil,
 			},
@@ -39,8 +39,8 @@ func TestProcess_Validate(t *testing.T) {
 			process: process.Process{
 				Delay: nil,
 				Exit: &process.ProcessExit{
-					After: common.SingleValueDur{
-						Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
+					After: values.SingleDuration{
+						Exactly: utils.NewP[values.Duration](values.Duration(time.Second)),
 					},
 				},
 			},
@@ -49,8 +49,8 @@ func TestProcess_Validate(t *testing.T) {
 		{
 			name: "invalid with bad delay duration (between with single value)",
 			process: process.Process{
-				Delay: &common.SingleValueDur{
-					Between: []common.Duration{common.Duration(time.Second)},
+				Delay: &values.SingleDuration{
+					Between: []values.Duration{values.Duration(time.Second)},
 				},
 				Exit: nil,
 			},
@@ -61,8 +61,8 @@ func TestProcess_Validate(t *testing.T) {
 			process: process.Process{
 				Delay: nil,
 				Exit: &process.ProcessExit{
-					After: common.SingleValueDur{
-						Between: []common.Duration{common.Duration(time.Second)},
+					After: values.SingleDuration{
+						Between: []values.Duration{values.Duration(time.Second)},
 					},
 					Code: 0,
 				},
@@ -74,7 +74,7 @@ func TestProcess_Validate(t *testing.T) {
 			process: process.Process{
 				Delay: nil,
 				Exit: &process.ProcessExit{
-					After: common.SingleValueDur{},
+					After: values.SingleDuration{},
 					Code:  0,
 				},
 			},
@@ -96,16 +96,16 @@ func TestProcess_MakeCustomPlan(t *testing.T) {
 	process := process.Process{
 		Delay: nil,
 		Exit: &process.ProcessExit{
-			After: common.SingleValueDur{
-				Exactly: utils.NewP[common.Duration](common.Duration(time.Second)),
+			After: values.SingleDuration{
+				Exactly: utils.NewP[values.Duration](values.Duration(time.Second)),
 			},
 		},
 	}
 
-	plan := process.MakeCustomPlan()
+	plan := process.MakeInlinePlan()
 
 	assert.Equal(t, "process-manager", *plan.Name)
 	assert.Equal(t, time.Second, time.Duration(*plan.Duration))
 	assert.Equal(t, time.Second, time.Duration(*plan.Interval))
-	assert.Equal(t, float32(1.0), *plan.Value.Exactly)
+	assert.Equal(t, float32(1.0), *plan.Percentage.Exactly)
 }

@@ -8,6 +8,7 @@ import (
 
 	"math/rand"
 
+	"github.com/shirou/gopsutil/cpu"
 	"gopkg.in/yaml.v3"
 )
 
@@ -54,11 +55,15 @@ func GetIpList() []string {
 	return list
 }
 
-func RandomFloat(min float32, max float32) float32 {
+func RandomFloatBetween(min, max float32) float32 {
 	return min + rand.Float32()*(max-min)
 }
 
-func RandomDuration(min, max time.Duration) (*time.Duration, error) {
+func RandomIntBetween(min, max int64) int64 {
+	return min + rand.Int63n(max-min+1)
+}
+
+func RandomDurationBetween(min, max time.Duration) (*time.Duration, error) {
 	s := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(s)
 
@@ -145,4 +150,14 @@ func IsSuccessByChance(chance float32) bool {
 
 func NewP[T any](value T) *T {
 	return &value
+}
+
+func GetCpuUsage(duration time.Duration) (float32, error) {
+	percentages, err := cpu.Percent(duration, false)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return float32(percentages[0]) / 100.0, nil
 }

@@ -1,8 +1,8 @@
 package web_server
 
 import (
-	"kermoo/modules/common"
 	"kermoo/modules/planner"
+	"kermoo/modules/values"
 	"math/rand"
 	"net/http"
 )
@@ -10,7 +10,7 @@ import (
 type RouteFault struct {
 	Plan          *planner.Plan   `json:"plan"`
 	PlanRefs      []string        `json:"planRefs"`
-	ResponseDelay common.Duration `json:"responseDelay"`
+	ResponseDelay values.Duration `json:"responseDelay"`
 	ClientErrors  *bool           `json:"clientErrors"`
 	ServerErrors  *bool           `json:"serverErrors"`
 }

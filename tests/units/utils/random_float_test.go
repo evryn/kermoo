@@ -32,13 +32,13 @@ func TestRandomFloat(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := utils.RandomFloat(testCase.min, testCase.max)
+			result := utils.RandomFloatBetween(testCase.min, testCase.max)
 
 			assert.GreaterOrEqual(t, testCase.max, result)
 			assert.LessOrEqual(t, testCase.min, result)
 
 			if testCase.max != testCase.min {
-				result2 := utils.RandomFloat(testCase.min, testCase.max)
+				result2 := utils.RandomFloatBetween(testCase.min, testCase.max)
 				assert.NotEqual(t, result, result2, "random generator must return different value on each call")
 			}
 		})

@@ -41,7 +41,7 @@ func TestRandomDuration(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result, err := utils.RandomDuration(testCase.min, testCase.max)
+			result, err := utils.RandomDurationBetween(testCase.min, testCase.max)
 
 			if testCase.hasError {
 				assert.Error(t, err)
@@ -50,7 +50,7 @@ func TestRandomDuration(t *testing.T) {
 				assert.GreaterOrEqual(t, testCase.max, *result)
 				assert.LessOrEqual(t, testCase.min, *result)
 
-				result2, _ := utils.RandomDuration(testCase.min, testCase.max)
+				result2, _ := utils.RandomDurationBetween(testCase.min, testCase.max)
 				assert.NotEqual(t, *result, *result2, "random value are supposed to be different on each call.")
 			}
 		})

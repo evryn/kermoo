@@ -1,32 +1,32 @@
-package common_test
+package values_test
 
 import (
-	"kermoo/modules/common"
+	"kermoo/modules/values"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetValue(t *testing.T) {
-	t.Run("value is exactly set", func(t *testing.T) {
+	t.Run("percentage is exactly set", func(t *testing.T) {
 		val := float32(42)
-		s := &common.SingleValueF{
+		s := &values.SingleFloat{
 			Exactly: &val,
 		}
 
-		got, err := s.GetValue()
+		got, err := s.ToFloat()
 		assert.NoError(t, err)
 		assert.Equal(t, val, got)
 	})
 
-	t.Run("value is a range", func(t *testing.T) {
+	t.Run("percentage is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
-		s := &common.SingleValueF{
+		s := &values.SingleFloat{
 			Between: []float32{min, max},
 		}
 
-		got, err := s.GetValue()
+		got, err := s.ToFloat()
 		assert.NoError(t, err)
 		assert.GreaterOrEqual(t, got, min)
 		assert.LessOrEqual(t, got, max)
@@ -34,28 +34,28 @@ func TestGetValue(t *testing.T) {
 }
 
 func TestToSingleValues(t *testing.T) {
-	t.Run("value is exactly set", func(t *testing.T) {
+	t.Run("percentage is exactly set", func(t *testing.T) {
 		val := float32(42)
-		v := common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		v := values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Exactly: &val,
 			},
 		}
 
-		got, err := v.ToSingleValues()
+		got, err := v.ToSingleFloats()
 		assert.NoError(t, err)
 		assert.Len(t, got, 1)
 		assert.Equal(t, val, *got[0].Exactly)
 	})
 
-	t.Run("value is a chart", func(t *testing.T) {
+	t.Run("percentage is a chart", func(t *testing.T) {
 		bars := []float32{1, 2, 3}
 
-		v := common.MixedValueF{
-			Chart: &common.Chart{Bars: bars},
+		v := values.MultiFloat{
+			Chart: &values.FloatChart{Bars: bars},
 		}
 
-		got, err := v.ToSingleValues()
+		got, err := v.ToSingleFloats()
 		assert.NoError(t, err)
 		assert.Len(t, got, len(bars))
 		for i, bar := range bars {
@@ -63,16 +63,16 @@ func TestToSingleValues(t *testing.T) {
 		}
 	})
 
-	t.Run("value is a range", func(t *testing.T) {
+	t.Run("percentage is a range", func(t *testing.T) {
 		min := float32(10)
 		max := float32(20)
-		v := common.MixedValueF{
-			SingleValueF: common.SingleValueF{
+		v := values.MultiFloat{
+			SingleFloat: values.SingleFloat{
 				Between: []float32{min, max},
 			},
 		}
 
-		got, err := v.ToSingleValues()
+		got, err := v.ToSingleFloats()
 		assert.NoError(t, err)
 		assert.Len(t, got, 1)
 		assert.Equal(t, min, got[0].Between[0])

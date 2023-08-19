@@ -104,7 +104,7 @@ func TestWebserverEndToEnd(t *testing.T) {
               fault:
                 plan:
                   interval: 100ms
-                  value:
+                  percentage:
                     exactly: 0.5
 		`, 3*time.Second)
 
@@ -128,7 +128,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: disaster
               interval: 100ms
-              value:
+              percentage:
                 exactly: 0.5
             webServers:
             - port: 8080
@@ -161,15 +161,15 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: disaster
               subPlans:
-              - value:
+              - percentage:
                   exactly: 0
                 interval: 20ms
                 duration: 1s
-              - value:
+              - percentage:
                   between: [1, 1]
                 interval: 20ms
                 duration: 1s
-              - value:
+              - percentage:
                   chart:
                     bars: [0.5, 0.4, 1]
                 interval: 20ms
@@ -222,7 +222,7 @@ func TestWebserverEndToEnd(t *testing.T) {
                 fault:
                   plan:
                     interval: 100ms
-                    value:
+                    percentage:
                         exactly: 0.5
 		`, 3*time.Second)
 
@@ -249,7 +249,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: readiness
               interval: 100ms
-              value:
+              percentage:
                 exactly: 0.6
             webServers:
             - port: 8080

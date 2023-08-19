@@ -1,23 +1,23 @@
 package planner
 
 type Plannable interface {
-	GetUid() string
-	HasCustomPlan() bool
-	MakeCustomPlan() *Plan
+	GetName() string
+	HasInlinePlan() bool
+	MakeInlinePlan() *Plan
 	MakeDefaultPlan() *Plan
 	AssignPlan(*Plan)
 	GetDesiredPlanNames() []string
 	GetPlanCycleHooks() CycleHooks
 }
 
-type PlannableTrait struct {
+type CanAssignPlan struct {
 	assignedPlans []*Plan
 }
 
-func (p *PlannableTrait) AssignPlan(plan *Plan) {
+func (p *CanAssignPlan) AssignPlan(plan *Plan) {
 	p.assignedPlans = append(p.assignedPlans, plan)
 }
 
-func (p *PlannableTrait) GetAssignedPlans() []*Plan {
+func (p *CanAssignPlan) GetAssignedPlans() []*Plan {
 	return p.assignedPlans
 }

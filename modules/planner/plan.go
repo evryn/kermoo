@@ -1,32 +1,30 @@
 package planner
 
 import (
-	"kermoo/modules/common"
+	"fmt"
 	"kermoo/modules/logger"
-	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"time"
 
 	"go.uber.org/zap"
 )
 
 type Plan struct {
-	Value                  *common.MixedValueF `json:"value"`
-	Interval               *common.Duration    `json:"interval"`
-	Duration               *common.Duration    `json:"duration"`
-	Name                   *string             `json:"name"`
-	SubPlans               []SubPlan           `json:"subPlans"`
-	plannables             []*Plannable
-	currentExecutableValue *ExecutableValue
-	currentStateByChance   bool
-	isDedicated            bool
-	executablePlans        []*ExecutablePlan
+	Percentage        *values.MultiFloat `json:"percentage"`
+	Size              *values.MultiSize  `json:"size"`
+	Interval          *values.Duration   `json:"interval"`
+	Duration          *values.Duration   `json:"duration"`
+	Name              *string            `json:"name"`
+	SubPlans          []SubPlan          `json:"subPlans"`
+	plannables        []*Plannable
+	currentCycleValue *CycleValue
+	isDedicated       bool
 }
 
 type Cycle struct {
-	ExecutablePlan  *ExecutablePlan
-	ExecutableValue *ExecutableValue
-	StartedAt       time.Time
-	TimeSpent       time.Duration
+	Value     CycleValue
+	StartedAt time.Time
+	TimeSpent time.Duration
 }
 
 type HookFunc func(cycle Cycle) PlanSignal
@@ -45,9 +43,10 @@ const (
 
 func (p *Plan) ToSubPlan() SubPlan {
 	return SubPlan{
-		Value:    p.Value,
-		Interval: p.Interval,
-		Duration: p.Duration,
+		Percentage: p.Percentage,
+		Size:       p.Size,
+		Interval:   p.Interval,
+		Duration:   p.Duration,
 	}
 }
 
@@ -60,50 +59,49 @@ func (p *Plan) MakePrivate() {
 	p.isDedicated = true
 }
 
-func (p *Plan) GetExecutablePlans() ([]*ExecutablePlan, error) {
-	if len(p.SubPlans) == 0 {
-		subPlan := p.ToSubPlan()
-		executablePlan, err := subPlan.ToExecutablePlan()
-
-		if err != nil {
-			return nil, err
-		}
-
-		return []*ExecutablePlan{executablePlan}, nil
-	}
-
-	// If the plans has SubPlans, generate coresponding executable SubPlans
-	var ep = []*ExecutablePlan{}
-
-	for _, sp := range p.SubPlans {
-		executablePlan, err := sp.ToExecutablePlan()
-
-		if err != nil {
-			return nil, err
-		}
-
-		ep = append(ep, executablePlan)
-	}
-
-	return ep, nil
-}
-
 func (p *Plan) Validate() error {
-	_, err := p.GetExecutablePlans()
+	_, err := p.GetPreparedSubPlans()
 
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to prepare sub-plans: %v", err)
 	}
 
 	return nil
 }
 
-func (p *Plan) GetCurrentValue() *ExecutableValue {
-	return p.currentExecutableValue
+func (p *Plan) GetCurrentValue() *CycleValue {
+	return p.currentCycleValue
 }
 
-func (p *Plan) GetCurrentStateByChance() bool {
-	return p.currentStateByChance
+func (p *Plan) SetCurrentValue(cv CycleValue) {
+	p.currentCycleValue = &cv
+}
+
+func (p *Plan) GetPreparedSubPlans() ([]*SubPlan, error) {
+	subPlans := []*SubPlan{}
+
+	if len(p.SubPlans) == 0 {
+		subPlans = append(subPlans, &SubPlan{
+			Percentage: p.Percentage,
+			Size:       p.Size,
+			Interval:   p.Interval,
+			Duration:   p.Duration,
+		})
+	} else {
+		for i := 0; i < len(p.SubPlans); i++ {
+			subPlans = append(subPlans, &p.SubPlans[i])
+		}
+	}
+
+	for _, subPlan := range subPlans {
+		subPlan.SetPlan(p)
+		if err := subPlan.Prepare(); err != nil {
+			return nil, err
+		}
+
+	}
+
+	return subPlans, nil
 }
 
 func (p *Plan) Start() {
@@ -113,87 +111,18 @@ func (p *Plan) Start() {
 		plannableNames := []string{}
 		for _, pl := range p.plannables {
 			plr := *pl
-			plannableNames = append(plannableNames, plr.GetUid())
+			plannableNames = append(plannableNames, plr.GetName())
 		}
 		logger.Log.Debug("executing plan...", zap.String("name", *p.Name), zap.Any("plan", *p), zap.Any("plannables", plannableNames))
 	}
 
-	if len(p.executablePlans) == 0 {
-		executablePlans, _ := p.GetExecutablePlans()
+	subPlans, _ := p.GetPreparedSubPlans()
 
-		p.executablePlans = executablePlans
-	}
-
-	for _, ep := range p.executablePlans {
-		for ep.IsForever || ep.CurrentTries <= ep.TotalTries {
-			for _, ev := range ep.Values {
-				p.currentExecutableValue = ev
-				p.currentStateByChance = utils.IsSuccessByChance(ev.GetValue())
-				startedAt := time.Now()
-
-				logger.Log.Info("executing pre-sleep hooks...", zap.String("plan", *p.Name), zap.Float32("value", ev.GetValue()), zap.Bool("success_by_chance", p.GetCurrentStateByChance()))
-
-				if !ep.IsForever {
-					ep.CurrentTries++
-
-					if ep.CurrentTries > ep.TotalTries {
-						break
-					}
-				}
-
-				for _, p := range p.plannables {
-					plannable := *p
-					hook := plannable.GetPlanCycleHooks().PreSleep
-					if hook != nil {
-						executable := *hook
-						value := executable(Cycle{
-							ExecutablePlan:  ep,
-							ExecutableValue: ev,
-							StartedAt:       startedAt,
-							TimeSpent:       time.Since(startedAt),
-						})
-
-						if value == PLAN_SIGNAL_TERMINATE {
-							return
-						}
-					}
-				}
-
-				time.Sleep(ep.Interval)
-
-				logger.Log.Info("executing post-sleep hooks...", zap.String("plan", *p.Name))
-
-				for _, p := range p.plannables {
-					plannable := *p
-					hook := plannable.GetPlanCycleHooks().PostSleep
-					if hook != nil {
-						executable := *hook
-						value := executable(Cycle{
-							ExecutablePlan:  ep,
-							ExecutableValue: ev,
-							StartedAt:       startedAt,
-							TimeSpent:       time.Since(startedAt),
-						})
-
-						if value == PLAN_SIGNAL_TERMINATE {
-							return
-						}
-					}
-				}
-
-				if ep.Interval == 0 {
-					logger.Log.Info("pausing plan due to zero interval", zap.String("plan", *p.Name))
-					return
-				}
-			}
-		}
+	for _, subPlan := range subPlans {
+		subPlan.Execute()
 	}
 }
 
-func InitPlan(p Plan) Plan {
-	if p.Value == nil {
-		p.Value = &common.MixedValueF{}
-	}
-
+func NewPlan(p Plan) Plan {
 	return p
 }

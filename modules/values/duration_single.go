@@ -1,4 +1,4 @@
-package common
+package values
 
 import (
 	"fmt"
@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-type SingleValueDur struct {
+type SingleDuration struct {
 	Exactly *Duration  `json:"exactly"`
 	Between []Duration `json:"between"`
 }
 
-func (s *SingleValueDur) GetValue() (time.Duration, error) {
+func (s *SingleDuration) ToStandardDuration() (time.Duration, error) {
 
 	if s.Exactly != nil {
 		return time.Duration(*s.Exactly), nil
@@ -30,7 +30,7 @@ func (s *SingleValueDur) GetValue() (time.Duration, error) {
 		max = t
 	}
 
-	dur, err := utils.RandomDuration(min, max)
+	dur, err := utils.RandomDurationBetween(min, max)
 
 	if err != nil {
 		return 0, err

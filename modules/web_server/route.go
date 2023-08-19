@@ -6,6 +6,7 @@ import (
 	"kermoo/config"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"net/http"
 	"os"
 	"strings"
@@ -15,14 +16,14 @@ import (
 )
 
 type Route struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	Path    string       `json:"path"`
 	Methods []string     `json:"methods"`
 	Content RouteContent `json:"content"`
 	Fault   *RouteFault  `json:"fault"`
 }
 
-func (route *Route) GetUid() string {
+func (route *Route) GetName() string {
 	return slug.Make(fmt.Sprintf("route-%s", route.Path))
 }
 
@@ -34,22 +35,24 @@ func (route *Route) GetDesiredPlanNames() []string {
 	return route.Fault.PlanRefs
 }
 
-func (route *Route) HasCustomPlan() bool {
+func (route *Route) HasInlinePlan() bool {
 	return route.Fault != nil && route.Fault.Plan != nil
 }
 
-func (route *Route) MakeCustomPlan() *planner.Plan {
+func (route *Route) MakeInlinePlan() *planner.Plan {
 	return route.Fault.Plan
 }
 
 // Create a lifetime-long plan to serve route
 func (route *Route) MakeDefaultPlan() *planner.Plan {
-	// Value of 1.0 indicates that the route will always
-	// be available.
-	value := float32(1.0)
+	plan := planner.NewPlan(planner.Plan{})
 
-	plan := planner.InitPlan(planner.Plan{})
-	plan.Value.Exactly = &value
+	// Value of 1.0 indicates that the route will always be available.
+	plan.Percentage = &values.MultiFloat{
+		SingleFloat: values.SingleFloat{
+			Exactly: utils.NewP[float32](1.0),
+		},
+	}
 
 	return &plan
 }
@@ -69,7 +72,7 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 		shouldSuccess := true
 
 		for _, plan := range route.GetAssignedPlans() {
-			if !plan.GetCurrentStateByChance() {
+			if !*plan.GetCurrentValue().ComputedPercentageChance {
 				shouldSuccess = false
 				break
 			}

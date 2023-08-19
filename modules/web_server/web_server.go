@@ -6,6 +6,8 @@ import (
 	"kermoo/config"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
+	"kermoo/modules/utils"
+	"kermoo/modules/values"
 	"net/http"
 	"time"
 
@@ -20,7 +22,7 @@ type WebServerFault struct {
 }
 
 type WebServer struct {
-	planner.PlannableTrait
+	planner.CanAssignPlan
 	Routes      []*Route        `json:"routes"`
 	Interface   *string         `json:"interface"`
 	Port        *int32          `json:"port"`
@@ -29,7 +31,7 @@ type WebServer struct {
 	isListening bool
 }
 
-func (ws *WebServer) GetUid() string {
+func (ws *WebServer) GetName() string {
 	return slug.Make(fmt.Sprintf("webserver-%s-%d", ws.GetInterface(), ws.GetPort()))
 }
 
@@ -77,7 +79,7 @@ func (ws *WebServer) ListenOnBackground() error {
 	}
 
 	go func() {
-		logger.Log.Info("listening webserver...", zap.String("webserver", ws.GetUid()))
+		logger.Log.Info("listening webserver...", zap.String("webserver", ws.GetName()))
 
 		ws.isListening = true
 		if err := ws.server.ListenAndServe(); err != nil {
@@ -90,7 +92,7 @@ func (ws *WebServer) ListenOnBackground() error {
 					zap.String("address", ws.server.Addr),
 				)
 			} else {
-				logger.Log.Info("webserver is down", zap.String("webserver", ws.GetUid()), zap.NamedError("reason", err))
+				logger.Log.Info("webserver is down", zap.String("webserver", ws.GetName()), zap.NamedError("reason", err))
 			}
 		}
 	}()
@@ -99,7 +101,7 @@ func (ws *WebServer) ListenOnBackground() error {
 }
 
 func (ws *WebServer) Stop() error {
-	logger.Log.Info("shutting down webserver...", zap.String("webserver", ws.GetUid()))
+	logger.Log.Info("shutting down webserver...", zap.String("webserver", ws.GetName()))
 	if ws.server == nil {
 		return nil
 	}
@@ -110,22 +112,24 @@ func (ws *WebServer) Stop() error {
 	return ws.server.Shutdown(ctx)
 }
 
-func (ws *WebServer) HasCustomPlan() bool {
+func (ws *WebServer) HasInlinePlan() bool {
 	return ws.Fault != nil && ws.Fault.Plan != nil
 }
 
-func (ws *WebServer) MakeCustomPlan() *planner.Plan {
+func (ws *WebServer) MakeInlinePlan() *planner.Plan {
 	return ws.Fault.Plan
 }
 
 // Create a lifetime-long plan to serve webserver
 func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
-	// Value of 1.0 indicates that the webserver will always
-	// be available.
-	value := float32(1.0)
+	plan := planner.NewPlan(planner.Plan{})
 
-	plan := planner.InitPlan(planner.Plan{})
-	plan.Value.Exactly = &value
+	// Value of 1.0 indicates that the webserver will always be available.
+	plan.Percentage = &values.MultiFloat{
+		SingleFloat: values.SingleFloat{
+			Exactly: utils.NewP[float32](1.0),
+		},
+	}
 
 	return &plan
 }
@@ -138,16 +142,22 @@ func (ws *WebServer) GetDesiredPlanNames() []string {
 	return ws.Fault.PlanRefs
 }
 
+func (ws *WebServer) getPlanPercentageChance() bool {
+	shouldListen := true
+
+	for _, plan := range ws.GetAssignedPlans() {
+		if !*plan.GetCurrentValue().ComputedPercentageChance {
+			shouldListen = false
+			break
+		}
+	}
+
+	return shouldListen
+}
+
 func (ws *WebServer) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		shouldListen := true
-
-		for _, plan := range ws.GetAssignedPlans() {
-			if !plan.GetCurrentStateByChance() {
-				shouldListen = false
-				break
-			}
-		}
+		shouldListen := ws.getPlanPercentageChance()
 
 		if shouldListen && !ws.isListening {
 			if err := ws.ListenOnBackground(); err != nil {

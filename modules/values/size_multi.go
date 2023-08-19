@@ -1,24 +1,24 @@
-package common
+package values
 
 import "fmt"
 
-type MixedValueF struct {
-	SingleValueF
-	Chart *Chart `json:"chart"`
+type MultiSize struct {
+	SingleSize
+	Chart *SizeChart `json:"chart"`
 }
 
-func (v MixedValueF) ToSingleValues() ([]SingleValueF, error) {
+func (v MultiSize) ToSingleSizes() ([]SingleSize, error) {
 	if v.Exactly != nil {
-		return []SingleValueF{{
+		return []SingleSize{{
 			Exactly: v.Exactly,
 		}}, nil
 	}
 
 	if v.Chart != nil && len(v.Chart.Bars) > 0 {
-		var sv []SingleValueF
+		var sv []SingleSize
 
 		for i := range v.Chart.Bars {
-			sv = append(sv, SingleValueF{
+			sv = append(sv, SingleSize{
 				Exactly: &v.Chart.Bars[i],
 			})
 		}
@@ -27,8 +27,8 @@ func (v MixedValueF) ToSingleValues() ([]SingleValueF, error) {
 	}
 
 	if len(v.Between) == 2 {
-		return []SingleValueF{{
-			Between: []float32{v.Between[0], v.Between[1]},
+		return []SingleSize{{
+			Between: []Size{v.Between[0], v.Between[1]},
 		}}, nil
 	}
 

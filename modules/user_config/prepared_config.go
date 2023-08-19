@@ -2,6 +2,7 @@ package user_config
 
 import (
 	"fmt"
+	"kermoo/modules/cpu"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
 	"kermoo/modules/process"
@@ -18,13 +19,14 @@ var Prepared PreparedConfigType
 type PreparedConfigType struct {
 	SchemaVersion string
 	Process       *process.Process
+	Cpu           *cpu.Cpu
 	Plans         []*planner.Plan
 	WebServers    []*web_server.WebServer
 }
 
 func (pc *PreparedConfigType) Start() {
 	if pc.Process != nil && pc.Process.Delay != nil {
-		dur, _ := pc.Process.Delay.GetValue()
+		dur, _ := pc.Process.Delay.ToStandardDuration()
 		logger.Log.Info("sleeping because of process manager configuration...", zap.Duration("sleep", dur))
 		time.Sleep(dur)
 		logger.Log.Info("woke up.")
@@ -39,11 +41,11 @@ func (u *PreparedConfigType) preparePlannable(plannable planner.Plannable) error
 	desiredPlans := plannable.GetDesiredPlanNames()
 
 	if len(desiredPlans) == 0 {
-		planName := plannable.GetUid()
+		planName := plannable.GetName()
 		var dedicatedPlan *planner.Plan
 
-		if plannable.HasCustomPlan() {
-			dedicatedPlan = plannable.MakeCustomPlan()
+		if plannable.HasInlinePlan() {
+			dedicatedPlan = plannable.MakeInlinePlan()
 			planName += "-custom-plan"
 		} else {
 			dedicatedPlan = plannable.MakeDefaultPlan()
@@ -57,13 +59,13 @@ func (u *PreparedConfigType) preparePlannable(plannable planner.Plannable) error
 		desiredPlans = append(desiredPlans, planName)
 	}
 
-	logger.Log.Debug("preparing plannable", zap.String("plannable", plannable.GetUid()), zap.Any("desired_plans", desiredPlans))
+	logger.Log.Debug("preparing plannable", zap.String("plannable", plannable.GetName()), zap.Any("desired_plans", desiredPlans))
 
 	for _, planName := range desiredPlans {
 		desiredPlan := u.findPlan(planName)
 
 		if desiredPlan == nil {
-			return fmt.Errorf("plan %s not found for sub-app %s", planName, plannable.GetUid())
+			return fmt.Errorf("plan %s not found for sub-app %s", planName, plannable.GetName())
 		}
 
 		desiredPlan.Assign(plannable)
@@ -82,17 +84,25 @@ func (u *PreparedConfigType) findPlan(name string) *planner.Plan {
 	return nil
 }
 
-func (pc *PreparedConfigType) Validate() error {
+func (pc *PreparedConfigType) validateDuplicateApps() error {
 	dups := pc.findDuplicateApps()
 	if len(dups) > 0 {
 		return fmt.Errorf("there are duplicate sub-apps: %s", strings.Join(dups, ", "))
 	}
 
-	dups = pc.findDuplicatePlans()
+	return nil
+}
+
+func (pc *PreparedConfigType) validateDuplicatePlans() error {
+	dups := pc.findDuplicatePlans()
 	if len(dups) > 0 {
 		return fmt.Errorf("there are duplicate plans: %s", strings.Join(dups, ", "))
 	}
 
+	return nil
+}
+
+func (pc *PreparedConfigType) validatePlans() error {
 	for _, plan := range pc.Plans {
 		err := plan.Validate()
 		if err != nil {
@@ -100,21 +110,45 @@ func (pc *PreparedConfigType) Validate() error {
 		}
 	}
 
+	return nil
+}
+
+func (pc *PreparedConfigType) validateProcess() error {
+	if pc.Process == nil {
+		return nil
+	}
+
 	if err := pc.Process.Validate(); err != nil {
 		return fmt.Errorf("process manager is invalid: %v", err)
 	}
 
+	return nil
+}
+
+func (pc *PreparedConfigType) validateCpu() error {
+	if pc.Cpu == nil {
+		return nil
+	}
+
+	if err := pc.Cpu.Validate(); err != nil {
+		return fmt.Errorf("cpu manager is invalid: %v", err)
+	}
+
+	return nil
+}
+
+func (pc *PreparedConfigType) validateWebservers() error {
 	for _, webServer := range pc.WebServers {
 		err := webServer.Validate()
 		if err != nil {
-			return fmt.Errorf("webserver %s is invalid: %v", webServer.GetUid(), err)
+			return fmt.Errorf("webserver %s is invalid: %v", webServer.GetName(), err)
 		}
 
 		for _, route := range webServer.Routes {
 			err := route.Validate()
 
 			if err != nil {
-				return fmt.Errorf("route %s is invalid for webserver %s: %v", route.Path, webServer.GetUid(), err)
+				return fmt.Errorf("route %s is invalid for webserver %s: %v", route.Path, webServer.GetName(), err)
 			}
 		}
 	}
@@ -122,13 +156,41 @@ func (pc *PreparedConfigType) Validate() error {
 	return nil
 }
 
+func (pc *PreparedConfigType) Validate() error {
+	if err := pc.validateDuplicateApps(); err != nil {
+		return err
+	}
+
+	if err := pc.validateDuplicatePlans(); err != nil {
+		return err
+	}
+
+	if err := pc.validatePlans(); err != nil {
+		return err
+	}
+
+	if err := pc.validateProcess(); err != nil {
+		return err
+	}
+
+	if err := pc.validateCpu(); err != nil {
+		return err
+	}
+
+	if err := pc.validateWebservers(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *PreparedConfigType) findDuplicateApps() []string {
 	apps := []string{
-		u.Process.GetUid(),
+		u.Process.GetName(),
 	}
 
 	for _, v := range u.WebServers {
-		apps = append(apps, v.GetUid())
+		apps = append(apps, v.GetName())
 	}
 
 	return utils.GetDuplicates(apps)
