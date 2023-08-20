@@ -1,0 +1,4 @@
+process:
+  exit:
+    after: 2s
+    code: 5
