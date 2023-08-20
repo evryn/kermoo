@@ -9,14 +9,10 @@ import (
 )
 
 // Size represents bytes
-type Size int64
+type Size uint64
 
 func (s *Size) ToBytes() int64 {
 	return int64(*s)
-}
-
-func (s Size) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s)
 }
 
 func (s *Size) UnmarshalJSON(b []byte) error {

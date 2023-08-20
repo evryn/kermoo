@@ -3,6 +3,7 @@ package user_config
 import (
 	"fmt"
 	"kermoo/modules/cpu"
+	"kermoo/modules/memory"
 	"kermoo/modules/planner"
 	"kermoo/modules/process"
 	"kermoo/modules/web_server"
@@ -12,6 +13,7 @@ type UserConfigType struct {
 	SchemaVersion string           `json:"schemaVersion"`
 	Process       *process.Process `json:"process"`
 	Cpu           *cpu.Cpu
+	Memory        *memory.Memory
 	Plans         []*planner.Plan         `json:"plans"`
 	WebServers    []*web_server.WebServer `json:"webServers"`
 }
@@ -53,29 +55,49 @@ func (u *UserConfigType) GetPreparedConfig() (*PreparedConfigType, error) {
 		}
 	}
 
+	// Prepare Memory Leaker
+	if u.Memory != nil {
+		if err := u.Memory.Leak.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid memory leaker: %v", err)
+		}
+
+		if err := prepared.preparePlannable(&u.Memory.Leak); err != nil {
+			return nil, fmt.Errorf("unable to prepare memory leaker: %v", err)
+		}
+	}
+
+	// Prepare Web Server
+	if err := u.prepareWebservers(&prepared); err != nil {
+		return nil, err
+	}
+
+	return &prepared, nil
+}
+
+func (u *UserConfigType) prepareWebservers(p *PreparedConfigType) error {
 	for _, ws := range u.WebServers {
 		// Prepare Web Server
 		if err := ws.Validate(); err != nil {
-			return nil, fmt.Errorf("invalid webserver %s: %v", ws.GetName(), err)
+			return fmt.Errorf("invalid webserver %s: %v", ws.GetName(), err)
 		}
 
-		prepared.WebServers = append(prepared.WebServers, ws)
+		p.WebServers = append(p.WebServers, ws)
 
-		if err := prepared.preparePlannable(ws); err != nil {
-			return nil, fmt.Errorf("unable to prepare webserver %s: %v", ws.GetName(), err)
+		if err := p.preparePlannable(ws); err != nil {
+			return fmt.Errorf("unable to prepare webserver %s: %v", ws.GetName(), err)
 		}
 
 		for _, route := range ws.Routes {
 			// Prepare Routes
 			if err := route.Validate(); err != nil {
-				return nil, fmt.Errorf("invalid route %s for webserver %s: %v", route.GetName(), ws.GetName(), err)
+				return fmt.Errorf("invalid route %s for webserver %s: %v", route.GetName(), ws.GetName(), err)
 			}
 
-			if err := prepared.preparePlannable(route); err != nil {
-				return nil, fmt.Errorf("unable to prepare route %s webserver %s: %v", route.GetName(), ws.GetName(), err)
+			if err := p.preparePlannable(route); err != nil {
+				return fmt.Errorf("unable to prepare route %s webserver %s: %v", route.GetName(), ws.GetName(), err)
 			}
 		}
 	}
 
-	return &prepared, nil
+	return nil
 }
