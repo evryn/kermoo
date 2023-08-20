@@ -1,0 +1,27 @@
+Thank you for installing the Kermoo Helm Chart!
+
+1. Get your Kermoo Pod:
+
+   kubectl get pods -n {{ .Release.Namespace }} -l "app=kermoo"
+
+2. To access the Kermoo web server within the cluster:
+
+   kubectl port-forward svc/{{ .Release.Name }}-service 80:80 -n {{ .Release.Namespace }}
+
+   Then navigate to http://localhost:80 in your browser.
+
+3. If you've configured any additional resources or custom configurations, you can access them as follows:
+
+   kubectl get configmap {{ .Release.Name }}-config -o yaml -n {{ .Release.Namespace }}
+
+{{- if .Values.debug }}
+NOTE: Debugging is enabled. Kermoo pod will produce more verbose output.
+{{- end }}
+
+For more information on using Kermoo, please refer to the official documentation or repository:
+- {{ .Release.home }}
+{{- range $source := .Release.source }}
+- {{ $source }}
+{{- end }}
+
+💕 Enjoy using Kermoo!

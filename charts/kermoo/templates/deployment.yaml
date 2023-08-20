@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  {{- with .Values.commonLabels }}
+  labels: 
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: kermoo
+  template:
+    metadata:
+      labels:
+        app: kermoo
+    spec:
+      containers:
+      - name: kermoo
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        {{- if .Values.debug }}
+        command: ["start", "-v", "debug"]
+        {{- else }}
+        command: ["start"]
+        {{- end }}
+        ports:
+        - containerPort: 80
+        resources:
+          {{- if .Values.resources.limits }}
+          limits: {{ toYaml .Values.resources.limits | nindent 10 }}
+          {{- end }}
+          {{- if .Values.resources.requests }}
+          requests: {{ toYaml .Values.resources.requests | nindent 10 }}
+          {{- end }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: ~/.kermoo/config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ .Release.Name }}-config
