@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  kermoo:
+    image: evryn/kermoo
+    command: start
+    configs:
+      - source: kermoo-config
+        target: ~/.kermoo/config.yaml
+
+configs:
+  kermoo-config:
+    external: true
