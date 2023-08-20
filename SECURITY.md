@@ -1,21 +1,28 @@
-# Security Policy for Kermoo
+# 🛡️ Security Policy for Kermoo 🚀
 
-Version: V1.0 (2023-08-07)
+**Version:** V1.0 (2023-08-07)
 
-## Supported Versions
+Greetings, security enthusiast! 👋 We truly appreciate your vigilance in keeping **Kermoo** safe and secure. Below is our guideline to ensure any vulnerabilities are addressed responsibly and promptly.
 
-These versions are currently supported for security updates:
+## 🔄 Supported Versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
+Only certain versions of Kermoo are currently receiving security updates. Here's a quick rundown:
 
-## Reporting a Vulnerability
+| Version | Supported            |
+| ------- | -------------------- |
+| 1.x.x   | ✅ Yes               |
 
-If you find a security related bug in Kermoo, we kindly ask you for responsible disclosure and for giving us appropriate time to react, analyze and develop a fix to mitigate the found security vulnerability.
+## 🐞 Reporting a Vulnerability
 
-We will publish security advisories using the [GitHub Security Advisories](https://github.com/evryn/kermoo/security/advisories/new) feature to keep our community well-informed, and will credit you for your findings (unless you prefer to stay anonymous, of course).
+🕵️‍♂️ Found a chink in our armor? We value the work of security researchers and the broader community in helping identify vulnerabilities. We request that you disclose them responsibly, giving us adequate time for analysis and mitigation.
 
-There are two ways to report a vulnerability to the Kermoo team:
-- By opening a draft GitHub security advisory: https://github.com/evryn/kermoo/security/advisories/new
-- By e-mail to the following address: nasiri.amirreza.96@gmail.com
+Once we've tackled the issue, we'll make sure our community stays in the loop by publishing a security advisory using the [GitHub Security Advisories](https://github.com/evryn/kermoo/security/advisories/new). And hey, we'll proudly credit you for your discovery (unless you'd rather slip back into the shadows and stay anonymous 😉).
+
+### How to whistle-blow? 📢
+
+1. 🌐 (Recommended) Via a draft GitHub security advisory: [Report Here](https://github.com/evryn/kermoo/security/advisories/new)
+2. 📧 Or drop us an e-mail at: nasiri.amirreza.96@gmail.com
+
+---
+
+Again, thank you for being on the lookout and helping us ensure Kermoo remains robust and trustworthy! 💖🔐
