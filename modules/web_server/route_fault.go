@@ -1,15 +1,18 @@
 package web_server
 
 import (
-	"kermoo/modules/planner"
 	"kermoo/modules/values"
 	"math/rand"
 	"net/http"
 )
 
 type RouteFault struct {
-	Plan          *planner.Plan   `json:"plan"`
-	PlanRefs      []string        `json:"planRefs"`
+	PlanRefs []string `json:"planRefs"`
+
+	Percentage values.MultiFloat `json:"percentage"`
+	Interval   *values.Duration  `json:"interval"`
+	Duration   *values.Duration  `json:"duration"`
+
 	ResponseDelay values.Duration `json:"responseDelay"`
 	ClientErrors  *bool           `json:"clientErrors"`
 	ServerErrors  *bool           `json:"serverErrors"`

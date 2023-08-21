@@ -102,10 +102,9 @@ func TestWebserverEndToEnd(t *testing.T) {
                 content:
                   static: hello-world
               fault:
-                plan:
-                  interval: 100ms
-                  percentage:
-                    exactly: 0.5
+                interval: 100ms
+                percentage:
+                  exactly: 0.5
 		`, 3*time.Second)
 
 		// Wait a few while for webserver to become available
@@ -220,10 +219,9 @@ func TestWebserverEndToEnd(t *testing.T) {
                 content:
                   static: hello-world
                 fault:
-                  plan:
-                    interval: 100ms
-                    percentage:
-                        exactly: 0.5
+                  interval: 100ms
+                  percentage:
+                      exactly: 0.5
 		`, 3*time.Second)
 
 		// Wait a few while for webserver to become available

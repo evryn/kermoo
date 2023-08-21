@@ -17,8 +17,11 @@ import (
 )
 
 type WebServerFault struct {
-	Plan     *planner.Plan `json:"plan"`
-	PlanRefs []string      `json:"planRefs"`
+	PlanRefs []string `json:"planRefs"`
+
+	Percentage values.MultiFloat `json:"percentage"`
+	Interval   *values.Duration  `json:"interval"`
+	Duration   *values.Duration  `json:"duration"`
 }
 
 type WebServer struct {
@@ -113,11 +116,21 @@ func (ws *WebServer) Stop() error {
 }
 
 func (ws *WebServer) HasInlinePlan() bool {
-	return ws.Fault != nil && ws.Fault.Plan != nil
+	return ws.MakeInlinePlan() != nil
 }
 
 func (ws *WebServer) MakeInlinePlan() *planner.Plan {
-	return ws.Fault.Plan
+	if ws.Fault == nil {
+		return nil
+	}
+
+	plan := planner.NewPlan(planner.Plan{
+		Percentage: &ws.Fault.Percentage,
+		Interval:   ws.Fault.Interval,
+		Duration:   ws.Fault.Duration,
+	})
+
+	return &plan
 }
 
 // Create a lifetime-long plan to serve webserver

@@ -36,11 +36,21 @@ func (route *Route) GetDesiredPlanNames() []string {
 }
 
 func (route *Route) HasInlinePlan() bool {
-	return route.Fault != nil && route.Fault.Plan != nil
+	return route.MakeInlinePlan() != nil
 }
 
 func (route *Route) MakeInlinePlan() *planner.Plan {
-	return route.Fault.Plan
+	if route.Fault == nil {
+		return nil
+	}
+
+	plan := planner.NewPlan(planner.Plan{
+		Percentage: &route.Fault.Percentage,
+		Interval:   route.Fault.Interval,
+		Duration:   route.Fault.Duration,
+	})
+
+	return &plan
 }
 
 // Create a lifetime-long plan to serve route
