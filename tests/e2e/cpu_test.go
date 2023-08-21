@@ -14,12 +14,10 @@ func TestCpuEndToEnd(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
-            cpu:
-              load:
-                plan:
-                  interval: 100ms
-                  percentage:
-                    exactly: 0.7
+            cpuLoad:
+              interval: 100ms
+              percentage:
+                exactly: 0.7
 		`, 3*time.Second)
 
 		// Wait a few while
@@ -45,10 +43,9 @@ func TestCpuEndToEnd(t *testing.T) {
               interval: 100ms
               percentage:
                 exactly: 0.7
-            cpu:
-              load:
-                planRefs:
-                - spike
+            cpuLoad:
+              planRefs:
+              - spike
 		`, 3*time.Second)
 
 		// Wait a few while

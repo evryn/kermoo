@@ -20,7 +20,7 @@ var Prepared PreparedConfigType
 type PreparedConfigType struct {
 	SchemaVersion string
 	Process       *process.Process
-	Cpu           *cpu.Cpu
+	CpuLoad       *cpu.CpuLoader
 	Memory        *memory.Memory
 	Plans         []*planner.Plan
 	WebServers    []*web_server.WebServer
@@ -127,13 +127,13 @@ func (pc *PreparedConfigType) validateProcess() error {
 	return nil
 }
 
-func (pc *PreparedConfigType) validateCpu() error {
-	if pc.Cpu == nil {
+func (pc *PreparedConfigType) validateCpuLoad() error {
+	if pc.CpuLoad == nil {
 		return nil
 	}
 
-	if err := pc.Cpu.Validate(); err != nil {
-		return fmt.Errorf("cpu manager is invalid: %v", err)
+	if err := pc.CpuLoad.Validate(); err != nil {
+		return fmt.Errorf("cpu load is invalid: %v", err)
 	}
 
 	return nil
@@ -187,7 +187,7 @@ func (pc *PreparedConfigType) Validate() error {
 		return err
 	}
 
-	if err := pc.validateCpu(); err != nil {
+	if err := pc.validateCpuLoad(); err != nil {
 		return err
 	}
 

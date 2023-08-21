@@ -12,7 +12,7 @@ import (
 type UserConfigType struct {
 	SchemaVersion string           `json:"schemaVersion"`
 	Process       *process.Process `json:"process"`
-	Cpu           *cpu.Cpu
+	CpuLoad       *cpu.CpuLoader   `json:"cpuLoad"`
 	Memory        *memory.Memory
 	Plans         []*planner.Plan         `json:"plans"`
 	WebServers    []*web_server.WebServer `json:"webServers"`
@@ -44,14 +44,14 @@ func (u *UserConfigType) GetPreparedConfig() (*PreparedConfigType, error) {
 		}
 	}
 
-	// Prepare CPU Manager
-	if u.Cpu != nil {
-		if err := u.Cpu.Validate(); err != nil {
-			return nil, fmt.Errorf("invalid cpu manager: %v", err)
+	// Prepare CPU Load
+	if u.CpuLoad != nil {
+		if err := u.CpuLoad.Validate(); err != nil {
+			return nil, fmt.Errorf("invalid cpu load: %v", err)
 		}
 
-		if err := prepared.preparePlannable(u.Cpu); err != nil {
-			return nil, fmt.Errorf("unable to prepare cpu manager: %v", err)
+		if err := prepared.preparePlannable(u.CpuLoad); err != nil {
+			return nil, fmt.Errorf("unable to prepare cpu load: %v", err)
 		}
 	}
 

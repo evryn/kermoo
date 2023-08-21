@@ -2,10 +2,101 @@ package cpu_test
 
 import (
 	"kermoo/modules/cpu"
+	"kermoo/modules/values"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestValidate(t *testing.T) {
+	t.Run("should return error when no plan or plan refs is set", func(t *testing.T) {
+		load := cpu.CpuLoader{}
+		err := load.Validate()
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "plan")
+	})
+
+	t.Run("should return error when plan refs contain more than one element", func(t *testing.T) {
+		load := cpu.CpuLoader{
+			PlanRefs: []string{"ref1", "ref2"},
+		}
+		err := load.Validate()
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "plan refs")
+	})
+
+	t.Run("should return error when plan validation fails", func(t *testing.T) {
+		load := cpu.CpuLoader{
+			Percentage: &values.MultiFloat{
+				SingleFloat: values.SingleFloat{
+					Between: []float32{0.1},
+				},
+			},
+		}
+		err := load.Validate()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "plan validation")
+	})
+}
+
+func TestGetUid(t *testing.T) {
+	c := &cpu.CpuLoader{}
+	assert.Equal(t, "cpu-manager", c.GetName())
+}
+
+func TestHasCustomPlan(t *testing.T) {
+	t.Run("with custom plan", func(t *testing.T) {
+		load := cpu.CpuLoader{
+			Percentage: &values.MultiFloat{
+				SingleFloat: values.SingleFloat{
+					Between: []float32{0.1, 0.2},
+				},
+			},
+		}
+		assert.True(t, load.HasInlinePlan())
+	})
+
+	t.Run("without custom plan", func(t *testing.T) {
+		c := &cpu.CpuLoader{}
+		assert.False(t, c.HasInlinePlan())
+	})
+}
+
+func TestGetDesiredPlanNames(t *testing.T) {
+	planRefs := []string{"plan1", "plan2"}
+	load := cpu.CpuLoader{
+		PlanRefs: planRefs,
+	}
+	assert.Equal(t, planRefs, load.GetDesiredPlanNames())
+}
+
+func TestMakeCustomPlan(t *testing.T) {
+	percentage := values.MultiFloat{
+		SingleFloat: values.SingleFloat{
+			Between: []float32{0.1, 0.2},
+		},
+	}
+	duration := values.Duration(0)
+	interval := values.Duration(0)
+
+	load := cpu.CpuLoader{
+		Percentage: &percentage,
+		Duration:   &duration,
+		Interval:   &interval,
+	}
+
+	plan := load.MakeInlinePlan()
+
+	assert.Equal(t, percentage, plan.Percentage)
+	assert.Equal(t, duration, plan.Duration)
+	assert.Equal(t, interval, plan.Interval)
+}
+
+func TestMakeDefaultPlan(t *testing.T) {
+	c := &cpu.CpuLoader{}
+	assert.Nil(t, c.MakeDefaultPlan())
+}
 
 func TestStart(t *testing.T) {
 	cu := &cpu.CpuLoader{}
