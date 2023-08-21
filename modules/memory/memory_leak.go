@@ -20,6 +20,10 @@ type MemoryLeak struct {
 	leakedData []byte
 }
 
+func (mu *MemoryLeak) GetLeakedData() []byte {
+	return mu.leakedData
+}
+
 func (mu *MemoryLeak) GetName() string {
 	return "memory-leaker"
 }
