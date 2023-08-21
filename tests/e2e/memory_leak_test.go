@@ -16,12 +16,10 @@ func TestMemoryLeakEndToEnd(t *testing.T) {
 		startMem, _ := utils.GetMemoryUsage()
 
 		e2e.Start(`
-            memory:
-              leak:
-                plan:
-                  interval: 100ms
-                  size:
-                    exactly: 100MiB
+            memoryLeak:
+              interval: 100ms
+              size:
+                exactly: 100MiB
 		`, 3*time.Second)
 
 		// Wait a few while
@@ -51,10 +49,9 @@ func TestMemoryLeakEndToEnd(t *testing.T) {
               interval: 100ms
               size:
                 exactly: 100MiB
-            memory:
-              leak:
-                planRefs:
-                - leak
+            memoryLeak:
+              planRefs:
+              - leak
 		`, 3*time.Second)
 
 		// Wait a few while

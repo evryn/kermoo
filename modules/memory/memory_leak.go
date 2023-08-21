@@ -10,8 +10,13 @@ var _ planner.Plannable = &MemoryLeak{}
 
 type MemoryLeak struct {
 	planner.CanAssignPlan
-	Plan       *planner.Plan `json:"plan"`
-	PlanRefs   []string      `json:"planRefs"`
+
+	PlanRefs []string `json:"planRefs"`
+
+	Size     *values.MultiSize `json:"size"`
+	Interval *values.Duration  `json:"interval"`
+	Duration *values.Duration  `json:"duration"`
+
 	leakedData []byte
 }
 
@@ -20,7 +25,7 @@ func (mu *MemoryLeak) GetName() string {
 }
 
 func (mu *MemoryLeak) HasInlinePlan() bool {
-	return mu.Plan != nil
+	return mu.MakeInlinePlan() != nil
 }
 
 func (mu *MemoryLeak) GetDesiredPlanNames() []string {
@@ -28,17 +33,17 @@ func (mu *MemoryLeak) GetDesiredPlanNames() []string {
 }
 
 func (mu *MemoryLeak) Validate() error {
-	if len(mu.PlanRefs) == 0 && mu.Plan == nil {
-		return fmt.Errorf("no plan or plan refs is set")
+	if len(mu.PlanRefs) == 0 && !mu.HasInlinePlan() {
+		return fmt.Errorf("no leak specifications or plan refs is set")
 	}
 
 	if len(mu.PlanRefs) > 1 {
-		return fmt.Errorf("plan refs can not contain more than one element for memory leak")
+		return fmt.Errorf("plan refs can not contain more than one element")
 	}
 
-	if mu.Plan != nil {
-		if err := mu.Plan.Validate(); err != nil {
-			return fmt.Errorf("plan validation failed: %v", err)
+	if mu.HasInlinePlan() {
+		if err := mu.MakeInlinePlan().Validate(); err != nil {
+			return fmt.Errorf("crafted plan validation failed: %v", err)
 		}
 	}
 
@@ -64,7 +69,17 @@ func (mu *MemoryLeak) GetPlanCycleHooks() planner.CycleHooks {
 }
 
 func (mu *MemoryLeak) MakeInlinePlan() *planner.Plan {
-	return mu.Plan
+	if mu.Size == nil {
+		return nil
+	}
+
+	plan := planner.NewPlan(planner.Plan{
+		Size:     mu.Size,
+		Interval: mu.Interval,
+		Duration: mu.Duration,
+	})
+
+	return &plan
 }
 
 func (mu *MemoryLeak) MakeDefaultPlan() *planner.Plan {

@@ -13,7 +13,7 @@ type UserConfigType struct {
 	SchemaVersion string           `json:"schemaVersion"`
 	Process       *process.Process `json:"process"`
 	CpuLoad       *cpu.CpuLoader   `json:"cpuLoad"`
-	Memory        *memory.Memory
+	MemoryLeak    *memory.MemoryLeak
 	Plans         []*planner.Plan         `json:"plans"`
 	WebServers    []*web_server.WebServer `json:"webServers"`
 }
@@ -56,12 +56,12 @@ func (u *UserConfigType) GetPreparedConfig() (*PreparedConfigType, error) {
 	}
 
 	// Prepare Memory Leaker
-	if u.Memory != nil {
-		if err := u.Memory.Leak.Validate(); err != nil {
+	if u.MemoryLeak != nil {
+		if err := u.MemoryLeak.Validate(); err != nil {
 			return nil, fmt.Errorf("invalid memory leaker: %v", err)
 		}
 
-		if err := prepared.preparePlannable(&u.Memory.Leak); err != nil {
+		if err := prepared.preparePlannable(u.MemoryLeak); err != nil {
 			return nil, fmt.Errorf("unable to prepare memory leaker: %v", err)
 		}
 	}

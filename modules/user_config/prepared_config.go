@@ -21,7 +21,7 @@ type PreparedConfigType struct {
 	SchemaVersion string
 	Process       *process.Process
 	CpuLoad       *cpu.CpuLoader
-	Memory        *memory.Memory
+	MemoryLeak    *memory.MemoryLeak
 	Plans         []*planner.Plan
 	WebServers    []*web_server.WebServer
 }
@@ -140,11 +140,11 @@ func (pc *PreparedConfigType) validateCpuLoad() error {
 }
 
 func (pc *PreparedConfigType) validateMemory() error {
-	if pc.Memory == nil {
+	if pc.MemoryLeak == nil {
 		return nil
 	}
 
-	if err := pc.Memory.Leak.Validate(); err != nil {
+	if err := pc.MemoryLeak.Validate(); err != nil {
 		return fmt.Errorf("memory leaker is invalid: %v", err)
 	}
 
