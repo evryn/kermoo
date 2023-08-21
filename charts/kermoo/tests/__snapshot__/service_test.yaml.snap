@@ -1,0 +1,31 @@
+manifest with default values should match snapshot:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: RELEASE-NAME
+      name: RELEASE-NAME-service-80
+    spec:
+      ports:
+        - port: 80
+          protocol: TCP
+          targetPort: 80
+      selector:
+        app: RELEASE-NAME
+      type: ClusterIP
+  2: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: RELEASE-NAME
+      name: RELEASE-NAME-service-8080
+    spec:
+      ports:
+        - port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        app: RELEASE-NAME
+      type: ClusterIP

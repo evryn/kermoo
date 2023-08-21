@@ -23,21 +23,20 @@ configuration: |
   process:
     delay: 1s
 
+# @param ports Define container (.targetPort) and associated service (.port) ports
+services:
+  - port: 80
+    targetPort: 80
+  - port: 8080
+    targetPort: 8080
+
 # @param replicaCount Integer specifying the number of pod replicas to be deployed
 replicaCount: 1  
 
-# @param resources Object containing CPU/Memory resource requests and limits for the Kermoo container
-resources:
-  # @param resources.limits CPU/Memory resource limits for the Kermoo container
-  # Example:
-  # limits:
-  #    cpu: 250m
-  #    memory: 256Mi
-  limits: {}
-  
-  # @param resources.requests CPU/Memory resource requests for the Kermoo container
-  # Example:
-  # requests:
-  #    cpu: 250m
-  #    memory: 256Mi
-  requests: {}
+# @param additionalContainerTemplate Object containing additional template for Kermoo such as resource limits
+# additionalContainerTemplate:
+#   resources:
+#     limits:
+#       cpu: 200m
+#       memory: 128Mi
+additionalContainerTemplate: {}

@@ -15,3 +15,11 @@ test-e2e:
 	rm -rf e2e-test-results
 	go build -v -o /tmp/kermoo .
 	KERMOO_BINARY="/tmp/kermoo" go test -v ./tests/e2e/...
+
+.PHONY: helm-unittest
+helm-unittest:
+	helm unittest charts/kermoo
+
+.PHONY: helm-unittest-update-snapshots
+helm-unittest-update-snapshots:
+	helm unittest charts/kermoo -u

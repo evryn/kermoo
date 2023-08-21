@@ -12,4 +12,4 @@ metadata:
   {{- end }}
 data:
   config.yaml: |
-{{ .Values.configuration | indent 4 }}
+  {{ .Values.configuration | nindent 4 }}
