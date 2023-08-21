@@ -31,8 +31,8 @@ type CycleValue struct {
 
 func (cv *CycleValue) ComputeStaticValues() {
 	value, _ := cv.Percentage.ToFloat()
-	computedPercentageChance := utils.IsSuccessByChance(value)
-	cv.ComputedPercentageChance = &computedPercentageChance
+	computedPercentageState := utils.PercentageToBoolean(value)
+	cv.ComputedPercentageChance = &computedPercentageState
 }
 
 func (s *SubPlan) getSingleSizes() ([]values.SingleSize, error) {

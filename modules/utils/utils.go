@@ -143,7 +143,7 @@ func Contains(arr []string, str string) bool {
 	return false
 }
 
-func IsSuccessByChance(chance float32) bool {
+func PercentageToBoolean(chance float32) bool {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	r := rand.New(source)
 	return r.Float32() < chance

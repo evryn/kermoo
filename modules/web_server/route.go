@@ -57,10 +57,10 @@ func (route *Route) MakeInlinePlan() *planner.Plan {
 func (route *Route) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
-	// Value of 1.0 indicates that the route will always be available.
+	// Value of 0.0 indicates that the route will never fail.
 	plan.Percentage = &values.MultiFloat{
 		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](1.0),
+			Exactly: utils.NewP[float32](0.0),
 		},
 	}
 
@@ -82,7 +82,7 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 		shouldSuccess := true
 
 		for _, plan := range route.GetAssignedPlans() {
-			if !*plan.GetCurrentValue().ComputedPercentageChance {
+			if *plan.GetCurrentValue().ComputedPercentageChance {
 				shouldSuccess = false
 				break
 			}

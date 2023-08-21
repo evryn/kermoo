@@ -137,10 +137,10 @@ func (ws *WebServer) MakeInlinePlan() *planner.Plan {
 func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
-	// Value of 1.0 indicates that the webserver will always be available.
+	// Value of 0.0 indicates that the webserver will never fail.
 	plan.Percentage = &values.MultiFloat{
 		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](1.0),
+			Exactly: utils.NewP[float32](0.0),
 		},
 	}
 
@@ -155,11 +155,11 @@ func (ws *WebServer) GetDesiredPlanNames() []string {
 	return ws.Fault.PlanRefs
 }
 
-func (ws *WebServer) getPlanPercentageChance() bool {
+func (ws *WebServer) getPlanPercentageState() bool {
 	shouldListen := true
 
 	for _, plan := range ws.GetAssignedPlans() {
-		if !*plan.GetCurrentValue().ComputedPercentageChance {
+		if *plan.GetCurrentValue().ComputedPercentageChance {
 			shouldListen = false
 			break
 		}
@@ -170,7 +170,7 @@ func (ws *WebServer) getPlanPercentageChance() bool {
 
 func (ws *WebServer) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		shouldListen := ws.getPlanPercentageChance()
+		shouldListen := ws.getPlanPercentageState()
 
 		if shouldListen && !ws.isListening {
 			if err := ws.ListenOnBackground(); err != nil {

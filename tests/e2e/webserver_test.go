@@ -161,11 +161,11 @@ func TestWebserverEndToEnd(t *testing.T) {
             - name: disaster
               subPlans:
               - percentage:
-                  exactly: 0
+                  exactly: 1
                 interval: 20ms
                 duration: 1s
               - percentage:
-                  between: [1, 1]
+                  between: [0, 0]
                 interval: 20ms
                 duration: 1s
               - percentage:
@@ -248,7 +248,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             - name: readiness
               interval: 100ms
               percentage:
-                exactly: 0.6
+                exactly: 0.4
             webServers:
             - port: 8080
               routes:
