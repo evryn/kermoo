@@ -1,0 +1,40 @@
+# The API version of the Helm chart (v2 is for Helm 3)
+apiVersion: v2
+
+# The unique name for the Helm chart
+name: kermoo-chart
+
+# A brief description of the Helm chart
+description: A Helm chart for Kubernetes deployment of the Kermoo application
+
+# The version of the Helm chart (follows semantic versioning)
+version: 1.0.0
+
+# The version of the application that this chart packages
+appVersion: "latest"
+
+# The home URL for the chart, where you can find more about the chart/application
+home: https://kermoo.dev
+
+# List of source code repository URLs related to this chart or the application itself
+sources:
+  - https://github.com/evryn/kermoo
+
+# Keywords related to the chart for better searchability
+keywords:
+  - devops
+  - sre
+  - cpu
+  - memory
+  - webserver
+  - golang
+  - bug
+  - test
+  - ha
+  - failover
+  - tools
+
+# List of maintainers for this chart along with their contact details
+maintainers:
+  - name: Amirreza Nasiri
+    email: hi@evryn.dev
