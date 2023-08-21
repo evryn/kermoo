@@ -118,12 +118,6 @@ jobs:
         with:
           name: e2e-test-results
           path: e2e-test-results
-      # -
-      #   name: Fail of tests are failed
-      #   if: ${{ steps.e2e-testing-step.outcome == 'failure' }}
-      #   run: |
-      #     echo "E2E tests failed. See the step details and inspect logs artifact."
-      #     exit 1
 
   test-helm-chart:
     name: Run Helm unit tests
@@ -144,8 +138,6 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - test-unit
-    #env:
-    #  sonar_secret: ${{ secrets.SONAR_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
@@ -167,41 +159,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  # releases-matrix:
-  #   name: Release Go Binary
-  #   runs-on: ubuntu-22.04
-  #   if: ${{ github.event_name == 'release' }}
-  #   needs:
-  #     - build-go
-  #     - lint-go
-  #     - analyze
-  #     - test-unit
-  #     - test-e2e
-  #   strategy:
-  #     matrix:
-  #       goos:
-  #       - linux
-  #       - windows
-  #       goarch:
-  #       - "386"
-  #       - amd64
-  #       - arm64
-  #       exclude:
-  #       - goarch: arm64
-  #         goos: windows
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-  #   - name: Build and upload binaries to release
-  #     uses: wangyoucao577/go-release-action@0aa3e4818bacdeab4f9a97f768d3a54734a5852e # v1.38
-  #     with:
-  #       github_token: ${{ secrets.GITHUB_TOKEN }}
-  #       goos: ${{ matrix.goos }}
-  #       goarch: ${{ matrix.goarch }}
-  #       goversion: ${{ env.GOLANG_VERSION }}
-  #       binary_name: kermoo
-  #       extra_files: LICENSE README.md
-
   goreleaser:
     runs-on: ubuntu-22.04
     if: startsWith(github.ref, 'refs/tags/v')
@@ -211,6 +168,7 @@ jobs:
        - analyze
        - test-unit
        - test-e2e
+       - test-helm-chart
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
