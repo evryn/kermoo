@@ -25,8 +25,11 @@ type Process struct {
 }
 
 type ProcessExit struct {
+	// After determines the duration in which the process will be terminated
 	After fluent.FluentDuration `json:"after"`
-	Code  uint                  `json:"code"`
+
+	// Code indicates the exit code of the process when the time is reached.
+	Code uint `json:"code"`
 }
 
 func (p *Process) GetName() string {
