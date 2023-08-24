@@ -11,10 +11,29 @@ var _ planner.Plannable = &MemoryLeak{}
 type MemoryLeak struct {
 	planner.CanAssignPlan
 
+	// PlanRefs is an optional list of plan names. It can used to avoid redundant
+	// re-declearing of plans in large-scale configurations.
+	// PlanRefs overrides Size, Interval and Duration fields are overrided in favor
+	// of the one defined in the referenced plan.
 	PlanRefs []string `json:"planRefs"`
 
-	Size     *fluent.FluentSize     `json:"size"`
+	// Size determines the size of the memory leak (memory consumption). This memory will be
+	// used in addition to the amount used by the Kermoo application itself. So the actual
+	// total memory usage is not guaranteed to be accurate.
+	//
+	// For specific and ranged declearations, it's going to use that but when an array of
+	// sizes are specified, it'll act like a graph of bars and iterate over them.
+	Size *fluent.FluentSize `json:"size"`
+
+	// Interval decides how long each leak cycle should last. A value above one second is recommended
+	// but you're free  to use any interval. Default is one second.
 	Interval *fluent.FluentDuration `json:"interval"`
+
+	// Duration defines the duration of the entire memory leak module. Leave it empty for
+	// life-long running or specify one to end the module completely after that and won't
+	// consume the specified memory.
+	// In fact, Duration/Interval determines the number of cycle, if defined. Default is empty
+	// for unlimited activity.
 	Duration *fluent.FluentDuration `json:"duration"`
 
 	leakedData []byte

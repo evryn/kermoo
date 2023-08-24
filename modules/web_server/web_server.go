@@ -16,19 +16,55 @@ import (
 )
 
 type WebServerFault struct {
+	// PlanRefs is an optional list of plan names. It can used to avoid redundant
+	// re-declearing of plans in large-scale configurations.
+	// PlanRefs overrides Size, Interval and Duration fields are overrided in favor
+	// of the one defined in the referenced plan.
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage fluent.FluentFloat     `json:"percentage"`
-	Interval   *fluent.FluentDuration `json:"interval"`
-	Duration   *fluent.FluentDuration `json:"duration"`
+	// Percentage determines the chance of failing. 0 means no not failure at all and 100
+	// means always failing. By failing, we mean the web server will stop listening and
+	// terminating all of the connections. By reviving, we mean the web server starts listening
+	// again.
+	//
+	// For specific and ranged declearations, it's going to use that but when an array of
+	// percentages are specified, it'll act like a graph of bars and iterate over them.
+	Percentage fluent.FluentFloat `json:"percentage"`
+
+	// Interval decides how long each desicion to stay failing or serving should last.
+	// A value above one second is recommended but you're free  to use any interval.
+	// Default is one second.
+	Interval *fluent.FluentDuration `json:"interval"`
+
+	// Duration defines the duration of the entire web server. Leave it empty for
+	// life-long running or specify one to end the module completely after that and last decision
+	// will be happening for ever.
+	// In fact, Duration/Interval determines the number of cycle, if defined. Default is empty
+	// for unlimited activity.
+	Duration *fluent.FluentDuration `json:"duration"`
 }
 
 type WebServer struct {
 	planner.CanAssignPlan
-	Routes      []*Route        `json:"routes"`
-	Interface   *string         `json:"interface"`
-	Port        *int32          `json:"port"`
-	Fault       *WebServerFault `json:"fault"`
+
+	// Routes define the HTTP routes for the web server with their own fault
+	// specifications and response types.
+	//
+	// By default, these routes are defined with no failing conditions: "/", "/livez",
+	// "/readyz", "/healthz". You can define your own routes with your desired failing
+	// conditions.
+	Routes []*Route `json:"routes"`
+
+	// Interface defines the network interface which the web server should listen
+	// on. Default is 0.0.0.0 but you're free to define another one like 127.0.0.1.
+	Interface *string `json:"interface"`
+
+	// Port defines the port which the web server should listen on. Default is 80.
+	Port *int32 `json:"port"`
+
+	// Fault specifies how the web server should fail. Default is no failure.
+	Fault *WebServerFault `json:"fault"`
+
 	server      *http.Server
 	isListening bool
 }
@@ -53,11 +89,41 @@ func (ws *WebServer) GetInterface() string {
 	return config.Default.WebServer.Interface
 }
 
-func (ws *WebServer) Validate() error {
-	if ws.Routes == nil {
-		return fmt.Errorf("no routes are provided")
+func (ws *WebServer) GetRoutes() []*Route {
+	if ws.Routes != nil {
+		return ws.Routes
 	}
 
+	return []*Route{
+		{
+			Path: "/",
+			Content: RouteContent{
+				Whoami:       true,
+				NoServerInfo: true,
+			},
+		},
+		{
+			Path: "/livez",
+			Content: RouteContent{
+				Static: "I'm Alive!",
+			},
+		},
+		{
+			Path: "/readyz",
+			Content: RouteContent{
+				Static: "I'm Ready!",
+			},
+		},
+		{
+			Path: "/healthz",
+			Content: RouteContent{
+				Static: "I'm Healthy!",
+			},
+		},
+	}
+}
+
+func (ws *WebServer) Validate() error {
 	return nil
 }
 
@@ -70,7 +136,7 @@ func (ws *WebServer) ListenOnBackground() error {
 
 	r := mux.NewRouter()
 
-	for _, route := range ws.Routes {
+	for _, route := range ws.GetRoutes() {
 		methods, _ := route.GetMethods()
 		r.HandleFunc(route.Path, route.Handle).Methods(methods...)
 	}

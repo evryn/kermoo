@@ -5,9 +5,17 @@ import (
 	"time"
 )
 
-// FluentDuration represents a parsed time.Duration value.
-// type FluentDuration ParsedValue[time.Duration]
-
+// FluentDuration is a human-friendly representation of a duration. Use golang-format durations
+// to define them - such as: 1h (hour), 2m (minute), 5s (second), 100ms (milisecond),
+// 500ns (nanosecond), etc. You can also combine them too: 1m8s100ms
+//
+// Here are a few examples on how to define your desired duration:
+//
+// - Define an specific duration like "100ms". I'll use it exactly as is.
+//
+// - Define a ranged duration like "200ms to 2s". I'll find a value randomly between them.
+//
+// - Define an array of durations like "1s, 200ms, 3m100ms". I'll pick one randomly.
 type FluentDuration struct {
 	input string
 	pv    *ParsedValue[time.Duration]

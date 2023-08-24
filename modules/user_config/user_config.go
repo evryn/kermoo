@@ -10,12 +10,38 @@ import (
 )
 
 type UserConfigType struct {
-	SchemaVersion string           `json:"schemaVersion"`
-	Process       *process.Process `json:"process"`
-	CpuLoad       *cpu.CpuLoader   `json:"cpuLoad"`
-	MemoryLeak    *memory.MemoryLeak
-	Plans         []*planner.Plan         `json:"plans"`
-	WebServers    []*web_server.WebServer `json:"webServers"`
+	// SchemaVersion is an optional indication of the schema version of the current
+	// given configuration. It's here for future backwards compatibility.
+	SchemaVersion string `json:"schemaVersion"`
+
+	// Process optionally controls the execution of the main process. It's to determine an initial
+	// delay and/or sudden exit of the process in the given time.
+	//
+	// By default, the process won't have any additional delay or perform sudden exit.
+	Process *process.Process `json:"process"`
+
+	// CpuLoad optionally simulates the CPU load of the machine. You can specify interval, duration
+	// and load of it in percentage.
+	//
+	// By default, no CPU load is simulated.
+	CpuLoad *cpu.CpuLoader `json:"cpuLoad"`
+
+	// MemoryLeak optionally simulates the memory leak by consuming the memory of the machine.
+	// You can specify interval, duration and size of the leak.
+	//
+	// By default, no memory leak is simulated.
+	MemoryLeak *memory.MemoryLeak
+
+	// WebServers is an optional array of web servers that will be used to serve defined routes.
+	// It can be configured to fail with percentage over an specific duration of time with specific
+	// interval. Routes can be configured too.
+	//
+	// By default, no web server is initiated.
+	WebServers []*web_server.WebServer `json:"webServers"`
+
+	// Plans is an optional array of plans which is there to avoid re-defining some repeatitive
+	// failure plans. It can be refered from a webServer, route, cpuLoad, or memoryLeak.
+	Plans []*planner.Plan `json:"plans"`
 }
 
 func (u *UserConfigType) Validate() error {

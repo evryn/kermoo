@@ -47,9 +47,12 @@ Want to see how your system fares against the worst? Or perhaps you've got a tad
     - Because who doesn't want to spring a leak now and then? Choose your memory size and duration.
 
 ## 🔆 Installation
-Kermoo is available as:
-- Docker Image
-- Helm Chart
+Kermoo is ready to be installed with:
+- Docker
+- Docker Compose
+- Docker Swarm
+- Kubernetes Kustomization
+- Kubernetes Helm Chart
 - Downloadable Binaries
 
 <center>Read More: <strong><a href="https://github.com/evryn/kermoo/wiki">Installation and Getting Started</a></strong></center>

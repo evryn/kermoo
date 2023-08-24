@@ -14,8 +14,14 @@ var _ planner.Plannable = &Process{}
 
 type Process struct {
 	planner.CanAssignPlan
+
+	// Delay optionally defines the initial startup delay. The process will sleep until
+	// that delay is reached.
 	Delay *fluent.FluentDuration `json:"delay"`
-	Exit  *ProcessExit           `json:"exit"`
+
+	// Exit optionally simulates sudden termination of the process in the given time with
+	// the given exit code.
+	Exit *ProcessExit `json:"exit"`
 }
 
 type ProcessExit struct {

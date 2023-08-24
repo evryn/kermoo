@@ -12,10 +12,28 @@ import (
 )
 
 type SubPlan struct {
-	Percentage *fluent.FluentFloat    `json:"percentage"`
-	Size       *fluent.FluentSize     `json:"size"`
-	Interval   *fluent.FluentDuration `json:"interval"`
-	Duration   *fluent.FluentDuration `json:"duration"`
+	// Percentage determines the percentage. Each module which reference this subplan's plan,
+	// may consider the percentage in their own language in the future. Currently,
+	// all modules consider the percentage as the chance of failing.
+	//
+	// For specific and ranged declearations, it's going to use that but when an array of
+	// percentages are specified, it'll act like a graph of bars and iterate over them.
+	Percentage *fluent.FluentFloat `json:"percentage"`
+
+	// Size determines the digital storage size. Currently, only memory leak module uses it.
+	//
+	// For specific and ranged declearations, it's going to use that but when an array of
+	// sizes are specified, it'll act like a graph of bars and iterate over them.
+	Size *fluent.FluentSize `json:"size"`
+
+	// Interval decides how long each sub-plan cycle should last. A value above one second is recommended
+	// but you're free  to use any interval. Default is one second.
+	Interval *fluent.FluentDuration `json:"interval"`
+
+	// Duration defines the duration of the entire sub-plan. Since you're using sub-plans,
+	// it's a good practice to have sub-plans with specific duration and then leave the last
+	// sub-plan's duration empty so it'll last forever.
+	Duration *fluent.FluentDuration `json:"duration"`
 
 	cycleValues  []CycleValue
 	relatedPlan  *Plan

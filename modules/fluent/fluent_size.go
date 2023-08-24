@@ -4,9 +4,17 @@ import (
 	"encoding/json"
 )
 
-// FluentSize represents a parsed int64 value.
-// type FluentSize ParsedValue[int64]
-
+// FluentSize is a human-friendly representation of a digital size (like memory size).
+// You can specify them using: 50 (bytes), 100Ki (kilibytes), 100K (kilobytes), 5Mi, 60M, 1G, 1Gi, etc.
+//
+// Here are a few examples on how to define your desired value:
+//
+// - Define an specific size like "100Mi". I'll use it exactly as is.
+//
+// - Define a ranged size like "100Mi to 1Gi". I'll find a value randomly between them.
+//
+// - Define an array of size like "20Mi, 150K, 100, 1G". Some modules will pick one among them
+// randomly or iterate over them like a graph of bars.
 type FluentSize struct {
 	input string
 	pv    *ParsedValue[int64]

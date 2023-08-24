@@ -15,20 +15,18 @@ import (
 )
 
 func TestWebserverEndToEnd(t *testing.T) {
-	t.Run("works with minimal config", func(t *testing.T) {
+	t.Run("works with defaults", func(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
             webServers:
             - port: 8080
-              routes:
-              - path: /my-world
 		`, 2*time.Second)
 
 		// Wait a few while for webserver to become available
 		time.Sleep(500 * time.Millisecond)
 
-		AssertHttpResponseContains(t, "GET", "http://0.0.0.0:8080/my-world", "Hello from Kermoo!")
+		AssertHttpResponseContains(t, "GET", "http://0.0.0.0:8080/livez", "I'm Alive!")
 
 		e2e.Wait()
 

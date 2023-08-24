@@ -4,9 +4,17 @@ import (
 	"encoding/json"
 )
 
-// FluentFloat represents a parsed float64 value.
-// type FluentFloat ParsedValue[float64]
-
+// FluentFloat is a human-friendly representation of a float amount like percentage.
+// You can specify them like: 0, 2.5, 100, 60.5, ...
+//
+// Here are a few examples on how to define your desired value:
+//
+// - Define an specific duration like "20.8". I'll use it exactly as is.
+//
+// - Define a ranged duration like "5.2 to 40". I'll find a value randomly between them.
+//
+// - Define an array of durations like "1.5, 20, 50, 0". Some modules will pick one among them
+// randomly or iterate over them like a graph of bars.
 type FluentFloat struct {
 	input string
 	pv    *ParsedValue[float64]

@@ -14,11 +14,29 @@ var _ planner.Plannable = &CpuLoader{}
 type CpuLoader struct {
 	planner.CanAssignPlan
 
+	// PlanRefs is an optional list of plan names. It can used to avoid redundant
+	// re-declearing of plans in large-scale configurations.
+	// PlanRefs overrides Percentage, Interval and Duration fields are overrided in favor
+	// of the one defined in the referenced plan.
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage *fluent.FluentFloat    `json:"percentage"`
-	Interval   *fluent.FluentDuration `json:"interval"`
-	Duration   *fluent.FluentDuration `json:"duration"`
+	// Percentage determines CPU load in percentage. 0 means no additional load and 100 means
+	// to use all cores as much as possible. The percentage is not guaranteed to be accurate.
+	//
+	// For specific and ranged declearations, it's going to use that but when an array of
+	// percentages are specified, it'll act like a graph of bars and iterate over them.
+	Percentage *fluent.FluentFloat `json:"percentage"`
+
+	// Interval decides how long each load cycle should last. A value above one second is recommended
+	// but you're free  to use any interval. Default is one second.
+	Interval *fluent.FluentDuration `json:"interval"`
+
+	// Duration defines the duration of the entire CPU load module. Leave it empty for
+	// life-long running or specify one to end the module completely after that and won't do
+	// any additional load.
+	// In fact, Duration/Interval determines the number of cycle, if defined. Default is empty
+	// for unlimited activity.
+	Duration *fluent.FluentDuration `json:"duration"`
 
 	ctx    context.Context
 	cancel context.CancelFunc
