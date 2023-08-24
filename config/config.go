@@ -28,9 +28,7 @@ var (
 	BuildDate      string
 	Default        = DefaultTemplate{
 		Planner: PlannerDefault{
-			Minimum:  0.0,
-			Maximum:  1.0,
-			Interval: 2 * time.Second,
+			Interval: 1 * time.Second,
 		},
 		WebServer: WebServerDefault{
 			Port:      80,
