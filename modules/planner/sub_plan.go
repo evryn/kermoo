@@ -6,17 +6,16 @@ import (
 	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/utils"
-	"kermoo/modules/values"
 	"time"
 
 	"go.uber.org/zap"
 )
 
 type SubPlan struct {
-	Percentage *fluent.FluentFloat `json:"percentage"`
-	Size       *fluent.FluentSize  `json:"size"`
-	Interval   *values.Duration    `json:"interval"`
-	Duration   *values.Duration    `json:"duration"`
+	Percentage *fluent.FluentFloat    `json:"percentage"`
+	Size       *fluent.FluentSize     `json:"size"`
+	Interval   *fluent.FluentDuration `json:"interval"`
+	Duration   *fluent.FluentDuration `json:"duration"`
 
 	cycleValues  []CycleValue
 	relatedPlan  *Plan
@@ -81,14 +80,14 @@ func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
 
 func (s *SubPlan) getInterval() time.Duration {
 	if s.Interval != nil {
-		return time.Duration(*s.Interval)
+		return s.Interval.Get()
 	}
 
 	return config.Default.Planner.Interval
 }
 
 func (s *SubPlan) computeRequiredCycles() uint64 {
-	dur := time.Duration(*s.Duration)
+	dur := s.Duration.Get()
 	return uint64(dur.Nanoseconds() / s.getInterval().Nanoseconds())
 }
 

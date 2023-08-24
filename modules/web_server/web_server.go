@@ -7,7 +7,6 @@ import (
 	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 	"net/http"
 	"time"
 
@@ -19,9 +18,9 @@ import (
 type WebServerFault struct {
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage fluent.FluentFloat `json:"percentage"`
-	Interval   *values.Duration   `json:"interval"`
-	Duration   *values.Duration   `json:"duration"`
+	Percentage fluent.FluentFloat     `json:"percentage"`
+	Interval   *fluent.FluentDuration `json:"interval"`
+	Duration   *fluent.FluentDuration `json:"duration"`
 }
 
 type WebServer struct {

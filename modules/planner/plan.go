@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
-	"kermoo/modules/values"
 	"time"
 
 	"go.uber.org/zap"
 )
 
 type Plan struct {
-	Percentage        *fluent.FluentFloat `json:"percentage"`
-	Size              *fluent.FluentSize  `json:"size"`
-	Interval          *values.Duration    `json:"interval"`
-	Duration          *values.Duration    `json:"duration"`
-	Name              *string             `json:"name"`
-	SubPlans          []SubPlan           `json:"subPlans"`
+	Percentage        *fluent.FluentFloat    `json:"percentage"`
+	Size              *fluent.FluentSize     `json:"size"`
+	Interval          *fluent.FluentDuration `json:"interval"`
+	Duration          *fluent.FluentDuration `json:"duration"`
+	Name              *string                `json:"name"`
+	SubPlans          []SubPlan              `json:"subPlans"`
 	plannables        []*Plannable
 	currentCycleValue *CycleValue
 	isDedicated       bool

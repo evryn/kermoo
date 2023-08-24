@@ -35,8 +35,8 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
-			Interval: &interval_10ms,
-			Duration: &duration_50ms,
+			Interval: fluent.NewMustFluentDuration("10ms"),
+			Duration: fluent.NewMustFluentDuration("50ms"),
 			Name:     &name,
 		})
 
@@ -63,8 +63,8 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
-			Interval: &interval_10ms,
-			Duration: &duration_50ms,
+			Interval: fluent.NewMustFluentDuration("10ms"),
+			Duration: fluent.NewMustFluentDuration("50ms"),
 			Name:     &name,
 		})
 
@@ -92,8 +92,8 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
-			Interval: &interval_10ms,
-			Duration: &duration_50ms,
+			Interval: fluent.NewMustFluentDuration("10ms"),
+			Duration: fluent.NewMustFluentDuration("50ms"),
 			Name:     &name,
 		})
 
@@ -143,18 +143,18 @@ func TestSubPlanExecution(t *testing.T) {
 			SubPlans: []planner.SubPlan{
 				{
 					Percentage: fluent.NewMustFluentFloat("50"),
-					Interval:   &interval_10ms,
-					Duration:   &duration_50ms,
+					Interval:   fluent.NewMustFluentDuration("10ms"),
+					Duration:   fluent.NewMustFluentDuration("50ms"),
 				},
 				{
 					Percentage: fluent.NewMustFluentFloat("10 to 90"),
-					Interval:   &interval_30ms,
-					Duration:   &duration_60ms,
+					Interval:   fluent.NewMustFluentDuration("30ms"),
+					Duration:   fluent.NewMustFluentDuration("60ms"),
 				},
 				{
 					Percentage: fluent.NewMustFluentFloat("20, 30, 40"),
-					Interval:   &interval_10ms,
-					Duration:   &duration_50ms,
+					Interval:   fluent.NewMustFluentDuration("10ms"),
+					Duration:   fluent.NewMustFluentDuration("50ms"),
 				},
 			},
 		})
@@ -195,17 +195,17 @@ func TestSubPlanExecution(t *testing.T) {
 			SubPlans: []planner.SubPlan{
 				{
 					Percentage: fluent.NewMustFluentFloat("50"),
-					Interval:   &interval_10ms,
-					Duration:   &duration_50ms,
+					Interval:   fluent.NewMustFluentDuration("10ms"),
+					Duration:   fluent.NewMustFluentDuration("50ms"),
 				},
 				{
 					Percentage: fluent.NewMustFluentFloat("10 to 90"),
-					Interval:   &interval_30ms,
-					Duration:   &duration_60ms,
+					Interval:   fluent.NewMustFluentDuration("30ms"),
+					Duration:   fluent.NewMustFluentDuration("60ms"),
 				},
 				{
 					Percentage: fluent.NewMustFluentFloat("20, 30, 40"),
-					Interval:   &interval_10ms,
+					Interval:   fluent.NewMustFluentDuration("10ms"),
 				},
 			},
 		})

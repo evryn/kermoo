@@ -1,11 +1,9 @@
 package process
 
 import (
-	"fmt"
 	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 	"os"
 
 	"go.uber.org/zap"
@@ -16,12 +14,12 @@ var _ planner.Plannable = &Process{}
 
 type Process struct {
 	planner.CanAssignPlan
-	Delay *values.SingleDuration `json:"delay"`
+	Delay *fluent.FluentDuration `json:"delay"`
 	Exit  *ProcessExit           `json:"exit"`
 }
 
 type ProcessExit struct {
-	After values.SingleDuration `json:"after"`
+	After fluent.FluentDuration `json:"after"`
 	Code  uint                  `json:"code"`
 }
 
@@ -30,7 +28,7 @@ func (p *Process) GetName() string {
 }
 
 func (p *Process) HasInlinePlan() bool {
-	return p.Exit != nil
+	return p.MakeInlinePlan() != nil
 }
 
 func (p Process) GetDesiredPlanNames() []string {
@@ -38,18 +36,6 @@ func (p Process) GetDesiredPlanNames() []string {
 }
 
 func (p Process) Validate() error {
-	if p.Delay != nil {
-		if _, err := p.Delay.ToStandardDuration(); err != nil {
-			return fmt.Errorf("unable to get delay duration: %v", err)
-		}
-	}
-
-	if p.Exit != nil {
-		if _, err := p.Exit.After.ToStandardDuration(); err != nil {
-			return fmt.Errorf("unable to get exit duration: %v", err)
-		}
-	}
-
 	return nil
 }
 
@@ -76,10 +62,13 @@ func (p *Process) GetPlanCycleHooks() planner.CycleHooks {
 }
 
 func (p *Process) MakeInlinePlan() *planner.Plan {
-	value, _ := p.Exit.After.ToStandardDuration()
+	if p.Exit == nil {
+		return nil
+	}
+
 	name := p.GetName()
 
-	valueDur := values.Duration(value)
+	valueDur := p.Exit.After
 
 	plan := planner.NewPlan(planner.Plan{
 		Name:     &name,

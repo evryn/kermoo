@@ -3,7 +3,6 @@ package cpu_test
 import (
 	"kermoo/modules/fluent"
 	"kermoo/modules/memory"
-	"kermoo/modules/values"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,20 +65,20 @@ func TestGetDesiredPlanNames(t *testing.T) {
 
 func TestMakeCustomPlan(t *testing.T) {
 	size := fluent.NewMustFluentSize("100 to 200")
-	duration := values.Duration(0)
-	interval := values.Duration(0)
+	duration := fluent.NewMustFluentDuration("0")
+	interval := fluent.NewMustFluentDuration("0")
 
 	leak := memory.MemoryLeak{
 		Size:     size,
-		Duration: &duration,
-		Interval: &interval,
+		Duration: duration,
+		Interval: interval,
 	}
 
 	plan := leak.MakeInlinePlan()
 
 	assert.Equal(t, size, plan.Size)
-	assert.Equal(t, int64(0), int64(*plan.Duration))
-	assert.Equal(t, int64(0), int64(*plan.Interval))
+	assert.Equal(t, int64(0), int64(plan.Duration.Get()))
+	assert.Equal(t, int64(0), int64(plan.Interval.Get()))
 }
 
 func TestMakeDefaultPlan(t *testing.T) {

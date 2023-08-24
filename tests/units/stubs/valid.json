@@ -1,13 +1,8 @@
 {
-  "schemaVersion": "0.1-beta",
+  "schemaVersion": "1",
   "process": {
       "exit": {
-        "after": {
-          "between": [
-              "10ms",
-              "1000ms"
-          ]
-        },
+        "after": "10ms to 1s100ms",
         "code": 2
       }
   }

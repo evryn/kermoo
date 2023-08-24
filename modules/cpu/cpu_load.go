@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 	"runtime"
 	"time"
 )
@@ -17,9 +16,9 @@ type CpuLoader struct {
 
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage *fluent.FluentFloat `json:"percentage"`
-	Interval   *values.Duration    `json:"interval"`
-	Duration   *values.Duration    `json:"duration"`
+	Percentage *fluent.FluentFloat    `json:"percentage"`
+	Interval   *fluent.FluentDuration `json:"interval"`
+	Duration   *fluent.FluentDuration `json:"duration"`
 
 	ctx    context.Context
 	cancel context.CancelFunc

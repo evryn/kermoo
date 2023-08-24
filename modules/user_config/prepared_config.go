@@ -28,7 +28,7 @@ type PreparedConfigType struct {
 
 func (pc *PreparedConfigType) Start() {
 	if pc.Process != nil && pc.Process.Delay != nil {
-		dur, _ := pc.Process.Delay.ToStandardDuration()
+		dur := pc.Process.Delay.Get()
 		logger.Log.Info("sleeping because of process manager configuration...", zap.Duration("sleep", dur))
 		time.Sleep(dur)
 		logger.Log.Info("woke up.")

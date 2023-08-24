@@ -3,7 +3,6 @@ package cpu_test
 import (
 	"kermoo/modules/cpu"
 	"kermoo/modules/fluent"
-	"kermoo/modules/values"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,20 +65,20 @@ func TestGetDesiredPlanNames(t *testing.T) {
 
 func TestMakeCustomPlan(t *testing.T) {
 	percentage := fluent.NewMustFluentFloat("10 to 20")
-	duration := values.Duration(0)
-	interval := values.Duration(0)
+	duration := fluent.NewMustFluentDuration("0")
+	interval := fluent.NewMustFluentDuration("0")
 
 	load := cpu.CpuLoader{
 		Percentage: percentage,
-		Duration:   &duration,
-		Interval:   &interval,
+		Duration:   duration,
+		Interval:   interval,
 	}
 
 	plan := load.MakeInlinePlan()
 
 	assert.Equal(t, percentage, plan.Percentage)
-	assert.Equal(t, int64(0), int64(*plan.Duration))
-	assert.Equal(t, int64(0), int64(*plan.Interval))
+	assert.Equal(t, int64(0), int64(plan.Duration.Get()))
+	assert.Equal(t, int64(0), int64(plan.Interval.Get()))
 }
 
 func TestMakeDefaultPlan(t *testing.T) {

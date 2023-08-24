@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 )
 
 var _ planner.Plannable = &MemoryLeak{}
@@ -14,9 +13,9 @@ type MemoryLeak struct {
 
 	PlanRefs []string `json:"planRefs"`
 
-	Size     *fluent.FluentSize `json:"size"`
-	Interval *values.Duration   `json:"interval"`
-	Duration *values.Duration   `json:"duration"`
+	Size     *fluent.FluentSize     `json:"size"`
+	Interval *fluent.FluentDuration `json:"interval"`
+	Duration *fluent.FluentDuration `json:"duration"`
 
 	leakedData []byte
 }

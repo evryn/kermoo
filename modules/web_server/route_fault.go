@@ -2,7 +2,6 @@ package web_server
 
 import (
 	"kermoo/modules/fluent"
-	"kermoo/modules/values"
 	"math/rand"
 	"net/http"
 )
@@ -10,13 +9,13 @@ import (
 type RouteFault struct {
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage fluent.FluentFloat `json:"percentage"`
-	Interval   *values.Duration   `json:"interval"`
-	Duration   *values.Duration   `json:"duration"`
+	Percentage fluent.FluentFloat     `json:"percentage"`
+	Interval   *fluent.FluentDuration `json:"interval"`
+	Duration   *fluent.FluentDuration `json:"duration"`
 
-	ResponseDelay values.Duration `json:"responseDelay"`
-	ClientErrors  *bool           `json:"clientErrors"`
-	ServerErrors  *bool           `json:"serverErrors"`
+	ResponseDelay fluent.FluentDuration `json:"responseDelay"`
+	ClientErrors  *bool                 `json:"clientErrors"`
+	ServerErrors  *bool                 `json:"serverErrors"`
 }
 
 type RouteStatus struct {

@@ -32,13 +32,13 @@ func TestLoadUserConfig(t *testing.T) {
 			name:     "filename is stdin and valid json",
 			filename: "-",
 			isError:  false,
-			stdin:    "{\"schemaVersion\":\"0.1-beta\",\"process\":{\"exit\":{\"after\":{\"between\":[\"10ms\",\"1000ms\"]},\"code\":2}}}",
+			stdin:    "{\"schemaVersion\":\"1\",\"process\":{\"exit\":{\"after\":\"10ms to 1s100ms\",\"code\":2}}}",
 		},
 		{
 			name:     "filename is stdin and valid yaml",
 			filename: "-",
 			isError:  false,
-			stdin:    "schemaVersion: \"0.1-beta\"\nprocess:\n  exit:\n    after:\n      between: [10ms, 1000ms]\n    code: 2",
+			stdin:    "schemaVersion: \"1\"\nprocess:\n  exit:\n    after:\n      10ms to 1s100ms\n    code: 2",
 		},
 		{
 			name:     "valid json file",
