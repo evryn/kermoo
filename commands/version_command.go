@@ -15,9 +15,9 @@ func GetVersionCommand() *cobra.Command {
 			fmt.Println(config.AppTitle)
 			fmt.Println(config.AppDescription)
 			fmt.Printf("Version: %s\nBuild: %s (%s)\n", config.BuildVersion, config.BuildRef, config.BuildDate)
-			fmt.Println("Home: https://github.com/evryn/kermoo")
+			fmt.Println("Home: https://kermoo.dev")
 			fmt.Println("Source: https://github.com/evryn/kermoo")
-			fmt.Println("Made with 💖 by: Amirreza Nasiri and contributors.")
+			fmt.Println("Made with 💖 by Amirreza Nasiri and contributors.")
 		},
 	}
 
