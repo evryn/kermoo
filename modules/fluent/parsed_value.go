@@ -1,6 +1,7 @@
 package fluent
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -56,6 +57,20 @@ func (p *ParsedValue[T]) GetValues() []T {
 	}
 
 	return p.values
+}
+
+// IsRanged determines whether the value is a ranged one
+func (p *ParsedValue[T]) IsRanged() bool {
+	return p.isBetween
+}
+
+// GetRange returns the range as min and max values
+func (p *ParsedValue[T]) GetRange() (T, T, error) {
+	if !p.isBetween {
+		return 0, 0, fmt.Errorf("value is not ranged")
+	}
+
+	return p.values[0], p.values[1], nil
 }
 
 // getBetween is a helper method that given a range, returns a random value falling between

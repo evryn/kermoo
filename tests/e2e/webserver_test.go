@@ -103,8 +103,7 @@ func TestWebserverEndToEnd(t *testing.T) {
                   static: hello-world
               fault:
                 interval: 100ms
-                percentage:
-                  exactly: 0.5
+                percentage: 50
 		`, 3*time.Second)
 
 		// Wait a few while for webserver to become available
@@ -127,8 +126,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: disaster
               interval: 100ms
-              percentage:
-                exactly: 0.5
+              percentage: 50
             webServers:
             - port: 8080
               routes:
@@ -160,17 +158,13 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: disaster
               subPlans:
-              - percentage:
-                  exactly: 1
+              - percentage: 100
                 interval: 20ms
                 duration: 1s
-              - percentage:
-                  between: [0, 0]
+              - percentage: 0 to 0
                 interval: 20ms
                 duration: 1s
-              - percentage:
-                  chart:
-                    bars: [0.5, 0.4, 1]
+              - percentage: 50, 40, 100
                 interval: 20ms
                 duration: 1s
             webServers:
@@ -220,8 +214,7 @@ func TestWebserverEndToEnd(t *testing.T) {
                   static: hello-world
                 fault:
                   interval: 100ms
-                  percentage:
-                      exactly: 0.5
+                  percentage: 50
 		`, 3*time.Second)
 
 		// Wait a few while for webserver to become available
@@ -247,8 +240,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: readiness
               interval: 100ms
-              percentage:
-                exactly: 0.4
+              percentage: 40
             webServers:
             - port: 8080
               routes:
@@ -265,7 +257,7 @@ func TestWebserverEndToEnd(t *testing.T) {
 		// Wait a few while for webserver to become available
 		time.Sleep(500 * time.Millisecond)
 
-		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 30*time.Millisecond)
+		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 40*time.Millisecond)
 
 		e2e.Wait()
 
@@ -287,7 +279,8 @@ func AssertHttpResponseContains(t *testing.T, method string, url string, expecte
 }
 
 func AssertHttpResponseCode(t *testing.T, method string, url string, expectedStatus int) {
-	_, response, _ := sendRequest(method, url, nil)
+	_, response, err := sendRequest(method, url, nil)
+	require.NoError(t, err)
 	assert.Equal(t, expectedStatus, response.StatusCode)
 }
 

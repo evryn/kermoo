@@ -2,6 +2,7 @@ package cpu_test
 
 import (
 	"kermoo/modules/cpu"
+	"kermoo/modules/fluent"
 	"kermoo/modules/values"
 	"testing"
 
@@ -28,15 +29,11 @@ func TestValidate(t *testing.T) {
 
 	t.Run("should return error when plan validation fails", func(t *testing.T) {
 		load := cpu.CpuLoader{
-			Percentage: &values.MultiFloat{
-				SingleFloat: values.SingleFloat{
-					Between: []float32{0.1},
-				},
-			},
+			Percentage: fluent.NewMustFluentFloat("1 to "),
 		}
 		err := load.Validate()
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "plan validation")
+		assert.Contains(t, err.Error(), "specification")
 	})
 }
 
@@ -48,11 +45,7 @@ func TestGetUid(t *testing.T) {
 func TestHasCustomPlan(t *testing.T) {
 	t.Run("with custom plan", func(t *testing.T) {
 		load := cpu.CpuLoader{
-			Percentage: &values.MultiFloat{
-				SingleFloat: values.SingleFloat{
-					Between: []float32{0.1, 0.2},
-				},
-			},
+			Percentage: fluent.NewMustFluentFloat("10 to 20"),
 		}
 		assert.True(t, load.HasInlinePlan())
 	})
@@ -72,16 +65,12 @@ func TestGetDesiredPlanNames(t *testing.T) {
 }
 
 func TestMakeCustomPlan(t *testing.T) {
-	percentage := values.MultiFloat{
-		SingleFloat: values.SingleFloat{
-			Between: []float32{0.1, 0.2},
-		},
-	}
+	percentage := fluent.NewMustFluentFloat("10 to 20")
 	duration := values.Duration(0)
 	interval := values.Duration(0)
 
 	load := cpu.CpuLoader{
-		Percentage: &percentage,
+		Percentage: percentage,
 		Duration:   &duration,
 		Interval:   &interval,
 	}
@@ -89,8 +78,8 @@ func TestMakeCustomPlan(t *testing.T) {
 	plan := load.MakeInlinePlan()
 
 	assert.Equal(t, percentage, plan.Percentage)
-	assert.Equal(t, duration, plan.Duration)
-	assert.Equal(t, interval, plan.Interval)
+	assert.Equal(t, int64(0), int64(*plan.Duration))
+	assert.Equal(t, int64(0), int64(*plan.Interval))
 }
 
 func TestMakeDefaultPlan(t *testing.T) {
@@ -101,8 +90,7 @@ func TestMakeDefaultPlan(t *testing.T) {
 func TestStart(t *testing.T) {
 	cu := &cpu.CpuLoader{}
 
-	usage := float32(0.5)
-	cu.Start(usage)
+	cu.Start(50)
 
 	// Check that ctx and cancel are set
 	ctx, cancel := cu.GetContextAndCancel()
@@ -122,7 +110,7 @@ func TestStart(t *testing.T) {
 
 func TestStop(t *testing.T) {
 	cu := &cpu.CpuLoader{}
-	cu.Start(float32(0.5))
+	cu.Start(50)
 
 	// Stop and check that the context is canceled
 	cu.Stop()

@@ -2,6 +2,7 @@ package memory
 
 import (
 	"fmt"
+	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
 	"kermoo/modules/values"
 )
@@ -13,9 +14,9 @@ type MemoryLeak struct {
 
 	PlanRefs []string `json:"planRefs"`
 
-	Size     *values.MultiSize `json:"size"`
-	Interval *values.Duration  `json:"interval"`
-	Duration *values.Duration  `json:"duration"`
+	Size     *fluent.FluentSize `json:"size"`
+	Interval *values.Duration   `json:"interval"`
+	Duration *values.Duration   `json:"duration"`
 
 	leakedData []byte
 }
@@ -56,8 +57,9 @@ func (mu *MemoryLeak) Validate() error {
 
 func (mu *MemoryLeak) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		size, _ := mu.GetAssignedPlans()[0].GetCurrentValue().Size.ToSize()
-		mu.StartLeaking(size)
+		mu.StartLeaking(
+			mu.GetAssignedPlans()[0].GetCurrentValue().Size,
+		)
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 
@@ -90,8 +92,8 @@ func (mu *MemoryLeak) MakeDefaultPlan() *planner.Plan {
 	return nil
 }
 
-func (mu *MemoryLeak) StartLeaking(size values.Size) {
-	mu.leakedData = make([]byte, size.ToBytes())
+func (mu *MemoryLeak) StartLeaking(size int64) {
+	mu.leakedData = make([]byte, size)
 }
 
 func (mu *MemoryLeak) StopLeaking() {

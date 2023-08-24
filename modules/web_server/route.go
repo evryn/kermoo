@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
-	"kermoo/modules/values"
 	"net/http"
 	"os"
 	"strings"
@@ -58,11 +58,7 @@ func (route *Route) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
 	// Value of 0.0 indicates that the route will never fail.
-	plan.Percentage = &values.MultiFloat{
-		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](0.0),
-		},
-	}
+	plan.Percentage = fluent.NewMustFluentFloat("0.0")
 
 	return &plan
 }
@@ -82,7 +78,7 @@ func (route *Route) Handle(w http.ResponseWriter, r *http.Request) {
 		shouldSuccess := true
 
 		for _, plan := range route.GetAssignedPlans() {
-			if *plan.GetCurrentValue().ComputedPercentageChance {
+			if !*plan.GetCurrentValue().ComputedPercentageChance {
 				shouldSuccess = false
 				break
 			}

@@ -3,6 +3,7 @@ package cpu
 import (
 	"context"
 	"fmt"
+	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
 	"kermoo/modules/values"
 	"runtime"
@@ -16,9 +17,9 @@ type CpuLoader struct {
 
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage *values.MultiFloat `json:"percentage"`
-	Interval   *values.Duration   `json:"interval"`
-	Duration   *values.Duration   `json:"duration"`
+	Percentage *fluent.FluentFloat `json:"percentage"`
+	Interval   *values.Duration    `json:"interval"`
+	Duration   *values.Duration    `json:"duration"`
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -56,8 +57,9 @@ func (cu CpuLoader) Validate() error {
 
 func (cu *CpuLoader) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		percentage, _ := cu.GetAssignedPlans()[0].GetCurrentValue().Percentage.ToFloat()
-		cu.Start(percentage)
+		cu.Start(
+			cu.GetAssignedPlans()[0].GetCurrentValue().Percentage,
+		)
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 
@@ -90,10 +92,10 @@ func (cu *CpuLoader) MakeDefaultPlan() *planner.Plan {
 	return nil
 }
 
-func (cu *CpuLoader) Start(usage float32) {
+func (cu *CpuLoader) Start(usagePercentage float64) {
 	cu.ctx, cu.cancel = context.WithCancel(context.Background())
 
-	cu.runCpuLoad(runtime.NumCPU(), int(usage*100))
+	cu.runCpuLoad(runtime.NumCPU(), int(usagePercentage))
 }
 
 func (cu *CpuLoader) Stop() {

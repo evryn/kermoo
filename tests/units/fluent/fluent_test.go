@@ -1,6 +1,8 @@
 package fluent_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -140,7 +142,13 @@ func TestFluentFloat_GetCachedValue(t *testing.T) {
 	})
 
 	t.Run("comma-separated floats", func(t *testing.T) {
-		fl, err := fluent.NewFluentFloat("1, 2.5, 5, 6.5")
+		var numbers []string
+
+		for i := 1; i <= 1000; i++ {
+			numbers = append(numbers, fmt.Sprintf("%d", i))
+		}
+
+		fl, err := fluent.NewFluentFloat(strings.Join(numbers, ", "))
 		require.NoError(t, err)
 
 		v1 := fl.GetCached()

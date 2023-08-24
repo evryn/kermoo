@@ -1,6 +1,7 @@
 package cpu_test
 
 import (
+	"kermoo/modules/fluent"
 	"kermoo/modules/memory"
 	"kermoo/modules/values"
 	"testing"
@@ -28,31 +29,23 @@ func TestValidate(t *testing.T) {
 
 	t.Run("should return error when plan validation fails", func(t *testing.T) {
 		leak := memory.MemoryLeak{
-			Size: &values.MultiSize{
-				SingleSize: values.SingleSize{
-					Between: []values.Size{100},
-				},
-			},
+			Size: fluent.NewMustFluentSize("100 to "),
 		}
 		err := leak.Validate()
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "plan validation")
+		assert.Contains(t, err.Error(), "leak specifications")
 	})
 }
 
 func TestGetUid(t *testing.T) {
 	c := &memory.MemoryLeak{}
-	assert.Equal(t, "cpu-manager", c.GetName())
+	assert.Equal(t, "memory-leaker", c.GetName())
 }
 
 func TestHasCustomPlan(t *testing.T) {
 	t.Run("with custom plan", func(t *testing.T) {
 		leak := memory.MemoryLeak{
-			Size: &values.MultiSize{
-				SingleSize: values.SingleSize{
-					Between: []values.Size{100, 200},
-				},
-			},
+			Size: fluent.NewMustFluentSize("100 to 200"),
 		}
 		assert.True(t, leak.HasInlinePlan())
 	})
@@ -72,16 +65,12 @@ func TestGetDesiredPlanNames(t *testing.T) {
 }
 
 func TestMakeCustomPlan(t *testing.T) {
-	size := values.MultiSize{
-		SingleSize: values.SingleSize{
-			Between: []values.Size{100, 200},
-		},
-	}
+	size := fluent.NewMustFluentSize("100 to 200")
 	duration := values.Duration(0)
 	interval := values.Duration(0)
 
 	leak := memory.MemoryLeak{
-		Size:     &size,
+		Size:     size,
 		Duration: &duration,
 		Interval: &interval,
 	}
@@ -89,8 +78,8 @@ func TestMakeCustomPlan(t *testing.T) {
 	plan := leak.MakeInlinePlan()
 
 	assert.Equal(t, size, plan.Size)
-	assert.Equal(t, duration, plan.Duration)
-	assert.Equal(t, interval, plan.Interval)
+	assert.Equal(t, int64(0), int64(*plan.Duration))
+	assert.Equal(t, int64(0), int64(*plan.Interval))
 }
 
 func TestMakeDefaultPlan(t *testing.T) {
@@ -103,7 +92,7 @@ func TestStartAndStopLeaking(t *testing.T) {
 
 	assert.Len(t, load.GetLeakedData(), 0)
 
-	load.StartLeaking(values.Size(100))
+	load.StartLeaking(100)
 
 	assert.Len(t, load.GetLeakedData(), 100)
 

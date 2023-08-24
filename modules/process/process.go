@@ -2,9 +2,9 @@ package process
 
 import (
 	"fmt"
+	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/utils"
 	"kermoo/modules/values"
 	"os"
 
@@ -88,11 +88,7 @@ func (p *Process) MakeInlinePlan() *planner.Plan {
 	})
 
 	// Set a dummy value since plan validation requires it
-	plan.Percentage = &values.MultiFloat{
-		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](1.0),
-		},
-	}
+	plan.Percentage = fluent.NewMustFluentFloat("100")
 
 	return &plan
 }

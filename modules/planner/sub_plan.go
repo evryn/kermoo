@@ -3,6 +3,7 @@ package planner
 import (
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/utils"
 	"kermoo/modules/values"
@@ -12,10 +13,10 @@ import (
 )
 
 type SubPlan struct {
-	Percentage *values.MultiFloat `json:"percentage"`
-	Size       *values.MultiSize  `json:"size"`
-	Interval   *values.Duration   `json:"interval"`
-	Duration   *values.Duration   `json:"duration"`
+	Percentage *fluent.FluentFloat `json:"percentage"`
+	Size       *fluent.FluentSize  `json:"size"`
+	Interval   *values.Duration    `json:"interval"`
+	Duration   *values.Duration    `json:"duration"`
 
 	cycleValues  []CycleValue
 	relatedPlan  *Plan
@@ -24,85 +25,49 @@ type SubPlan struct {
 }
 
 type CycleValue struct {
-	Percentage               values.SingleFloat
-	Size                     values.SingleSize
+	Percentage               float64
+	Size                     int64
 	ComputedPercentageChance *bool
 }
 
 func (cv *CycleValue) ComputeStaticValues() {
-	value, _ := cv.Percentage.ToFloat()
-	computedPercentageState := utils.PercentageToBoolean(value)
+	computedPercentageState := utils.PercentageToBoolean(cv.Percentage)
 	cv.ComputedPercentageChance = &computedPercentageState
 }
 
-func (s *SubPlan) getSingleSizes() ([]values.SingleSize, error) {
-	var err error
-	var singleSizes []values.SingleSize
-
-	if s.Size != nil {
-		singleSizes, err = s.Size.ToSingleSizes()
-
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert size to single values: %v", err)
-		}
-	}
-
-	return singleSizes, nil
-}
-
-func (s *SubPlan) getSinglePercentages() ([]values.SingleFloat, error) {
-	var err error
-	var singlePercentages []values.SingleFloat
-
-	if s.Percentage != nil {
-		singlePercentages, err = s.Percentage.ToSingleFloats()
-
-		if err != nil {
-			return nil, fmt.Errorf("failed to convert value to single values: %v", err)
-		}
-	}
-
-	return singlePercentages, nil
-}
-
 func (s *SubPlan) computeCycleValues() ([]CycleValue, error) {
-	count := 0
 	var cycleValues []CycleValue
 
-	singleSizes, err := s.getSingleSizes()
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert size to single values: %v", err)
+	var sizes []int64
+	if s.Size != nil {
+		sizes = s.Size.GetArray()
 	}
 
-	if len(singleSizes) > count {
-		count = len(singleSizes)
+	count := len(sizes)
+
+	var percentages []float64
+	if s.Percentage != nil {
+		percentages = s.Percentage.GetArray()
 	}
 
-	singlePercentages, err := s.getSinglePercentages()
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert value to single values: %v", err)
+	if len(percentages) > count {
+		count = len(percentages)
 	}
 
-	if len(singlePercentages) > count {
-		count = len(singlePercentages)
-	}
-
-	if len(singleSizes) > 0 && len(singlePercentages) > 0 && len(singleSizes) != len(singlePercentages) {
-		return nil, fmt.Errorf("both size and values are set while the count of individual steps does not match together")
+	if len(sizes) > 0 && len(percentages) > 0 && len(sizes) != len(percentages) {
+		return nil, fmt.Errorf("both size and percentage are set while the count of individual items does not match together")
 	}
 
 	for i := 0; i < count; i++ {
-		percentage := values.NewZeroFloat()
-		size := values.NewZeroSize()
+		percentage := float64(0)
+		size := int64(0)
 
-		if len(singlePercentages) >= i+1 {
-			percentage = singlePercentages[i]
+		if len(percentages) >= i+1 {
+			percentage = percentages[i]
 		}
 
-		if len(singleSizes) >= i+1 {
-			size = singleSizes[i]
+		if len(sizes) >= i+1 {
+			size = sizes[i]
 		}
 
 		cycleValues = append(cycleValues, CycleValue{

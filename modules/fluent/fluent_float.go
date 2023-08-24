@@ -28,6 +28,10 @@ func (f FluentFloat) GetUpdatedCache() float64 {
 	return f.pv.GetUpdatedCacheValue()
 }
 
+func (f FluentFloat) GetParsedValue() *ParsedValue[float64] {
+	return f.pv
+}
+
 func (f *FluentFloat) MarshalJSON() ([]byte, error) {
 	return json.Marshal(f.input)
 }
@@ -65,4 +69,10 @@ func NewFluentFloat(input string) (*FluentFloat, error) {
 	}
 
 	return &fluent, nil
+}
+
+func NewMustFluentFloat(input string) *FluentFloat {
+	f, _ := NewFluentFloat(input)
+
+	return f
 }

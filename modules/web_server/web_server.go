@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/utils"
 	"kermoo/modules/values"
 	"net/http"
 	"time"
@@ -19,9 +19,9 @@ import (
 type WebServerFault struct {
 	PlanRefs []string `json:"planRefs"`
 
-	Percentage values.MultiFloat `json:"percentage"`
-	Interval   *values.Duration  `json:"interval"`
-	Duration   *values.Duration  `json:"duration"`
+	Percentage fluent.FluentFloat `json:"percentage"`
+	Interval   *values.Duration   `json:"interval"`
+	Duration   *values.Duration   `json:"duration"`
 }
 
 type WebServer struct {
@@ -138,11 +138,7 @@ func (ws *WebServer) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
 	// Value of 0.0 indicates that the webserver will never fail.
-	plan.Percentage = &values.MultiFloat{
-		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](0.0),
-		},
-	}
+	plan.Percentage = fluent.NewMustFluentFloat("0.0")
 
 	return &plan
 }
@@ -159,7 +155,7 @@ func (ws *WebServer) getPlanPercentageState() bool {
 	shouldListen := true
 
 	for _, plan := range ws.GetAssignedPlans() {
-		if *plan.GetCurrentValue().ComputedPercentageChance {
+		if !*plan.GetCurrentValue().ComputedPercentageChance {
 			shouldListen = false
 			break
 		}
