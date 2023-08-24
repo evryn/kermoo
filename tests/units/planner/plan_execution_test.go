@@ -4,7 +4,6 @@ import (
 	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 
 	"testing"
 	"time"
@@ -18,13 +17,6 @@ func teardownSubTest(t *testing.T) {
 
 var (
 	name          = "My Plan"
-	interval_10ms = values.Duration(10 * time.Millisecond)
-	interval_30ms = values.Duration(30 * time.Millisecond)
-	duration_50ms = values.Duration(50 * time.Millisecond)
-	duration_60ms = values.Duration(60 * time.Millisecond)
-	float_0_1     = float32(0.1)
-	float_0_5     = float32(0.5)
-	float_0_9     = float32(0.9)
 	acceptedError = float64(0.1)
 )
 
