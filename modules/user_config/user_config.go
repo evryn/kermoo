@@ -59,15 +59,18 @@ func (u *UserConfigType) GetPreparedConfig() (*PreparedConfigType, error) {
 
 	// Prepare process manager
 	if u.Process != nil {
-		if err := u.Process.Validate(); err != nil {
-			return nil, fmt.Errorf("invalid process manager: %v", err)
-		}
-
 		prepared.Process = u.Process
 
-		if err := prepared.preparePlannable(u.Process); err != nil {
-			return nil, fmt.Errorf("unable to prepare process manager: %v", err)
+		if u.Process.Exit != nil {
+			if err := u.Process.Validate(); err != nil {
+				return nil, fmt.Errorf("invalid process manager: %v", err)
+			}
+
+			if err := prepared.preparePlannable(u.Process); err != nil {
+				return nil, fmt.Errorf("unable to prepare process manager: %v", err)
+			}
 		}
+
 	}
 
 	// Prepare CPU Load

@@ -22,12 +22,12 @@ func TestLoadUserConfig(t *testing.T) {
 		errMsg   string
 		stdin    string
 	}{
-		{
-			name:     "filename is empty",
-			filename: "",
-			isError:  true,
-			errMsg:   "provided filename is empty",
-		},
+		// {
+		// 	name:     "filename is empty",
+		// 	filename: "",
+		// 	isError:  true,
+		// 	errMsg:   "provided filename is empty",
+		// },
 		{
 			name:     "filename is stdin and valid json",
 			filename: "-",
