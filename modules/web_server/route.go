@@ -38,6 +38,25 @@ type Route struct {
 	Fault *RouteFault `json:"fault"`
 }
 
+type RouteContent struct {
+	// Static defines an static text to be returned as the response body.
+	//
+	// Default is `Hellow from Kermoo!`
+	Static string `json:"static"`
+
+	// Whoami returns a whoami respose which contains information about the
+	// application, environment, and the received request
+	//
+	// Default is disabled.
+	Whoami bool `json:"whoami"`
+
+	// NoServerInfo indicates Whoami response to not include server information
+	// which might not be desirable for some environments.
+	//
+	// Default is disabled.
+	NoServerInfo bool `json:"serverInfo"`
+}
+
 func (route *Route) GetName() string {
 	return slug.Make(fmt.Sprintf("route-%s", route.Path))
 }
@@ -167,12 +186,6 @@ func (route *Route) Validate() error {
 	}
 
 	return nil
-}
-
-type RouteContent struct {
-	Static       string `json:"static"`
-	Whoami       bool   `json:"whoami"`
-	NoServerInfo bool   `json:"server_info"`
 }
 
 func (rc *RouteContent) GetReflectionContent(r *http.Request) ReflectorResponse {
