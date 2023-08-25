@@ -82,7 +82,7 @@ func (p *Process) MakeInlinePlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{
 		Name:     &name,
 		Interval: &valueDur,
-		Duration: &valueDur,
+		// Duration: &valueDur,
 	})
 
 	// Set a dummy value since plan validation requires it
