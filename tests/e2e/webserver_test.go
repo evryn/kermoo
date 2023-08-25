@@ -15,20 +15,18 @@ import (
 )
 
 func TestWebserverEndToEnd(t *testing.T) {
-	t.Run("works with minimal config", func(t *testing.T) {
+	t.Run("works with defaults", func(t *testing.T) {
 		e2e := NewE2E(t)
 
 		e2e.Start(`
             webServers:
             - port: 8080
-              routes:
-              - path: /my-world
 		`, 2*time.Second)
 
 		// Wait a few while for webserver to become available
 		time.Sleep(500 * time.Millisecond)
 
-		AssertHttpResponseContains(t, "GET", "http://0.0.0.0:8080/my-world", "Hello from Kermoo!")
+		AssertHttpResponseContains(t, "GET", "http://0.0.0.0:8080/livez", "I'm Alive!")
 
 		e2e.Wait()
 
@@ -102,10 +100,8 @@ func TestWebserverEndToEnd(t *testing.T) {
                 content:
                   static: hello-world
               fault:
-                plan:
-                  interval: 100ms
-                  percentage:
-                    exactly: 0.5
+                interval: 100ms
+                percentage: 50
 		`, 3*time.Second)
 
 		// Wait a few while for webserver to become available
@@ -128,8 +124,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: disaster
               interval: 100ms
-              percentage:
-                exactly: 0.5
+              percentage: 50
             webServers:
             - port: 8080
               routes:
@@ -161,17 +156,13 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: disaster
               subPlans:
-              - percentage:
-                  exactly: 0
+              - percentage: 100
                 interval: 20ms
                 duration: 1s
-              - percentage:
-                  between: [1, 1]
+              - percentage: 0 to 0
                 interval: 20ms
                 duration: 1s
-              - percentage:
-                  chart:
-                    bars: [0.5, 0.4, 1]
+              - percentage: 50, 40, 100
                 interval: 20ms
                 duration: 1s
             webServers:
@@ -220,10 +211,8 @@ func TestWebserverEndToEnd(t *testing.T) {
                 content:
                   static: hello-world
                 fault:
-                  plan:
-                    interval: 100ms
-                    percentage:
-                        exactly: 0.5
+                  interval: 100ms
+                  percentage: 50
 		`, 3*time.Second)
 
 		// Wait a few while for webserver to become available
@@ -249,8 +238,7 @@ func TestWebserverEndToEnd(t *testing.T) {
             plans:
             - name: readiness
               interval: 100ms
-              percentage:
-                exactly: 0.6
+              percentage: 40
             webServers:
             - port: 8080
               routes:
@@ -267,7 +255,7 @@ func TestWebserverEndToEnd(t *testing.T) {
 		// Wait a few while for webserver to become available
 		time.Sleep(500 * time.Millisecond)
 
-		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 30*time.Millisecond)
+		inspect := InspectRoute(t, "GET", "http://0.0.0.0:8080/my-probe", 40*time.Millisecond)
 
 		e2e.Wait()
 
@@ -289,7 +277,8 @@ func AssertHttpResponseContains(t *testing.T, method string, url string, expecte
 }
 
 func AssertHttpResponseCode(t *testing.T, method string, url string, expectedStatus int) {
-	_, response, _ := sendRequest(method, url, nil)
+	_, response, err := sendRequest(method, url, nil)
+	require.NoError(t, err)
 	assert.Equal(t, expectedStatus, response.StatusCode)
 }
 

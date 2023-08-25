@@ -1,6 +1,5 @@
 schemaVersion: "invalid-schema-version"
 process:
   exit:
-    after:
-      betweenRange: [10ms, 1000ms]
-      code: 2
+    after: 10ms to 1s100ms
+    code: 2

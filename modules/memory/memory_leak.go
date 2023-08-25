@@ -2,17 +2,45 @@ package memory
 
 import (
 	"fmt"
+	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 )
 
 var _ planner.Plannable = &MemoryLeak{}
 
 type MemoryLeak struct {
 	planner.CanAssignPlan
-	Plan       *planner.Plan `json:"plan"`
-	PlanRefs   []string      `json:"planRefs"`
+
+	// PlanRefs is an optional list of plan names. It can used to avoid redundant
+	// re-declearing of plans in large-scale configurations.
+	// PlanRefs overrides Size, Interval and Duration fields are overrided in favor
+	// of the one defined in the referenced plan.
+	PlanRefs []string `json:"planRefs"`
+
+	// Size determines the size of the memory leak (memory consumption). This memory will be
+	// used in addition to the amount used by the Kermoo application itself. So the actual
+	// total memory usage is not guaranteed to be accurate.
+	//
+	// For specific and ranged declearations, it's going to use that but when an array of
+	// sizes are specified, it'll act like a graph of bars and iterate over them.
+	Size *fluent.FluentSize `json:"size"`
+
+	// Interval decides how long each leak cycle should last. A value above one second is recommended
+	// but you're free  to use any interval. Default is one second.
+	Interval *fluent.FluentDuration `json:"interval"`
+
+	// Duration defines the duration of the entire memory leak module. Leave it empty for
+	// life-long running or specify one to end the module completely after that and won't
+	// consume the specified memory.
+	// In fact, Duration/Interval determines the number of cycle, if defined. Default is empty
+	// for unlimited activity.
+	Duration *fluent.FluentDuration `json:"duration"`
+
 	leakedData []byte
+}
+
+func (mu *MemoryLeak) GetLeakedData() []byte {
+	return mu.leakedData
 }
 
 func (mu *MemoryLeak) GetName() string {
@@ -20,7 +48,7 @@ func (mu *MemoryLeak) GetName() string {
 }
 
 func (mu *MemoryLeak) HasInlinePlan() bool {
-	return mu.Plan != nil
+	return mu.MakeInlinePlan() != nil
 }
 
 func (mu *MemoryLeak) GetDesiredPlanNames() []string {
@@ -28,17 +56,17 @@ func (mu *MemoryLeak) GetDesiredPlanNames() []string {
 }
 
 func (mu *MemoryLeak) Validate() error {
-	if len(mu.PlanRefs) == 0 && mu.Plan == nil {
-		return fmt.Errorf("no plan or plan refs is set")
+	if len(mu.PlanRefs) == 0 && !mu.HasInlinePlan() {
+		return fmt.Errorf("no leak specifications or plan refs is set")
 	}
 
 	if len(mu.PlanRefs) > 1 {
-		return fmt.Errorf("plan refs can not contain more than one element for memory leak")
+		return fmt.Errorf("plan refs can not contain more than one element")
 	}
 
-	if mu.Plan != nil {
-		if err := mu.Plan.Validate(); err != nil {
-			return fmt.Errorf("plan validation failed: %v", err)
+	if mu.HasInlinePlan() {
+		if err := mu.MakeInlinePlan().Validate(); err != nil {
+			return fmt.Errorf("crafted plan validation failed: %v", err)
 		}
 	}
 
@@ -47,8 +75,9 @@ func (mu *MemoryLeak) Validate() error {
 
 func (mu *MemoryLeak) GetPlanCycleHooks() planner.CycleHooks {
 	preSleep := planner.HookFunc(func(cycle planner.Cycle) planner.PlanSignal {
-		size, _ := mu.GetAssignedPlans()[0].GetCurrentValue().Size.ToSize()
-		mu.StartLeaking(size)
+		mu.StartLeaking(
+			mu.GetAssignedPlans()[0].GetCurrentValue().Size,
+		)
 		return planner.PLAN_SIGNAL_CONTINUE
 	})
 
@@ -64,15 +93,25 @@ func (mu *MemoryLeak) GetPlanCycleHooks() planner.CycleHooks {
 }
 
 func (mu *MemoryLeak) MakeInlinePlan() *planner.Plan {
-	return mu.Plan
+	if mu.Size == nil {
+		return nil
+	}
+
+	plan := planner.NewPlan(planner.Plan{
+		Size:     mu.Size,
+		Interval: mu.Interval,
+		Duration: mu.Duration,
+	})
+
+	return &plan
 }
 
 func (mu *MemoryLeak) MakeDefaultPlan() *planner.Plan {
 	return nil
 }
 
-func (mu *MemoryLeak) StartLeaking(size values.Size) {
-	mu.leakedData = make([]byte, size.ToBytes())
+func (mu *MemoryLeak) StartLeaking(size int64) {
+	mu.leakedData = make([]byte, size)
 }
 
 func (mu *MemoryLeak) StopLeaking() {

@@ -1,10 +1,9 @@
 package planner_test
 
 import (
+	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/utils"
-	"kermoo/modules/values"
 
 	"testing"
 	"time"
@@ -18,13 +17,6 @@ func teardownSubTest(t *testing.T) {
 
 var (
 	name          = "My Plan"
-	interval_10ms = values.Duration(10 * time.Millisecond)
-	interval_30ms = values.Duration(30 * time.Millisecond)
-	duration_50ms = values.Duration(50 * time.Millisecond)
-	duration_60ms = values.Duration(60 * time.Millisecond)
-	float_0_1     = float32(0.1)
-	float_0_5     = float32(0.5)
-	float_0_9     = float32(0.9)
 	acceptedError = float64(0.1)
 )
 
@@ -35,16 +27,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
-			Interval: &interval_10ms,
-			Duration: &duration_50ms,
+			Interval: fluent.NewMustFluentDuration("10ms"),
+			Duration: fluent.NewMustFluentDuration("50ms"),
 			Name:     &name,
 		})
 
-		plan.Percentage = &values.MultiFloat{
-			SingleFloat: values.SingleFloat{
-				Exactly: utils.NewP[float32](0.5),
-			},
-		}
+		plan.Percentage = fluent.NewMustFluentFloat("50")
 
 		plan.Assign(&Recorder)
 
@@ -54,12 +42,12 @@ func TestSimplePlanExecution(t *testing.T) {
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
-		Recorder.AssertCycleValues(t, []planner.CycleValue{
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
+		Recorder.AssertCycleValues(t, []ExpectedCycleValue{
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
 		})
 	})
 
@@ -67,16 +55,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
-			Interval: &interval_10ms,
-			Duration: &duration_50ms,
+			Interval: fluent.NewMustFluentDuration("10ms"),
+			Duration: fluent.NewMustFluentDuration("50ms"),
 			Name:     &name,
 		})
 
-		plan.Percentage = &values.MultiFloat{
-			SingleFloat: values.SingleFloat{
-				Between: []float32{0.1, 0.9},
-			},
-		}
+		plan.Percentage = fluent.NewMustFluentFloat("10 to 90")
 
 		plan.Assign(&Recorder)
 
@@ -87,12 +71,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		// Assert that it took around 50ms (with 2ms error)
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
-		Recorder.AssertCycleValues(t, []planner.CycleValue{
-			NewCycleValue(0.1, 0.9, 0, 0),
-			NewCycleValue(0.1, 0.9, 0, 0),
-			NewCycleValue(0.1, 0.9, 0, 0),
-			NewCycleValue(0.1, 0.9, 0, 0),
-			NewCycleValue(0.1, 0.9, 0, 0),
+		Recorder.AssertCycleValues(t, []ExpectedCycleValue{
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
 		})
 	})
 
@@ -100,16 +84,12 @@ func TestSimplePlanExecution(t *testing.T) {
 		defer teardownSubTest(t)
 
 		plan := planner.NewPlan(planner.Plan{
-			Interval: &interval_10ms,
-			Duration: &duration_50ms,
+			Interval: fluent.NewMustFluentDuration("10ms"),
+			Duration: fluent.NewMustFluentDuration("50ms"),
 			Name:     &name,
 		})
 
-		plan.Percentage = &values.MultiFloat{
-			Chart: &values.FloatChart{
-				Bars: []float32{0, 0.3, 0.7},
-			},
-		}
+		plan.Percentage = fluent.NewMustFluentFloat("0, 30, 70")
 
 		plan.Assign(&Recorder)
 
@@ -119,12 +99,12 @@ func TestSimplePlanExecution(t *testing.T) {
 
 		Recorder.AssertTotalTimeSpent(t, 50*time.Millisecond, acceptedError)
 
-		Recorder.AssertCycleValues(t, []planner.CycleValue{
-			NewCycleValue(0, 0, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
-			NewCycleValue(0.7, 0.7, 0, 0),
-			NewCycleValue(0, 0, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
+		Recorder.AssertCycleValues(t, []ExpectedCycleValue{
+			{Percentage: fluent.NewMustFluentFloat("0")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
+			{Percentage: fluent.NewMustFluentFloat("70")},
+			{Percentage: fluent.NewMustFluentFloat("0")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
 		})
 	})
 
@@ -154,38 +134,22 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Percentage: &values.MultiFloat{},
-					Interval:   &interval_10ms,
-					Duration:   &duration_50ms,
+					Percentage: fluent.NewMustFluentFloat("50"),
+					Interval:   fluent.NewMustFluentDuration("10ms"),
+					Duration:   fluent.NewMustFluentDuration("50ms"),
 				},
 				{
-					Percentage: &values.MultiFloat{},
-					Interval:   &interval_30ms,
-					Duration:   &duration_60ms,
+					Percentage: fluent.NewMustFluentFloat("10 to 90"),
+					Interval:   fluent.NewMustFluentDuration("30ms"),
+					Duration:   fluent.NewMustFluentDuration("60ms"),
 				},
 				{
-					Percentage: &values.MultiFloat{},
-					Interval:   &interval_10ms,
-					Duration:   &duration_50ms,
+					Percentage: fluent.NewMustFluentFloat("20, 30, 40"),
+					Interval:   fluent.NewMustFluentDuration("10ms"),
+					Duration:   fluent.NewMustFluentDuration("50ms"),
 				},
 			},
 		})
-
-		plan.SubPlans[0].Percentage = &values.MultiFloat{
-			SingleFloat: values.SingleFloat{
-				Exactly: utils.NewP[float32](0.5),
-			},
-		}
-		plan.SubPlans[1].Percentage = &values.MultiFloat{
-			SingleFloat: values.SingleFloat{
-				Between: []float32{0.1, 0.9},
-			},
-		}
-		plan.SubPlans[2].Percentage = &values.MultiFloat{
-			Chart: &values.FloatChart{
-				Bars: []float32{0.2, 0.3, 0.4},
-			},
-		}
 
 		plan.Assign(&Recorder)
 
@@ -198,21 +162,21 @@ func TestSubPlanExecution(t *testing.T) {
 			acceptedError,
 		)
 
-		Recorder.AssertCycleValues(t, []planner.CycleValue{
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
+		Recorder.AssertCycleValues(t, []ExpectedCycleValue{
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
 
-			NewCycleValue(0.1, 0.9, 0, 0),
-			NewCycleValue(0.1, 0.9, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
 
-			NewCycleValue(0.2, 0.2, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
-			NewCycleValue(0.4, 0.4, 0, 0),
-			NewCycleValue(0.2, 0.2, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("20")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
+			{Percentage: fluent.NewMustFluentFloat("40")},
+			{Percentage: fluent.NewMustFluentFloat("20")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
 		})
 	})
 
@@ -222,37 +186,21 @@ func TestSubPlanExecution(t *testing.T) {
 			Name: &name,
 			SubPlans: []planner.SubPlan{
 				{
-					Percentage: &values.MultiFloat{},
-					Interval:   &interval_10ms,
-					Duration:   &duration_50ms,
+					Percentage: fluent.NewMustFluentFloat("50"),
+					Interval:   fluent.NewMustFluentDuration("10ms"),
+					Duration:   fluent.NewMustFluentDuration("50ms"),
 				},
 				{
-					Percentage: &values.MultiFloat{},
-					Interval:   &interval_30ms,
-					Duration:   &duration_60ms,
+					Percentage: fluent.NewMustFluentFloat("10 to 90"),
+					Interval:   fluent.NewMustFluentDuration("30ms"),
+					Duration:   fluent.NewMustFluentDuration("60ms"),
 				},
 				{
-					Percentage: &values.MultiFloat{},
-					Interval:   &interval_10ms,
+					Percentage: fluent.NewMustFluentFloat("20, 30, 40"),
+					Interval:   fluent.NewMustFluentDuration("10ms"),
 				},
 			},
 		})
-
-		plan.SubPlans[0].Percentage = &values.MultiFloat{
-			SingleFloat: values.SingleFloat{
-				Exactly: utils.NewP[float32](0.5),
-			},
-		}
-		plan.SubPlans[1].Percentage = &values.MultiFloat{
-			SingleFloat: values.SingleFloat{
-				Between: []float32{0.1, 0.9},
-			},
-		}
-		plan.SubPlans[2].Percentage = &values.MultiFloat{
-			Chart: &values.FloatChart{
-				Bars: []float32{0.2, 0.3, 0.4},
-			},
-		}
 
 		// Limit the execution to 20 times. It's here to preven the real inifnit number of executions -
 		// just enough to test.
@@ -272,33 +220,33 @@ func TestSubPlanExecution(t *testing.T) {
 			acceptedError,
 		)
 
-		Recorder.AssertCycleValues(t, []planner.CycleValue{
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
-			NewCycleValue(0.5, 0.5, 0, 0),
+		Recorder.AssertCycleValues(t, []ExpectedCycleValue{
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
+			{Percentage: fluent.NewMustFluentFloat("50")},
 
-			NewCycleValue(0.1, 0.9, 0, 0),
-			NewCycleValue(0.1, 0.9, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
+			{Percentage: fluent.NewMustFluentFloat("10 to 90")},
 
-			NewCycleValue(0.2, 0.2, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
-			NewCycleValue(0.4, 0.4, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("20")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
+			{Percentage: fluent.NewMustFluentFloat("40")},
 
-			NewCycleValue(0.2, 0.2, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
-			NewCycleValue(0.4, 0.4, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("20")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
+			{Percentage: fluent.NewMustFluentFloat("40")},
 
-			NewCycleValue(0.2, 0.2, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
-			NewCycleValue(0.4, 0.4, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("20")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
+			{Percentage: fluent.NewMustFluentFloat("40")},
 
-			NewCycleValue(0.2, 0.2, 0, 0),
-			NewCycleValue(0.3, 0.3, 0, 0),
-			NewCycleValue(0.4, 0.4, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("20")},
+			{Percentage: fluent.NewMustFluentFloat("30")},
+			{Percentage: fluent.NewMustFluentFloat("40")},
 
-			NewCycleValue(0.2, 0.2, 0, 0),
+			{Percentage: fluent.NewMustFluentFloat("20")},
 		})
 	})
 }

@@ -7,6 +7,7 @@ import (
 	"kermoo/modules/logger"
 	"kermoo/modules/utils"
 	"os"
+	"os/user"
 
 	"go.uber.org/zap"
 )
@@ -36,7 +37,11 @@ func LoadUserConfig(filename string) (*UserConfigType, error) {
 	var uc UserConfigType
 
 	if filename == "" {
-		return nil, fmt.Errorf("provided filename is empty")
+		u, err := user.Current()
+		if err != nil {
+			return nil, fmt.Errorf("unable to determine current user to autoload config: %v", err)
+		}
+		filename = u.HomeDir + "/.kermoo/config.yaml"
 	}
 
 	if filename == "-" {

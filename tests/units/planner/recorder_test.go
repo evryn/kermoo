@@ -1,8 +1,8 @@
 package planner_test
 
 import (
+	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
-	"kermoo/modules/values"
 	"testing"
 	"time"
 
@@ -17,24 +17,51 @@ type PlanRecorder struct {
 	ExecutaionCap  int
 }
 
+type ExpectedCycleValue struct {
+	Percentage *fluent.FluentFloat
+	Size       *fluent.FluentSize
+}
+
 func (r *PlanRecorder) Reset() {
 	r.Cycles = []planner.Cycle{}
 	r.TotalTimeSpent = 0
 }
 
-func (r *PlanRecorder) AssertCycleValues(t *testing.T, expectedCycleValues []planner.CycleValue) {
+func (r *PlanRecorder) AssertCycleValues(t *testing.T, expectedCycleValues []ExpectedCycleValue) {
 	require.Len(t, r.Cycles, len(expectedCycleValues))
 
 	for i, ev := range expectedCycleValues {
-		actualPercentage, _ := r.Cycles[i].Value.Percentage.ToFloat()
-		minPercentage, maxPercentage, _ := ev.Percentage.ToFloatRange()
-		assert.GreaterOrEqual(t, maxPercentage, actualPercentage)
-		assert.LessOrEqual(t, minPercentage, actualPercentage)
+		if ev.Percentage != nil {
+			actual := r.Cycles[i].Value.Percentage
 
-		actualSize, _ := r.Cycles[i].Value.Size.ToSize()
-		minSize, maxSize, _ := ev.Size.ToSizeRange()
-		assert.GreaterOrEqual(t, maxSize, actualSize)
-		assert.LessOrEqual(t, minSize, actualSize)
+			evpv := ev.Percentage.GetParsedValue()
+
+			if evpv.IsRanged() {
+				min, max, _ := ev.Percentage.GetParsedValue().GetRange()
+				assert.Less(t, min, actual)
+				assert.Greater(t, max, actual)
+
+			} else {
+				assert.Equal(t, ev.Percentage.Get(), actual)
+			}
+
+		}
+
+		if ev.Size != nil {
+			actual := r.Cycles[i].Value.Size
+
+			evpv := ev.Size.GetParsedValue()
+
+			if evpv.IsRanged() {
+				max, min, _ := ev.Size.GetParsedValue().GetRange()
+				assert.Less(t, min, actual)
+				assert.Greater(t, max, actual)
+
+			} else {
+				assert.Equal(t, ev.Size.Get(), actual)
+			}
+
+		}
 	}
 }
 
@@ -87,17 +114,6 @@ func (r *PlanRecorder) GetPlanCycleHooks() planner.CycleHooks {
 	return planner.CycleHooks{
 		PreSleep:  &preSleep,
 		PostSleep: &postSleep,
-	}
-}
-
-func NewCycleValue(minPercentage, maxPercentage float32, minSize, maxSize values.Size) planner.CycleValue {
-	return planner.CycleValue{
-		Percentage: values.SingleFloat{
-			Between: []float32{minPercentage, maxPercentage},
-		},
-		Size: values.SingleSize{
-			Between: []values.Size{minSize, maxSize},
-		},
 	}
 }
 

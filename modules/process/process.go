@@ -1,11 +1,9 @@
 package process
 
 import (
-	"fmt"
+	"kermoo/modules/fluent"
 	"kermoo/modules/logger"
 	"kermoo/modules/planner"
-	"kermoo/modules/utils"
-	"kermoo/modules/values"
 	"os"
 
 	"go.uber.org/zap"
@@ -16,13 +14,22 @@ var _ planner.Plannable = &Process{}
 
 type Process struct {
 	planner.CanAssignPlan
-	Delay *values.SingleDuration `json:"delay"`
-	Exit  *ProcessExit           `json:"exit"`
+
+	// Delay optionally defines the initial startup delay. The process will sleep until
+	// that delay is reached.
+	Delay *fluent.FluentDuration `json:"delay"`
+
+	// Exit optionally simulates sudden termination of the process in the given time with
+	// the given exit code.
+	Exit *ProcessExit `json:"exit"`
 }
 
 type ProcessExit struct {
-	After values.SingleDuration `json:"after"`
-	Code  uint                  `json:"code"`
+	// After determines the duration in which the process will be terminated
+	After fluent.FluentDuration `json:"after"`
+
+	// Code indicates the exit code of the process when the time is reached.
+	Code uint `json:"code"`
 }
 
 func (p *Process) GetName() string {
@@ -30,7 +37,7 @@ func (p *Process) GetName() string {
 }
 
 func (p *Process) HasInlinePlan() bool {
-	return p.Exit != nil
+	return p.MakeInlinePlan() != nil
 }
 
 func (p Process) GetDesiredPlanNames() []string {
@@ -38,18 +45,6 @@ func (p Process) GetDesiredPlanNames() []string {
 }
 
 func (p Process) Validate() error {
-	if p.Delay != nil {
-		if _, err := p.Delay.ToStandardDuration(); err != nil {
-			return fmt.Errorf("unable to get delay duration: %v", err)
-		}
-	}
-
-	if p.Exit != nil {
-		if _, err := p.Exit.After.ToStandardDuration(); err != nil {
-			return fmt.Errorf("unable to get exit duration: %v", err)
-		}
-	}
-
 	return nil
 }
 
@@ -76,10 +71,13 @@ func (p *Process) GetPlanCycleHooks() planner.CycleHooks {
 }
 
 func (p *Process) MakeInlinePlan() *planner.Plan {
-	value, _ := p.Exit.After.ToStandardDuration()
+	if p.Exit == nil {
+		return nil
+	}
+
 	name := p.GetName()
 
-	valueDur := values.Duration(value)
+	valueDur := p.Exit.After
 
 	plan := planner.NewPlan(planner.Plan{
 		Name:     &name,
@@ -88,11 +86,7 @@ func (p *Process) MakeInlinePlan() *planner.Plan {
 	})
 
 	// Set a dummy value since plan validation requires it
-	plan.Percentage = &values.MultiFloat{
-		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](1.0),
-		},
-	}
+	plan.Percentage = fluent.NewMustFluentFloat("100")
 
 	return &plan
 }

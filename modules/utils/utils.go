@@ -143,10 +143,10 @@ func Contains(arr []string, str string) bool {
 	return false
 }
 
-func IsSuccessByChance(chance float32) bool {
+func PercentageToBoolean(percentage float64) bool {
 	source := rand.New(rand.NewSource(time.Now().UnixNano()))
 	r := rand.New(source)
-	return r.Float32() < chance
+	return r.Float64()*100 > percentage
 }
 
 func NewP[T any](value T) *T {

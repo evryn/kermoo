@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"kermoo/config"
+	"kermoo/modules/fluent"
 	"kermoo/modules/planner"
 	"kermoo/modules/utils"
-	"kermoo/modules/values"
 	"net/http"
 	"os"
 	"strings"
@@ -17,10 +17,44 @@ import (
 
 type Route struct {
 	planner.CanAssignPlan
-	Path    string       `json:"path"`
-	Methods []string     `json:"methods"`
+
+	// Path defines the route path. Here are a few examples: "/", "/livez", "/api/v1/readyz", etc.
+	Path string `json:"path"`
+
+	// Methods is an array of method names that the route should live on them, such as "HEAD",
+	// "GET", "POST", "PUT", etc.
+	//
+	// If no methods are defined, it'll use default ones: "HEAD", "GET", "POST"
+	Methods []string `json:"methods"`
+
+	// Content represent the response of the route. You can define either an static content or
+	// enable a whoami-like response which will response few things about the application and
+	// the received request.
+	//
+	// If nothing is set, a default "Hello World" will be responded.
 	Content RouteContent `json:"content"`
-	Fault   *RouteFault  `json:"fault"`
+
+	// Fault defines how the route should fail. Default is no failure.
+	Fault *RouteFault `json:"fault"`
+}
+
+type RouteContent struct {
+	// Static defines an static text to be returned as the response body.
+	//
+	// Default is `Hellow from Kermoo!`
+	Static string `json:"static"`
+
+	// Whoami returns a whoami respose which contains information about the
+	// application, environment, and the received request
+	//
+	// Default is disabled.
+	Whoami bool `json:"whoami"`
+
+	// NoServerInfo indicates Whoami response to not include server information
+	// which might not be desirable for some environments.
+	//
+	// Default is disabled.
+	NoServerInfo bool `json:"serverInfo"`
 }
 
 func (route *Route) GetName() string {
@@ -36,23 +70,29 @@ func (route *Route) GetDesiredPlanNames() []string {
 }
 
 func (route *Route) HasInlinePlan() bool {
-	return route.Fault != nil && route.Fault.Plan != nil
+	return route.MakeInlinePlan() != nil
 }
 
 func (route *Route) MakeInlinePlan() *planner.Plan {
-	return route.Fault.Plan
+	if route.Fault == nil {
+		return nil
+	}
+
+	plan := planner.NewPlan(planner.Plan{
+		Percentage: &route.Fault.Percentage,
+		Interval:   route.Fault.Interval,
+		Duration:   route.Fault.Duration,
+	})
+
+	return &plan
 }
 
 // Create a lifetime-long plan to serve route
 func (route *Route) MakeDefaultPlan() *planner.Plan {
 	plan := planner.NewPlan(planner.Plan{})
 
-	// Value of 1.0 indicates that the route will always be available.
-	plan.Percentage = &values.MultiFloat{
-		SingleFloat: values.SingleFloat{
-			Exactly: utils.NewP[float32](1.0),
-		},
-	}
+	// Value of 0.0 indicates that the route will never fail.
+	plan.Percentage = fluent.NewMustFluentFloat("0.0")
 
 	return &plan
 }
@@ -146,12 +186,6 @@ func (route *Route) Validate() error {
 	}
 
 	return nil
-}
-
-type RouteContent struct {
-	Static       string `json:"static"`
-	Whoami       bool   `json:"whoami"`
-	NoServerInfo bool   `json:"server_info"`
 }
 
 func (rc *RouteContent) GetReflectionContent(r *http.Request) ReflectorResponse {

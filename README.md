@@ -47,9 +47,12 @@ Want to see how your system fares against the worst? Or perhaps you've got a tad
     - Because who doesn't want to spring a leak now and then? Choose your memory size and duration.
 
 ## 🔆 Installation
-Kermoo is available as:
-- Docker Image
-- Helm Chart
+Kermoo is ready to be installed with:
+- Docker
+- Docker Compose
+- Docker Swarm
+- Kubernetes Kustomization
+- Kubernetes Helm Chart
 - Downloadable Binaries
 
 <center>Read More: <strong><a href="https://github.com/evryn/kermoo/wiki">Installation and Getting Started</a></strong></center>
@@ -59,27 +62,21 @@ Kermoo is available as:
 Simply setup the all-optional configurations using YAML and pass it to Kermoo:
 
 ```yaml
-kermoo start -f <<EOL
+kermoo start -f - <<EOL
   # Simulate the main process to delay initially for 5 seconds
   # Then simulate disaster by exiting the process after somewhere
   # between 4 to 10 seconds with the exit code of 20.
   process:
-    delay:
-      exactly: 5s
+    delay: 5s
     exit:
-      after:
-        between: [4s, 10s]
+      after: 4s to 10s
       code: 20
 
   webServers:
     # Setup a webserver that listens on 0.0.0.0:80
     # that will be ready for connect 50% of time
-    - port: 8080
-      interface: 0.0.0.0
-      fault:
-        plan:
-          percentage:
-              exactly: 50
+    - fault:
+        percentage: 50
       routes:
         # Setup a /livez route that will serve a whoami content
         # with the chance of 60% or fail with an error (4xx, 5xx)
@@ -87,28 +84,20 @@ kermoo start -f <<EOL
           content:
             whoami: true
           fault:
-            plan:
-              percentage:
-                exactly: 60
+            percentage: 60
 
   # Simulate CPU load which will repeatitivly utilize
   # 20%, 50% and 80% of all cores every second.
-  cpu:
-    load:
-      plan:
-        percentage:
-          bars: [20, 50, 80]
-        interval: 1s
+  cpuLoad:
+    percentage: 20, 50, 80
+    interval: 1s
 
   # Simulate memory leak which will repeatitivly consume
-  # somewhere between 50MiB and 1GiB of memory - recomputed
+  # somewhere between 100Mi and 1Gi of memory - recomputed
   # every 5 seconds.
-  memory:
-    load:
-      plan:
-        size:
-          between: ["50MiB", "1GiB"]
-        interval: 5s
+  memoryLeak:
+    size: 100Mi to 1Gi
+    interval: 5s
 EOL
 ```
 

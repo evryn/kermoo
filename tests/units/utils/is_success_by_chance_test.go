@@ -11,7 +11,7 @@ func TestIsSuccessByChance(t *testing.T) {
 	success := 0
 
 	for i := 0; i < 100; i++ {
-		if utils.IsSuccessByChance(0.5) == true {
+		if utils.PercentageToBoolean(50) == true {
 			success = success + 1
 		}
 	}
