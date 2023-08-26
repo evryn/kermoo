@@ -26,6 +26,8 @@ jobs:
             
   release:
     name: Release Helm packages and update repository on gh-pages
+    needs:
+      - test
     if: ${{ github.ref_type == 'tag' }}
     permissions:
       contents: write
@@ -42,6 +44,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v3
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968
+        # uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968
+        uses: edmondop/chart-releaser-action@ef58c21b3f93daff872ba384abd9cdb16e715334
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
