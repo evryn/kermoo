@@ -41,7 +41,7 @@ jobs:
           flavor: |
             latest=auto
           tags: |
-            type=ref,event=tag
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
@@ -106,7 +106,6 @@ jobs:
         if: ${{ github.ref_type == 'tag' && github.actor != 'dependabot[bot]' }}
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
