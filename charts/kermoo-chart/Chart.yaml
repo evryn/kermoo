@@ -11,7 +11,7 @@ description: A Helm chart for Kubernetes deployment of the Kermoo application
 version: 1.0.0
 
 # The version of the application that this chart packages
-appVersion: "latest"
+appVersion: latest
 
 # The home URL for the chart, where you can find more about the chart/application
 home: https://kermoo.dev

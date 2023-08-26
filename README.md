@@ -9,14 +9,9 @@
 <h1 align="center">Kermoo</h1>
 <p align="center">
 🪱 A Delightfully Buggy Application 🪱
+<p align="center">📚 <strong><a href="https://github.com/evryn/kermoo/wiki">Getting Started</a></strong> 📚</p>
 </p>
 
-
----
-
-<center>
-<p><strong>⚠️ Kermoo is heavily under development and doesn't have a stable release yet. Keep checking this page again in a day or two. ⚠️</strong></p>
-</center>
 
 ---
 
@@ -55,7 +50,7 @@ Kermoo is ready to be installed with:
 - Kubernetes Helm Chart
 - Downloadable Binaries
 
-<center>Read More: <strong><a href="https://github.com/evryn/kermoo/wiki">Installation and Getting Started</a></strong></center>
+<p align="center">📚 <strong><a href="https://github.com/evryn/kermoo/wiki">Read Documents</a></strong></p>
 
 ## 🛠 Setup & Configuration
 
@@ -101,7 +96,7 @@ kermoo start -f - <<EOL
 EOL
 ```
 
-<center>Read More: <a href="https://github.com/evryn/kermoo/wiki">Advanced Configuration</a></center>
+<p align="center">📚 <strong><a href="https://github.com/evryn/kermoo/wiki">Read Documents</a></strong></p>
 
 ## 🤝 Join the Chaos Club
 Love the pandemonium? Consider [contributing](CONTRIBUTING.md) and let's brew more bedlam together! ☕🔥
