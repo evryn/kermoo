@@ -18,8 +18,8 @@ test-e2e:
 
 .PHONY: helm-unittest
 helm-unittest:
-	helm unittest charts/kermoo
+	helm unittest charts/kermoo-chart
 
 .PHONY: helm-unittest-update-snapshots
 helm-unittest-update-snapshots:
-	helm unittest charts/kermoo -u
+	helm unittest charts/kermoo-chart -u
