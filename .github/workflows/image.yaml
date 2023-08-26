@@ -69,7 +69,7 @@ jobs:
 
       -
         name: Test image functionality
-        uses: plexsystems/container-structure-test-action@v0.1.0
+        uses: plexsystems/container-structure-test-action@cc689017bbb16a3c98e6e87b0e07f92ad35a9df1
         with:
           image: ${{ env.TEST_IMAGE_TAG }}
           config: container-structure-test.yaml
