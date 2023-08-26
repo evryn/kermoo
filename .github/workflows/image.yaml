@@ -41,6 +41,7 @@ jobs:
           flavor: |
             latest=auto
           tags: |
+            type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
