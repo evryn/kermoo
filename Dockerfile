@@ -10,7 +10,11 @@ ARG BUILD_REF
 WORKDIR /go/src/app
 COPY . .
 RUN go get -d -v ./... \
- && go build -ldflags "-X kermoo/config.BuildVersion=\"$BUILD_VERSION\" -X kermoo/config.BuildRef=\"$BUILD_REF\" -X kermoo/config.BuildDate=\"$BUILD_DATE\"" -o /go/bin/app -v .
+ && go build -ldflags "-X kermoo/config.BuildVersion=\"$BUILD_VERSION\" -X kermoo/config.BuildRef=\"$BUILD_REF\" -X kermoo/config.BuildDate=\"$BUILD_DATE\"" -o /go/bin/app -v . \
+ && adduser -D -u 1000 kerm \
+ && mkdir -p /home/kerm/.kermoo \
+ && chown -R kerm:kerm /home/kerm/ \
+ && chown -R 0750 /home/kerm/
 
 # A layer for running automated tests
 FROM builder as test
@@ -20,5 +24,7 @@ RUN go test ./...
 FROM alpine:3.18
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /usr/local/bin/kermoo
+WORKDIR /home/kerm/
+USER kerm
 EXPOSE 80
 ENTRYPOINT ["kermoo"]
