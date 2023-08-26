@@ -2,6 +2,7 @@
 
 | Workflow           | Description                                                    |
 |--------------------|----------------------------------------------------------------|
-| ci-build.yaml      | Build, lint, test, codegen, build-ui, analyze, e2e-test        |
-| build-and-push-docker-image.yml         | Build container image, test, install helm chart, and publish for tag events       |
+| build.yaml      | Build, lint, test, codegen, build-ui, analyze, e2e-test, and release binaries        |
+| image.yaml         | Build container image, test, and publish for tag events       |
+| helm.yaml         | Test helm, release packages, and update repository on gh-pages       |
 | snyk-report.yaml   | Scheduled snyk reports                                         |
