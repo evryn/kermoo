@@ -8,7 +8,7 @@ name: kermoo-chart
 description: A Helm chart for Kubernetes deployment of the Kermoo application
 
 # The version of the Helm chart (follows semantic versioning)
-version: 1.0.1-beta
+version: 1.0.0
 
 # The version of the application that this chart packages
 appVersion: latest
