@@ -39,9 +39,8 @@ jobs:
             ghcr.io/evryn/kermoo
             quay.io/evryn/kermoo
           flavor: |
-            latest=auto
+            latest=true
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value={{sha}},enable=${{ github.ref_type != 'tag' }}
