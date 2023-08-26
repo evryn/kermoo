@@ -38,6 +38,8 @@ jobs:
             evryn/kermoo
             ghcr.io/evryn/kermoo
             quay.io/evryn/kermoo
+          flavor: |
+            latest=auto
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
