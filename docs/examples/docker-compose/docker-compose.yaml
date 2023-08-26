@@ -5,4 +5,4 @@ services:
     image: evryn/kermoo
     command: start
     volumes:
-      - "./config.yaml:~/.kermoo/config.yaml"
+      - "./config.yaml:/home/kerm/.kermoo/config.yaml"

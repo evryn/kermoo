@@ -17,7 +17,7 @@ spec:
         - containerPort: 80
         volumeMounts:
         - name: config-volume
-          mountPath: ~/.kermoo/config.yaml
+          mountPath: /home/kerm/.kermoo/config.yaml
           subPath: config.yaml
       volumes:
       - name: config-volume
