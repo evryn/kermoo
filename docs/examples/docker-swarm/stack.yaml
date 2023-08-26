@@ -6,7 +6,7 @@ services:
     command: start
     configs:
       - source: kermoo-config
-        target: ~/.kermoo/config.yaml
+        target: /home/kerm/.kermoo/config.yaml
 
 configs:
   kermoo-config:

@@ -14,11 +14,19 @@ RUN go get -d -v ./... \
 
 # A layer for running automated tests
 FROM builder as test
+
 RUN go test ./...
 
 # A layer with final executable
 FROM alpine:3.18
-RUN apk --no-cache add ca-certificates
+
+RUN apk --no-cache add ca-certificates \
+ && adduser -S -u 1000 -s /bin/bash -h /home/kerm kerm \
+ && mkdir -p /home/kerm/.kermoo
+
 COPY --from=builder /go/bin/app /usr/local/bin/kermoo
+
+WORKDIR /home/kerm/
+USER kerm
 EXPOSE 80
 ENTRYPOINT ["kermoo"]
