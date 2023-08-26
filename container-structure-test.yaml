@@ -4,8 +4,8 @@ fileExistenceTests:
   path: '/usr/local/bin/kermoo'
   shouldExist: true
   permissions: '-rwxr-xr-x'
-  uid: 1000
-  gid: 1000
+  uid: 0
+  gid: 0
 commandTests:
 - name: "Kermoo executable is runnable"
   command: "/usr/local/bin/kermoo"
@@ -17,5 +17,5 @@ commandTests:
 metadataTest:
   exposedPorts: ["80"]
   entrypoint: ["kermoo"]
-  workdir: "/home/kerm"
+  workdir: "/home/kerm/"
   user: "kerm"
