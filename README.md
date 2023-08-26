@@ -4,7 +4,7 @@
 [![CodeQL](https://github.com/evryn/kermoo/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/evryn/kermoo/actions/workflows/github-code-scanning/codeql)
 
 <p align="center">
-<img src="./docs/kermoo.png" width="200" height="200">
+<img src="https://raw.githubusercontent.com/evryn/kermoo/1b899e7479ad3f5dfff9ad2642b8a113a8fafd34/docs/kermoo.png" width="200" height="200">
 </p>
 <h1 align="center">Kermoo</h1>
 <p align="center">
