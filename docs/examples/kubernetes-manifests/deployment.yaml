@@ -4,6 +4,9 @@ metadata:
   name: kermoo-deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: kermoo
   template:
     metadata:
       labels:
@@ -12,7 +15,7 @@ spec:
       containers:
       - name: kermoo
         image: evryn/kermoo
-        command: ["start"]
+        command: ["kermoo", "start"]
         ports:
         - containerPort: 80
         volumeMounts:
