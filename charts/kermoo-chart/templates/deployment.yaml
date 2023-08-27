@@ -43,7 +43,7 @@ spec:
         {{- end }}
         volumeMounts:
         - name: config-volume
-          mountPath: ~/.kermoo/config.yaml
+          mountPath: /home/kerm/.kermoo/config.yaml
           subPath: config.yaml
         {{- if .Values.additionalContainerTemplate -}}
         {{ toYaml .Values.additionalContainerTemplate | nindent 8 }}
