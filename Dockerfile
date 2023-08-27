@@ -30,3 +30,4 @@ WORKDIR /home/kerm/
 USER kerm
 EXPOSE 80
 ENTRYPOINT ["kermoo"]
+CMD ["start"]
