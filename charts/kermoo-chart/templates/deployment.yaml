@@ -31,9 +31,9 @@ spec:
       - name: kermoo
         image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         {{- if .Values.debug }}
-        command: ["start", "-v", "debug"]
+        command: ["kermoo", "start", "-v", "debug"]
         {{- else }}
-        command: ["start"]
+        command: ["kermoo", "start"]
         {{- end }}
         {{- if .Values.services }}
         ports:
