@@ -3,6 +3,33 @@ entries:
   kermoo-chart:
   - apiVersion: v2
     appVersion: latest
+    created: "2023-08-27T13:49:52.669925553Z"
+    description: A Helm chart for Kubernetes deployment of the Kermoo application
+    digest: 1b94f30c93a35720d7787a2da831e3dc9f2a3ce6d8ff1f06aaf01803f5a5492a
+    home: https://kermoo.dev
+    keywords:
+    - devops
+    - sre
+    - cpu
+    - memory
+    - webserver
+    - golang
+    - bug
+    - test
+    - ha
+    - failover
+    - tools
+    maintainers:
+    - email: hi@evryn.dev
+      name: Amirreza Nasiri
+    name: kermoo-chart
+    sources:
+    - https://github.com/evryn/kermoo
+    urls:
+    - https://github.com/evryn/kermoo/releases/download/kermoo-chart-1.0.1/kermoo-chart-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: latest
     created: "2023-08-26T11:43:22.489533083Z"
     description: A Helm chart for Kubernetes deployment of the Kermoo application
     digest: a2c88adb4324c98b136c8ae37789a135e6a8c5394dfffad16507bf252e432635
@@ -55,4 +82,4 @@ entries:
     urls:
     - https://github.com/evryn/kermoo/releases/download/kermoo-chart-1.0.0/kermoo-chart-1.0.0.tgz
     version: 1.0.0
-generated: "2023-08-26T12:53:54.577524065Z"
+generated: "2023-08-27T13:49:52.670091057Z"
