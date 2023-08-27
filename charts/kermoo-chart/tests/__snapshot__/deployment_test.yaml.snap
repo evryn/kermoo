@@ -16,6 +16,7 @@ manifest with default values should match snapshot:
         spec:
           containers:
             - command:
+                - kermoo
                 - start
               image: docker.io/evryn/kermoo:latest
               name: kermoo

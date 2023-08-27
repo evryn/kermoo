@@ -56,6 +56,7 @@ tests:
       - equal:
           path: spec.template.spec.containers[0].command
           value:
+            - kermoo
             - start
             - -v
             - debug
