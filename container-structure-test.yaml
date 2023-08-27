@@ -17,5 +17,6 @@ commandTests:
 metadataTest:
   exposedPorts: ["80"]
   entrypoint: ["kermoo"]
+  cmd: ["start"]
   workdir: "/home/kerm/"
   user: "kerm"
