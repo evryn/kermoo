@@ -24,7 +24,7 @@ manifest with default values should match snapshot:
                 - containerPort: 80
                 - containerPort: 8080
               volumeMounts:
-                - mountPath: ~/.kermoo/config.yaml
+                - mountPath: /home/kerm/.kermoo/config.yaml
                   name: config-volume
                   subPath: config.yaml
           volumes:
