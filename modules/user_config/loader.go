@@ -38,13 +38,13 @@ func MakePreparedConfig(config string) (*PreparedConfigType, error) {
 	uc, err := makeUserConfig(config)
 
 	if err != nil {
-		return nil, fmt.Errorf("invalid config", zap.Error(err))
+		return nil, fmt.Errorf("invalid config: %v", err)
 	}
 
 	prepared, err := uc.GetPreparedConfig()
 
 	if err != nil {
-		return nil, fmt.Errorf("unable to preapre parsed config", zap.Error(err))
+		return nil, fmt.Errorf("unable to preapre parsed config: %v", err)
 	}
 
 	return prepared, nil
