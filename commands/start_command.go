@@ -13,12 +13,18 @@ func GetStartCommand() *cobra.Command {
 		Use:   "start",
 		Short: "Start the Kermoo foreground service",
 		Run: func(cmd *cobra.Command, args []string) {
+			config, _ := cmd.Flags().GetString("config")
 			filename, _ := cmd.Flags().GetString("filename")
 			verbosity, _ := cmd.Flags().GetString("verbosity")
 
 			logger.MustInitLogger(verbosity)
 
-			user_config.MustLoadProvidedConfig(filename)
+			if filename != "" {
+				logger.Log.Warn("`filename` flag is deprecated and will be removed in a future major release. use `config` flag instead.")
+				config = filename
+			}
+
+			user_config.MustLoadPreparedConfig(config)
 
 			user_config.Prepared.Start()
 
@@ -29,7 +35,8 @@ func GetStartCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("filename", "f", "", "Path to your .yaml or .json configuration file")
+	cmd.Flags().StringP("filename", "f", "", "Alias to `config` flag")
+	cmd.Flags().StringP("config", "c", "", "Your YAML or JSON config content or path to a config file")
 	cmd.Flags().StringP("verbosity", "v", "", "Verbosity level of logging output. Valid values are: debug, info")
 
 	return cmd

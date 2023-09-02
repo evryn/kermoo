@@ -1,5 +1,4 @@
-schemaVersion: "invalid-schema-version"
 process:
   exit:
-    after: 10ms to 1s100ms
+    after: something invalid
     code: 2

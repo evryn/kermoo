@@ -1,5 +1,4 @@
 {
-  "schemaVersion": "1",
   "process": {
       "exit": {
         "after": "10ms to 1s100ms",
