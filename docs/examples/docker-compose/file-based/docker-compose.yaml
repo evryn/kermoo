@@ -3,6 +3,5 @@ version: '3.7'
 services:
   kermoo:
     image: evryn/kermoo
-    command: start
     volumes:
       - "./config.yaml:/home/kerm/.kermoo/config.yaml"

@@ -113,7 +113,7 @@ func getAutoloadedConfig() (string, error) {
 	}
 
 	for _, path := range pathes {
-		content, err := readFile(u.HomeDir + path)
+		content, err := readFile(path)
 
 		if err == nil {
 			return content, nil
@@ -125,7 +125,7 @@ func getAutoloadedConfig() (string, error) {
 		return content, nil
 	}
 
-	return "", fmt.Errorf("no config is specified so we tried to autoload config but was unable to load it either from default path (%v) or from the environment variable. kermoo can not live without a config :(", u.HomeDir+"/.kermoo/")
+	return "", fmt.Errorf("no config is specified so we tried to autoload config but was unable to load it either from default home paths (like %v) or from the environment variable. kermoo can not live without a config :(", pathes[0])
 }
 
 func readFile(filename string) (string, error) {

@@ -3,6 +3,7 @@ package commands
 import (
 	"kermoo/modules/logger"
 	"kermoo/modules/user_config"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -10,18 +11,21 @@ import (
 
 func GetStartCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "start",
+		Use:   "start [flags] [CONFIG]",
 		Short: "Start the Kermoo foreground service",
+		Long:  "Start the Kermoo foreground service. \n\nPass your config content or the config file path to the [CONFIG] argument below. You can also pass \"-\" to read from stdin. Leaving it empty will discover config from default path or `KERMOO_CONFIG` environmetn variable. \n\nRead documentation at: https://github.com/evryn/kermoo/wiki",
 		Run: func(cmd *cobra.Command, args []string) {
-			config, _ := cmd.Flags().GetString("config")
-			filename, _ := cmd.Flags().GetString("filename")
+			config, _ := cmd.Flags().GetString("filename")
 			verbosity, _ := cmd.Flags().GetString("verbosity")
+
+			if verbosity == "" {
+				verbosity = os.Getenv("KERMOO_VERBOSITY")
+			}
 
 			logger.MustInitLogger(verbosity)
 
-			if filename != "" {
-				logger.Log.Warn("`filename` flag is deprecated and will be removed in a future major release. use `config` flag instead.")
-				config = filename
+			if len(args) == 1 {
+				config = args[0]
 			}
 
 			user_config.MustLoadPreparedConfig(config)
@@ -35,9 +39,8 @@ func GetStartCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("filename", "f", "", "Alias to `config` flag")
-	cmd.Flags().StringP("config", "c", "", "Your YAML or JSON config content or path to a config file")
-	cmd.Flags().StringP("verbosity", "v", "", "Verbosity level of logging output. Valid values are: debug, info")
+	cmd.Flags().StringP("filename", "f", "", "(Deprecated) Content of config or path to file. Use [CONFIG] placeholder argument instead. It will be removed in future versions.")
+	cmd.Flags().StringP("verbosity", "v", "", "Verbosity level of logging output, including: debug, info, warning, error, fatal. It overrides KERMOO_VERBOSITY environment variable.")
 
 	return cmd
 }
