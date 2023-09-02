@@ -5,7 +5,6 @@ services:
     image: evryn/kermoo
     command:
     - start
-    - -f
     - |
       process:
         exit:

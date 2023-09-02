@@ -3,7 +3,6 @@ version: '3.7'
 services:
   kermoo:
     image: evryn/kermoo
-    command: start
     configs:
       - source: kermoo-config
         target: /home/kerm/.kermoo/config.yaml

@@ -15,7 +15,6 @@ spec:
       containers:
       - name: kermoo
         image: evryn/kermoo
-        command: ["kermoo", "start"]
         ports:
         - containerPort: 80
         volumeMounts:
