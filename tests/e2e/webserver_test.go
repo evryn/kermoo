@@ -211,7 +211,7 @@ func TestWebserverEndToEnd(t *testing.T) {
                 content:
                   static: hello-world
                 fault:
-                  interval: 100ms
+                  interval: 50ms
                   percentage: 50
 		`, 3*time.Second)
 
@@ -237,7 +237,7 @@ func TestWebserverEndToEnd(t *testing.T) {
 		e2e.Start(`
             plans:
             - name: readiness
-              interval: 100ms
+              interval: 50ms
               percentage: 40
             webServers:
             - port: 8080

@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  kermoo:
+    image: evryn/kermoo
+    command:
+    - start
+    - -f
+    - |
+      process:
+        exit:
+          after: 2s
+          code: 5

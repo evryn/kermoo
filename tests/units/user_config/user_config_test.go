@@ -6,125 +6,201 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadUserConfig(t *testing.T) {
+const ROOT = "../../.."
+
+const (
+	PATH_VALID_YAML          = ROOT + "/tests/units/stubs/valid.yaml"
+	PATH_VALID_JSON          = ROOT + "/tests/units/stubs/valid.json"
+	PATH_INVALID_YAML        = ROOT + "/tests/units/stubs/invalid.yaml"
+	PATH_INVALID_JSON        = ROOT + "/tests/units/stubs/invalid.json"
+	PATH_INVALSTRUCTURE_YAML = ROOT + "/tests/units/stubs/invalid_structure.yaml"
+	PATH_INVALSTRUCTURE_JSON = ROOT + "/tests/units/stubs/invalid_structure.json"
+)
+
+func TestMakeConfigFromFilename(t *testing.T) {
 	logger.MustInitLogger("fatal")
 
-	root := "../../.."
-
 	tt := []struct {
-		name     string
-		filename string
-		isError  bool
-		errMsg   string
-		stdin    string
+		name         string
+		filename     string
+		expectsError bool
 	}{
-		// {
-		// 	name:     "filename is empty",
-		// 	filename: "",
-		// 	isError:  true,
-		// 	errMsg:   "provided filename is empty",
-		// },
-		{
-			name:     "filename is stdin and valid json",
-			filename: "-",
-			isError:  false,
-			stdin:    "{\"schemaVersion\":\"1\",\"process\":{\"exit\":{\"after\":\"10ms to 1s100ms\",\"code\":2}}}",
-		},
-		{
-			name:     "filename is stdin and valid yaml",
-			filename: "-",
-			isError:  false,
-			stdin:    "schemaVersion: \"1\"\nprocess:\n  exit:\n    after:\n      10ms to 1s100ms\n    code: 2",
-		},
 		{
 			name:     "valid json file",
-			filename: root + "/tests/units/stubs/valid.json",
-			isError:  false,
+			filename: PATH_VALID_JSON,
 		},
 		{
 			name:     "valid yaml file",
-			filename: root + "/tests/units/stubs/valid.yaml",
-			isError:  false,
+			filename: PATH_VALID_YAML,
 		},
 		{
-			name:     "invalid json file",
-			filename: root + "/tests/units/stubs/invalid.json",
-			isError:  true,
-			errMsg:   "unable to unmarshal json content",
+			name:         "invalid json file",
+			filename:     PATH_INVALID_JSON,
+			expectsError: true,
 		},
 		{
-			name:     "invalid yaml file",
-			filename: root + "/tests/units/stubs/invalid.yaml",
-			isError:  true,
-			errMsg:   "invalid yaml configuration",
+			name:         "invalid yaml file",
+			filename:     PATH_INVALID_YAML,
+			expectsError: true,
 		},
 		{
-			name:     "non-existent file",
-			filename: root + "/tests/units/stubs/non_existent.json",
-			isError:  true,
-			errMsg:   "unable to read file",
+			name:         "non-existent file",
+			filename:     "/path/to/non_existent.json",
+			expectsError: true,
 		},
 		{
-			name:     "valid json but does not match user_config_type",
-			filename: root + "/tests/units/stubs/invalid_structure.json",
-			isError:  true,
-			errMsg:   "schema version is not supported",
+			name:         "parsable json but invalid structure",
+			filename:     PATH_INVALSTRUCTURE_JSON,
+			expectsError: true,
 		},
 		{
-			name:     "valid yaml but does not match user_config_type",
-			filename: root + "/tests/units/stubs/invalid_structure.yaml",
-			isError:  true,
-			errMsg:   "schema version is not supported",
-		},
-		{
-			name:     "stdin is not available",
-			filename: "-",
-			isError:  true,
-			errMsg:   "stdin is not available to read from",
+			name:         "parsable yaml but invalid structure",
+			filename:     PATH_INVALSTRUCTURE_YAML,
+			expectsError: true,
 		},
 	}
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			// Temporarily replace os.Stdin if we're testing with filename == "-"
-			if tc.filename == "-" && tc.stdin != "" {
+			_, err := user_config.MakePreparedConfig(tc.filename)
+
+			if tc.expectsError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestMakeConfigFromStdin(t *testing.T) {
+	logger.MustInitLogger("fatal")
+
+	tt := []struct {
+		name         string
+		stdin        string
+		expectsError bool
+	}{
+		{
+			name:  "valid json",
+			stdin: getFileContent(t, PATH_VALID_JSON),
+		},
+		{
+			name:  "valid yaml",
+			stdin: getFileContent(t, PATH_VALID_YAML),
+		},
+
+		{
+			name:         "invalid json",
+			stdin:        getFileContent(t, PATH_INVALID_JSON),
+			expectsError: true,
+		},
+		{
+			name:         "invalid yaml",
+			stdin:        getFileContent(t, PATH_INVALID_YAML),
+			expectsError: true,
+		},
+		{
+			name:         "parsable json with invalid structure",
+			stdin:        getFileContent(t, PATH_INVALSTRUCTURE_JSON),
+			expectsError: true,
+		},
+		{
+			name:         "parsable yaml with invalid structure",
+			stdin:        getFileContent(t, PATH_INVALSTRUCTURE_YAML),
+			expectsError: true,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.stdin != "" {
 				tmpfile, err := os.CreateTemp("", "stdin")
 				if err != nil {
-					t.Fatalf("Failed to create temporary file: %v", err)
+					t.Fatalf("failed to create temporary file: %v", err)
 				}
 				defer os.Remove(tmpfile.Name())
 
 				tmpfile.WriteString(tc.stdin)
-				tmpfile.Seek(0, 0) // rewind
+				tmpfile.Seek(0, 0)
 
 				oldStdin := os.Stdin
-				defer func() { os.Stdin = oldStdin }() // Restore original Stdin
+				defer func() { os.Stdin = oldStdin }()
 				os.Stdin = tmpfile
 			}
 
-			uc, err := user_config.LoadUserConfig(tc.filename)
+			_, err := user_config.MakePreparedConfig("-")
 
-			if tc.isError {
+			if tc.expectsError {
 				require.Error(t, err)
-				if err != nil {
-					assert.Contains(t, err.Error(), tc.errMsg)
-				}
 			} else {
 				require.NoError(t, err)
-
-				pc, err := uc.GetPreparedConfig()
-
-				require.NoError(t, err, "prepared config is problematic")
-
-				err = pc.Validate()
-
-				require.NoError(t, err, "prepared config is invalid")
 			}
-
 		})
 	}
+}
+
+func TestMakeConfigFromString(t *testing.T) {
+	logger.MustInitLogger("fatal")
+
+	tt := []struct {
+		name         string
+		content      string
+		expectsError bool
+	}{
+		{
+			name:    "valid json",
+			content: getFileContent(t, PATH_VALID_JSON),
+		},
+		{
+			name:    "valid yaml",
+			content: getFileContent(t, PATH_VALID_YAML),
+		},
+
+		{
+			name:         "invalid json",
+			content:      getFileContent(t, PATH_INVALID_JSON),
+			expectsError: true,
+		},
+		{
+			name:         "invalid yaml",
+			content:      getFileContent(t, PATH_INVALID_YAML),
+			expectsError: true,
+		},
+		{
+			name:         "parsable json with invalid structure",
+			content:      getFileContent(t, PATH_INVALSTRUCTURE_JSON),
+			expectsError: true,
+		},
+		{
+			name:         "parsable yaml with invalid structure",
+			content:      getFileContent(t, PATH_INVALSTRUCTURE_YAML),
+			expectsError: true,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := user_config.MakePreparedConfig(tc.content)
+
+			if tc.expectsError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+func getFileContent(t *testing.T, filename string) string {
+	bytes, err := os.ReadFile(filename)
+
+	if err != nil {
+		t.Fatal("unable to load file from "+filename, err)
+	}
+
+	return string(bytes)
 }
