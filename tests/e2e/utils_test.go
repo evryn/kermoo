@@ -147,7 +147,7 @@ func (e *E2E) StartBinary(config string, timeout time.Duration) {
 
 	var mw io.Writer
 
-	e.cmd = exec.CommandContext(e.context, e.GetKermooBinaryPath(), "start", "-v", "debug", "-f", "-")
+	e.cmd = exec.CommandContext(e.context, e.GetKermooBinaryPath(), "start", "-v", "debug", "-")
 
 	//mw = io.MultiWriter(os.Stdout, e.GetFileLogWriter(), &e.out)
 	mw = io.MultiWriter(e.GetFileLogWriter(), &e.out)
