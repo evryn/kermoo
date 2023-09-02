@@ -7,20 +7,24 @@ import (
 
 var Log *zap.Logger
 
-func MustInitLogger(verbosity string) {
+func MustInitLogger(level string) {
 	var err error
+
+	if level == "" {
+		level = "info"
+	}
 
 	config := zap.NewProductionConfig()
 
 	config.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 
-	if verbosity == "debug" {
-		config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	levelObject, err := zapcore.ParseLevel(level)
+
+	if err != nil {
+		panic(err)
 	}
 
-	if verbosity == "fatal" {
-		config.Level = zap.NewAtomicLevelAt(zapcore.FatalLevel)
-	}
+	config.Level = zap.NewAtomicLevelAt(levelObject)
 
 	Log, err = config.Build()
 

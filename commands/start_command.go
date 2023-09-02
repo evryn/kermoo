@@ -3,6 +3,7 @@ package commands
 import (
 	"kermoo/modules/logger"
 	"kermoo/modules/user_config"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -16,6 +17,10 @@ func GetStartCommand() *cobra.Command {
 			config, _ := cmd.Flags().GetString("config")
 			filename, _ := cmd.Flags().GetString("filename")
 			verbosity, _ := cmd.Flags().GetString("verbosity")
+
+			if verbosity == "" {
+				verbosity = os.Getenv("KERMOO_VERBOSITY")
+			}
 
 			logger.MustInitLogger(verbosity)
 
