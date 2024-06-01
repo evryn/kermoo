@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Build Stage
-FROM golang:1.20-alpine3.18 as builder
+FROM golang:1.21-alpine3.18 as builder
 
 ARG BUILD_VERSION
 ARG BUILD_DATE
